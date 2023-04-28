@@ -83,11 +83,7 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 void solve()
 {
-    spl arr;
-    arr.insert({1, 2});
-    arr.insert({2, 3});
-    arr.insert({1,6});
-    print(arr);
+
 }
 
 int main()
