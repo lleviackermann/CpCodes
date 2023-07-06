@@ -83,41 +83,10 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
+
 void solve()
 {
-    ll n,m;
-    cin>>n>>m;
-    vl arr(n);
-    read(arr);
-    vvl dp(n, vl(m+2, 0));
-    for(int i = 0; i < n; i++) {
-        for(int j = 0; j < m+1; j++) {
-            if(i==0) {
-                if(arr[i]==0) dp[i][j] = 1;
-                else dp[i][j] = 0,dp[i][arr[i]]=1;
-                 
-            }
-            if(j==0) dp[i][j] = 0;
-            if(j==m+1) dp[i][j] = 0;
-        }
-    }
-    debug(dp[9][1]);
-
-    for(int i = 1; i < n; i++) {
-        for(int j = 1; j < m+1; j++) {
-            if(arr[i]!=0) {
-                dp[i][j] = 0;
-                dp[i][arr[i]] = dp[i-1][arr[i]-1] + dp[i-1][arr[i]] + dp[i-1][arr[i]+1];
-            } else {
-                dp[i][j] = dp[i-1][j-1] + dp[i-1][j] + dp[i-1][j+1];
-            }
-            dp[i][j] %= mod;
-        }
-    }
-    debug(dp[8][1]);
-    ll ans = 0;
-    for(int j = 0; j < m+1; j++) ans += dp[n-1][j], ans %= mod;
-    cout<<ans<<endl;
+    
 }
 
 int main()
@@ -126,7 +95,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    // cin >> t;
+    cin >> t;
     while (t--)
     {
         solve();
