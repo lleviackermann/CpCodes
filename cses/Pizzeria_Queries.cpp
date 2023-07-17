@@ -83,10 +83,128 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
+template <typename T>
+class SegmentTree
+{
+public:
+    T n;
+    vector<pair<ll,ll>> tree;
+
+    SegmentTree(vector<T> &arr)
+    {
+        this->n = arr.size();
+        tree.resize(4 * this->n + 1);
+        build(arr);
+    }
+
+    void build(T index, T start, T end, vector<T> &arr)
+    {
+        if (start == end)
+        {
+            tree[index] = {arr[start]+1, arr[end]+1};
+            return;
+        }
+        T mid = (start + end) / 2;
+        build(2 * index + 1, start, mid, arr);
+        build(2 * index + 2, mid + 1, end, arr);
+        tree[index] = {min(tree[2*index+1].first+end-mid, tree[2*index+2].first), min(tree[2*index+1].second, tree[2*index+2].second+mid-start+1)};
+    }
+
+    T leftQuery(T index, T start, T end, T l, T r)
+    {
+        if (start > r || end < l)
+        {
+            return 2e9;
+        }
+        if (start >= l && end <= r)
+        {
+            // debug3(start, end, tree[index].first);
+            return tree[index].first + r - end;
+        }
+        T mid = (start + end) / 2;
+        T first = leftQuery(2 * index + 1, start, mid, l, r);
+        T second = leftQuery(2 * index + 2, mid + 1, end, l, r);
+        return min(first, second);
+    }
+
+    T rightQuery(T index, T start, T end, T l, T r)
+    {
+        if (start > r || end < l)
+        {
+            return 2e9;
+        }
+        if (start >= l && end <= r)
+            return tree[index].second + start - l;
+
+        T mid = (start + end) / 2;
+        T first = rightQuery(2 * index + 1, start, mid, l, r);
+        T second = rightQuery(2 * index + 2, mid + 1, end, l, r);
+        return min(first, second);
+    }
+
+    void update(T index, T target, T value, T start, T end)
+    {
+        if (start == end)
+        {
+            tree[index] = {value+1, value+1};
+            return;
+        }
+
+        T mid = (start + end) / 2;
+        if (target <= mid)
+        {
+            update(2 * index + 1, target, value, start, mid);
+        }
+        else
+        {
+            update(2 * index + 2, target, value, mid + 1, end);
+        }
+        tree[index] = {min(tree[2*index+1].first+end-mid, tree[2*index+2].first), min(tree[2*index+1].second, tree[2*index+2].second+mid-start+1)};
+    }
+
+    void build(vector<T> &arr)
+    {
+        build(0, 0, arr.size() - 1, arr);
+    }
+
+
+    T query(T ind)
+    {
+        T left = leftQuery(0, 0, this->n - 1, 0, ind-2);
+        T right = rightQuery(0, 0, this->n - 1, ind, this->n -1);
+        // debug2(left, right);
+        return min(left , right);
+    }
+
+    void update(T target, T value)
+    {
+        update(0, --target, value, 0, this->n - 1);
+    }
+
+};
 
 void solve()
 {
-    
+    ll n, q;
+    cin>>n>>q;
+    vl arr(n);
+    read(arr);
+    debug(arr[56]);
+    SegmentTree<ll> segtree(arr);
+    while(q--) {
+        int x;
+        cin>>x;
+        if(x == 1) {
+            int index, value;
+            cin>>index>>value;
+            arr[index-1] = value;
+            segtree.update(index, value);
+        } else {
+            int index;
+            cin>>index;
+            cout<<min(arr[index-1],segtree.query(index))<<endl;
+        }
+    }
 }
 
 int main()
@@ -95,7 +213,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    cin >> t;
+    // cin >> t;
     while (t--)
     {
         solve();
