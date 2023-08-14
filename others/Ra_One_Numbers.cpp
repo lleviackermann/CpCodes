@@ -83,16 +83,49 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-int fun(int n) {
-    cout<<1<<"\n";
-    if(n==0) return 0;
-    return (n-1) * fun(n-1);
-}
+ll dp[100][100][2];
 
+ll raOneCities(string &s, int n, int check, int even, int odd) {
+    if(n == 0) {
+        if(even - odd == 1) {
+            debug2(even, odd);
+            return 1;   
+        }
+        else return 0;
+    }
+
+    int answer = 0;
+    if(dp[even][odd][check] != -1) return dp[even][odd][check];
+
+    int ub = check ? (s[s.size() - n] - '0') : 9;
+    debug4(ub, n, even, odd);
+    for(int digit = 0; digit <= ub; digit++) {
+        int x = n % 2;
+        if(!x) even += digit;
+        else odd += digit;
+        answer += raOneCities(s, n-1, check & (digit == ub), even, odd);
+        if(!x) even -= digit;
+        else odd -= digit;
+    }
+
+    dp[even][odd][check] = answer;
+    return answer;
+}
 void solve()
 {
-    fun(5);
-    
+    ll l, r;
+    cin>>l>>r;
+    l -= l > 0;
+    string left = to_string(l);
+    string right = to_string(r);
+    memset(dp, -1, sizeof dp);
+    int totalSum = raOneCities(right, right.size(), 1, 0, 0);
+    memset(dp, -1, sizeof dp);
+    debug(totalSum);
+    int useless = raOneCities(left, left.size(), 1, 0, 0);
+
+    cout<<totalSum - useless<<endl;
+
 }
 
 int main()
@@ -101,7 +134,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    // cin >> t;
+    cin >> t;
     while (t--)
     {
         solve();
@@ -110,7 +143,7 @@ int main()
     double elapsed = double(end - start) / CLOCKS_PER_SEC;
     
     #ifndef ONLINE_JUDGE
-    // cout << setprecision(10) << elapsed << endl;
+    cout << setprecision(10) << elapsed << endl;
     #endif
     return 0;
 }

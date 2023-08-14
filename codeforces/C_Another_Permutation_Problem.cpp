@@ -83,15 +83,18 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-int fun(int n) {
-    cout<<1<<"\n";
-    if(n==0) return 0;
-    return (n-1) * fun(n-1);
-}
 
 void solve()
 {
-    fun(5);
+    int n;
+    cin>>n;
+
+    int sumOfSquares = n*(n+1)*(2*n+1) / 6;
+
+    int ans = 0;
+    priority_queue<int> pq;
+    for(int i = 1; i <= n; i++) pq.push(i*i);
+
     
 }
 
@@ -101,7 +104,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    // cin >> t;
+    cin >> t;
     while (t--)
     {
         solve();
@@ -110,7 +113,7 @@ int main()
     double elapsed = double(end - start) / CLOCKS_PER_SEC;
     
     #ifndef ONLINE_JUDGE
-    // cout << setprecision(10) << elapsed << endl;
+    cout << setprecision(10) << elapsed << endl;
     #endif
     return 0;
 }

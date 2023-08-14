@@ -83,16 +83,51 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-int fun(int n) {
-    cout<<1<<"\n";
-    if(n==0) return 0;
-    return (n-1) * fun(n-1);
+bool check(ll num, vl &arr, ll days) {
+    int n = arr.size();
+
+    ll temp = 0;
+
+    for(int i = n-1; i >= 0; i--) {
+        if(num <= 0) break;
+        if(arr[i] > num) continue;
+        ll another = (num - arr[i]) / (i + 1) + 1;
+        temp += another;
+        num -= (another * (i+1));
+    }
+    debug(temp);
+    if(temp > days) return false;
+    else return true;
+
 }
 
 void solve()
 {
-    fun(5);
-    
+    ll n, days;
+    cin>>n>>days;
+    vl arr(n);
+    for(int i = 0; i < n; i++) {
+        ll x;
+        cin>>x;
+        arr[i] = x;
+    }
+
+    if(arr[0]!=1) {
+        cout<<"1\n";
+        return;
+    }
+
+    ll low = 1, high = 5*10e10;
+    ll ans = 0;
+    while(low <= high) {
+        ll mid = (low + high) / 2;
+        debug3(mid, low, high);
+        if(check(mid, arr, days)) {
+            low = mid + 1;
+        } else ans = mid, high = mid -1;
+    }
+
+    cout<<ans<<endl;
 }
 
 int main()
@@ -101,7 +136,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    // cin >> t;
+    cin >> t;
     while (t--)
     {
         solve();
@@ -110,7 +145,7 @@ int main()
     double elapsed = double(end - start) / CLOCKS_PER_SEC;
     
     #ifndef ONLINE_JUDGE
-    // cout << setprecision(10) << elapsed << endl;
+    cout << setprecision(10) << elapsed << endl;
     #endif
     return 0;
 }

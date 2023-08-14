@@ -83,16 +83,59 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-int fun(int n) {
-    cout<<1<<"\n";
-    if(n==0) return 0;
-    return (n-1) * fun(n-1);
-}
 
 void solve()
 {
-    fun(5);
-    
+    int n;
+    cin>>n;
+    vpi arr(n);
+    int another = 0;
+    for(auto &i : arr) cin>>i.first, i.second = another++;
+    vpi temp = arr;
+    sort(all(temp));
+    reverse(all(temp));
+    vi count(n, 0);
+    for(int i = 0; i < n; i++) {
+        int x = temp[i].first;
+        count[0]++;
+        if(x < n) count[x]--;
+    }
+    int current = 0;
+    for(int i = 0; i < n; i++) {
+        current += count[i];
+        count[i] = current;
+        if(temp[i].first != count[i]) {
+            cout<<"NO\n";
+            return;
+        }
+    }
+    // print(count);
+    cout<<"YES\n";
+    vi tempans(n);
+
+    tempans[0] = n;
+    if(count[n-1]==0) tempans[0] = n-1;
+    if(count[0]==0) {
+        for(int i = 0; i < n; i++) cout<<"-1 ";
+        line
+        return;
+    }
+    int noth = n;
+    for(int i = 1; i < n; i++) {
+        if(i < count[i]) {
+            tempans[i] = tempans[i-1] - (count[i-1] - count[i] + 1);
+        } else if(i == count[i]) tempans[i] = -1;
+        else {
+            if(count[i]==0) tempans[i] = -n;
+            else tempans[i] = -1 * (tempans[count[i]-1] - 1);
+        }
+    }
+    // print(count);
+    // print(tempans);
+    vi ans(n);
+    for(int i = 0; i < n; i++) ans[temp[i].second] = tempans[i];
+    for(auto &i : ans) cout<<i<<" ";
+    line
 }
 
 int main()
@@ -101,7 +144,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    // cin >> t;
+    cin >> t;
     while (t--)
     {
         solve();
@@ -110,7 +153,7 @@ int main()
     double elapsed = double(end - start) / CLOCKS_PER_SEC;
     
     #ifndef ONLINE_JUDGE
-    // cout << setprecision(10) << elapsed << endl;
+    cout << setprecision(10) << elapsed << endl;
     #endif
     return 0;
 }

@@ -83,16 +83,59 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-int fun(int n) {
-    cout<<1<<"\n";
-    if(n==0) return 0;
-    return (n-1) * fun(n-1);
+long long binpow(long long a, long long b) {
+    long long res = 1;
+    while (b > 0) {
+        if (b & 1)
+            res = res * a;
+        a = a * a;
+        b >>= 1;
+    }
+    return res;
+}
+
+ll dp[18][2];
+
+ll countOfDigits(string &right, int n, bool tight) {
+    if(tight == 0) return binpow(10, n);
+    if(n == 0) return 1;
+
+    ll answer = stol(right.substr(right.size() - n)) + 1;
+    return answer;
+}
+
+ll sumOfDigits(string &right, int n, bool tight) {
+    if(n == 0) return 0;
+
+    if(dp[n][tight]!=-1) return dp[n][tight];
+
+    ll ub = tight ? (right[right.size() - n] - '0') : 9;
+    ll answer = 0;
+    for(ll digit = 0; digit <= ub; digit++) {
+        answer += digit * countOfDigits(right, n-1, tight && (digit == ub));
+        answer += sumOfDigits(right, n-1, tight && (digit == ub));
+    }
+    dp[n][tight] = answer;
+    return answer;
 }
 
 void solve()
 {
-    fun(5);
-    
+    ll l, r;
+    cin>>l>>r;
+    l -= l>0;
+    string left = to_string(l);
+    string right = to_string(r);
+    memset(dp, -1, sizeof dp);
+    ll totalSum = sumOfDigits(right, right.length(), 1);
+    memset(dp, -1, sizeof dp);
+    ll uselessSum = sumOfDigits(left, left.length(), 1);
+
+    ll ans = totalSum - uselessSum;
+    cout<<ans<<endl;
+
+    // string temp = "222";
+    // cout<<countOfDigits(temp, 2, 1)<<endl;
 }
 
 int main()
@@ -101,7 +144,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    // cin >> t;
+    cin >> t;
     while (t--)
     {
         solve();
@@ -110,7 +153,7 @@ int main()
     double elapsed = double(end - start) / CLOCKS_PER_SEC;
     
     #ifndef ONLINE_JUDGE
-    // cout << setprecision(10) << elapsed << endl;
+    cout << setprecision(10) << elapsed << endl;
     #endif
     return 0;
 }

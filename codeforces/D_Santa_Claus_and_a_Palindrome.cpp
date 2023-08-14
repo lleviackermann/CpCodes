@@ -1,0 +1,283 @@
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
+#include <ext/pb_ds/tree_policy.hpp>
+using namespace std;
+using namespace __gnu_pbds;
+
+template <typename T> 
+using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
+
+#define endl "\n"
+#define fo(i, n) for (i = 0; i < n; i++)
+#define Fo(i, k, n) for (i = k; k < n; k++)
+#define pb push_back
+#define ll long long
+#define mp make_pair
+#define ff first
+#define ss second
+#define all(x) x.begin(), x.end()
+#define clr(x) memset(x, 0, sizeof(x))
+#define sortall(x) sort(all(x))
+#define tr(it, arr) for (auto it = arr.begin(); it != arr.end(); it++)
+#define PI 3.1415926535897932384626
+#define suprit ios_base::sync_with_stdio(0); cout.tie(0); cin.tie(0);
+#define line cout << endl;
+
+typedef pair<int, int> pi;
+typedef pair<ll, ll> pl;
+typedef vector<int> vi;
+typedef vector<ll> vl;
+typedef vector<pi> vpi;
+typedef vector<pl> vpl;
+typedef vector<vi> vvi;
+typedef vector<vl> vvl;
+typedef map<ll, ll> ml;
+typedef map<string, ll> msl;
+typedef map<ll, string> mls;
+typedef unordered_map<ll, ll> uml;
+typedef unordered_map<string, ll> umsl;
+typedef unordered_map<ll, string> umls;
+typedef set<ll> sl;
+typedef set<pair<ll, ll>> spl;
+typedef ordered_set<ll> osl;
+typedef ordered_set<pair<ll, ll>> ospl;
+
+const ll mod = 1e9 + 7;
+
+bool comp2(pair<ll, ll> &arr, pair<ll, ll> &b)
+{
+    if (arr.first == b.first)
+        return arr.second < b.second;
+    return arr.first < b.first;
+};
+
+template <typename T> void read(T i, T n, vector<T> &arr) { for(T j = i; j < n; j++) cin >> arr[j]; }
+template <typename T> void read(vector<T> &arr) { for(auto &j : arr) cin>>j; }
+
+#ifndef ONLINE_JUDGE
+
+template <typename T, typename V> void print(set<pair<T, V>> &arr) { for(auto &it : arr) cout<<it.first<<" "<<it.second<<endl; line}
+template <typename T, typename V> void print(pair<T, V>& pa) { cout<<pa.first<<" "<<pa.second<<endl; }
+template <typename T> void print(T i, T last, vector<T> &arr) { for(T j = i; j < last; j++) cout<<arr[j]<<" "; line} 
+template <typename T> void print(T i, vector<T> &arr) { for(T j = i; j < arr.size(); j++) cout<<arr[j]<<" "; line} 
+template <typename T> void print(vector<T> &arr) { for(auto &i : arr) cout<<i<<" "; line}
+template <typename T, typename V> void print(unordered_map<T, V>& arr) { for(auto &it : arr) cout<<it.first<<" "<<it.second<<endl; line}
+template <typename T, typename V> void print(map<T, V>& arr) { for(auto &it : arr) cout<<it.first<<" "<<it.second<<endl;}
+template <typename T> void print(unordered_set<T> &arr) { for(auto &it : arr) cout<<it<<" "; line }
+template <typename T> void print(ordered_set<T> &arr) { for(auto &it : arr) cout<<it<<" "; line }
+template <typename T> void print(set<T> &arr) { for(auto &it : arr) cout<<it<<" "; line }
+template <typename T, typename... Args> void print(T t, Args... args) { cout << t << " "; print(args...); }
+template <typename T> void print(T t) { cout<<t<<"\n"; }
+#define debug(x) cout<<#x<<" "<<x<<endl;
+#define debug2(x, y) cout<<#x<<" "<<x<<" "<<#y<<" "<<y<<endl;
+#define debug3(x, y, z) cout<<#x<<" "<<x<<" "<<#y<<" "<<y<<" "<<#z<<" "<<z<<endl;
+#define debug4(x, y, z, a) cout<<#x<<" "<<x<<" "<<#y<<" "<<y<<" "<<#z<<" "<<z<<" "<<#a<<" "<<a<<endl;
+
+#else
+
+#define print(x) 
+#define debug(x)
+#define debug2(x, y)
+#define debug3(x, y, z)
+#define debug4(x, y, z, a)
+
+#endif
+
+long long binpow(long long a, long long b, long long m) {
+    a %= m;
+    long long res = 1;
+    while (b > 0) {
+        if (b & 1)
+            res = res * a % m;
+        a = a * a % m;
+        b >>= 1;
+    }
+    return res;
+}
+
+class SingleHash {
+public:
+    string s;
+    int n;
+    vl prefixHash1, inverseValue1;
+    ll p1, modulo1;
+
+    SingleHash(string &temp) {
+        s = temp;
+        n = temp.length();
+        prefixHash1.resize(n+1, 0);
+        inverseValue1.resize(n+1, 0);
+        p1 = 31, modulo1 = 1e9+7;
+        computePrefixHash(p1, modulo1, prefixHash1);
+        computeInverse(inverseValue1, p1, modulo1);
+
+    }
+
+    void computeInverse(vl &inverse, ll p, ll modulo) {
+        ll temp = binpow(p, n-1, modulo);
+        inverse[n-1] = binpow(temp, modulo-2, modulo);
+        for(ll i = n-2; i >=0; i--) inverse[i] = (inverse[i+1] * (p)) % modulo;
+    }
+
+    void computePrefixHash(ll p, ll modulo, vl &prefix) {
+        ll power_p = 1;
+        for(ll i = 0; i < n; i++) {
+            ll x = s[i] - 'a' + 1;
+            prefix[i+1] = (prefix[i] + power_p * x) % modulo;
+            prefix[i+1] = (prefix[i+1] + modulo) % modulo; 
+            power_p = (power_p * p) % modulo;
+
+        }
+    }
+
+    ll partialHash(ll l, ll r, ll modulo, ll p, vl &prefix, vl &inverse) {
+        ll temp = (((prefix[r] - prefix[l-1]) % modulo) + modulo) % modulo;
+        temp = (temp * inverse[l-1]) % modulo;
+        return temp;
+    }
+
+    ll substrHash(ll l, ll r) {
+        ll ans;
+        ans = partialHash(l, r, modulo1, p1, prefixHash1, inverseValue1);
+        return ans;
+    }
+
+    static ll getHash(string &t, ll p, ll modulo) {
+        int len = t.length();
+        ll ans = 0;
+        ll power_p = 1;
+        for(ll i = 0; i < len; i++) {
+            ll x = t[i] - 'a' + 1;
+            ans += x * power_p;
+            power_p = (power_p * p) % modulo;
+            ans %= modulo;
+        }
+        return ans;
+    }
+
+    static ll getHashString(string t) {
+        ll ans;
+        ans = getHash(t, 31, 1e9+7);
+        return ans;
+
+    }
+};
+
+void solve()
+{
+    int n, len;
+    cin>>n>>len;
+    map<ll, priority_queue<pl>> notreversed;
+    // vector<pair<string, ll>> words;
+    vector<pl> hash(n);
+    vl value(n), ans(n);
+    for(int i = 0; i < n; i++) {
+        string s;
+        cin>>s;
+        cin>>value[i];
+        hash[i].first = SingleHash::getHashString(s);
+        reverse(all(s));
+        hash[i].second = SingleHash::getHashString(s);
+        notreversed[hash[i].first].push({value[i], i});
+    }
+
+
+    for(int i = 0; i < n; i++) {
+        ll notrev = hash[i].first, rev = hash[i].second;
+        // cout<<i<<" ";
+        if(ans[i]) continue;
+        if(notrev == rev) {
+            while(notreversed[notrev].size()>1) {
+                pl temp1 = notreversed[notrev].top();
+                notreversed[notrev].pop();
+                if(temp1.first <= 0 || ans[temp1.second]) break;
+                pl temp2 = notreversed[notrev].top();
+                notreversed[notrev].pop();
+                if(ans[temp2.second]) {
+                    notreversed[notrev].push(temp1);
+                    break;
+                }
+                if(temp2.first < 0) {
+                    notreversed[notrev].push(temp1);
+                    notreversed[notrev].push(temp2);
+                    break;
+
+                }
+                if(temp1.first + temp2.first > 0) {
+                    ans[temp1.second] = 1, ans[temp2.second] = 1;
+                }
+            }
+        } else {
+            while(notreversed[notrev].size() > 0 && notreversed[rev].size() > 0) {
+                pl temp1 = notreversed[notrev].top();
+                notreversed[notrev].pop();
+                if(ans[temp1.second]) continue;
+                pl temp2 = notreversed[rev].top();
+                notreversed[rev].pop();
+                if(ans[temp2.second]) continue;
+                if(temp1.first + temp2.first > 0) ans[temp1.second] = 1, ans[temp2.second] = 1;
+
+            }
+        }
+        // print(ans);
+    }
+
+    ll finalAns = 0;
+    for(int i = 0; i < n; i++) if(ans[i]) finalAns += value[i];
+    print(ans);
+    debug(finalAns);
+    ll another = -1e18;
+    set<ll> se;
+    for(int i = 0; i < n; i++) if(hash[i].first == hash[i].second) se.insert(hash[i].first);
+    ll totalSum = 0;
+    for(auto &i : se) {
+        if(notreversed[i].size() > 1) {
+            pl temp3 = notreversed[i].top();
+            notreversed[i].pop();
+            pl temp4 = notreversed[i].top();
+            notreversed[i].pop();
+            ll anotherTemp = temp3.first + temp4.first;
+            if(anotherTemp > 0) totalSum += anotherTemp;
+            notreversed[i].push(temp3);
+            notreversed[i].push(temp4);
+        }
+    }
+    debug(totalSum);
+    for(auto &i : se) {
+        if(notreversed[i].size() == 1) {
+            ll ano = notreversed[i].top().first;
+            another = max({another, ano, ano + totalSum});
+        } else if(notreversed[i].size() > 1) {
+            ll ano = notreversed[i].top().first;
+            notreversed[i].pop();
+            ll two = notreversed[i].top().first;
+            if(abs(two) >= ano) {
+                another = max({another, ano, ano + totalSum});
+            }
+            else another = max({another, totalSum - two, ano});
+        }
+    }
+    another = max(another, totalSum);
+    debug(another);
+    cout<<finalAns + another<<endl;
+}
+
+int main()
+{ 
+    suprit;
+    clock_t start = clock();
+
+    int t = 1;
+    // cin >> t;
+    while (t--)
+    {
+        solve();
+    }
+    clock_t end = clock();
+    double elapsed = double(end - start) / CLOCKS_PER_SEC;
+    
+    #ifndef ONLINE_JUDGE
+    cout << setprecision(10) << elapsed << endl;
+    #endif
+    return 0;
+}
