@@ -83,50 +83,33 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-ll dp[55][55][2][12]  ;
 
-
-ll raOneCities(string &s, int n, int check, int even, int odd) {
-    if(n == 0) {
-        if(even - odd == 1) {
-            debug2(even, odd);
-            return 1;   
-        }
-        else return 0;
-    }
-
-    int answer = 0;
-    if(dp[even][odd][check][n] != -1) return dp[even][odd][check][n];
-
-    int ub = check ? (s[s.size() - n] - '0') : 9;
-    debug4(ub, n, even, odd);
-    for(int digit = 0; digit <= ub; digit++) {
-        int x = n % 2;
-        if(!x) even += digit;
-        else odd += digit;
-        answer += raOneCities(s, n-1, check && (digit == ub), even, odd);
-        if(!x) even -= digit;
-        else odd -= digit;
-    }
-
-    dp[even][odd][check][n] = answer;
-    return answer;
-}
 void solve()
 {
-    ll l, r;
-    cin>>l>>r;
-    l -= l > 0;
-    string left = to_string(l);
-    string right = to_string(r);
-    memset(dp, -1, sizeof dp);
-    int totalSum = raOneCities(right, right.size(), 1, 0, 0);
-    memset(dp, -1, sizeof dp);
-    debug(totalSum);
-    int useless = raOneCities(left, left.size(), 1, 0, 0);
-
-    cout<<totalSum - useless<<endl;
-
+    int n;
+    cin>>n;
+    vi arr(n);
+    read(arr);
+    map<ll, ll> m;
+    for(auto &i : arr) m[i]++;
+    int q;
+    cin>>q;
+    while(q--) {
+        debug(q);
+        ll plus,mul;
+        cin>>plus>>mul;
+        ll temp = plus*plus - 4*mul;
+        // debug(temp);
+        if(temp < 0) cout<<"0 ";
+        else {
+            temp = (sqrt(temp) + plus)/2;
+            debug(temp);
+            if(temp*(plus-temp)!=mul) cout<<"0 ";
+            else if(temp==plus-temp) cout<<(m[temp] * (m[temp]-1))/2<<" ";
+            else cout<<m[temp]*m[plus-temp]<<" ";
+        }
+    }
+    cout<<endl;
 }
 
 int main()
@@ -148,7 +131,3 @@ int main()
     #endif
     return 0;
 }
-
-
-
-
