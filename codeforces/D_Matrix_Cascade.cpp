@@ -88,22 +88,38 @@ void solve()
 {
     int n;
     cin>>n;
-    vpi ans;
-    int temp = ceil(sqrt(n));
-    int last = n;
-    n--;
-    while(n >= 2) {
-        if(n == temp) {
-            ans.pb({last, n}), ans.pb({last, n});
-            temp = ceil(sqrt(n));
-            last = n;
-        } else {
-            ans.pb({n,last});
+    vector<string> arr(n);
+    for(auto &i : arr) cin>>i;
+    vector<vector<int>> flag(n, vi(n, 0)), flag2(n, vi(n, 0));
+    ll ans = 0;
+    for(int i = 0; i < n; i++) {
+        int temp = 0;
+        for(int j = 0; j < n; j++) {
+            temp = temp + flag[i][j] + flag2[i][j];
+            if((temp%2==0 && arr[i][j]=='1') || (temp % 2 && arr[i][j]=='0')) {
+                ans++;
+                if(i!=n-1) {
+                    flag[i+1][max(0,j-1)] += 1;
+                    if(j < n-2) flag2[i+1][j+2] += -1;
+                }
+            }
+            
+            if(flag[i][j]) {
+                if(i!=n-1) {
+                    // if(i==1) debug2(i+1,max(0,j-1));
+                    flag[i+1][max(0,j-1)] += flag[i][j];
+                }
+            }
+            if(flag2[i][j]!=0) {
+                if(i!=n-1) {
+                    if(j < n-1) flag2[i+1][j+1] += flag2[i][j];
+                }
+            }
         }
-        n--;
+        // cout<<ans<<" ";
     }
-    cout<<ans.size()<<endl;
-    for(auto &i: ans) cout<<i.first<<" "<<i.second<<endl;
+    cout<<ans<<endl;
+
 }
 
 int main()

@@ -88,14 +88,15 @@ struct man {
 };
 
 bool comp(man &first, man &second) {
+    if(first.h==second.h) return first.w < second.w;
     return first.h < second.h;
 }
 int binary(vector<man> &arr, int ind) {
-    int low = 0, high = ind-1;
+    int low = 0, high = arr.size()-1;
     int ans = -1;
     while(low <= high) {
         int mid = (low + high) / 2;
-        if(arr[mid].h < arr[ind].h) ans=mid,low=mid+1;
+        if(arr[mid].h < ind) ans=mid,low=mid+1;
         else high=mid-1;
     }
     return ans;
@@ -106,52 +107,51 @@ void solve()
     int n;
     cin>>n;
     
-    vector<man> arr(n),width(n);
+    vector<man> arr(n);
     int count = 0;
     for(auto &i : arr) {
         cin>>i.h>>i.w;
         i.ind = count;
-        width[count].h = i.w;
-        width[count].w = i.h;
-        width[count].ind = i.ind;
+
         count++;
     }
     sort(all(arr), comp);
-    // for(int i = 0; i < n; i++) cout<<arr[i].h<<" "<<arr[i].w<<" "<<arr[i].ind<<endl;
-    // cout<<" no ";
-    sort(all(width), comp);
-    // for(int i = 0; i < n; i++) cout<<width[i].h<<" "<<width[i].w<<" "<<width[i].ind<<endl;
-
-    vpi minh(n),minw(n);
-    minh[0] = mp(arr[0].w, arr[0].ind), minw[0] = mp(width[0].w, width[0].ind);
+    // for(auto &i : arr) cout<<i.h<<" "<<i.w<<" "<<i.ind<<endl;
+    vpi minw(n);
+    minw[0] = mp(arr[0].w, arr[0].ind);
     for(int i = 1; i < n; i++) {
-        if(arr[i].w < minh[i-1].first) minh[i].first = arr[i].w, minh[i].second = arr[i].ind;
-        if(width[i].w < minw[i-1].first) minw[i].first = width[i].w, minw[i].second = width[i].ind;
+        if(arr[i].w < minw[i-1].first) minw[i].first = arr[i].w, minw[i].second = arr[i].ind;
+        else minw[i] = minw[i-1];
+
+
     }
     vi ans(n,-1);
-    for(int i = 1; i < n; i++) {
-        int index = binary(arr, i);
+    for(int i = 0; i < n; i++) {
+        int index = binary(arr,arr[i].h);
         debug(index);
         if(index!=-1) {
-            pi temp = minh[index];
+            pi temp = minw[index];
             print(temp);
             if(temp.first < arr[i].w) {
                 ans[arr[i].ind] = temp.second+1;
                 continue;
             }
         }
-        index = binary(width,i);
+        debug2(arr[i].h, arr[i].w);
+        index = binary(arr,arr[i].w);
         // cout<<" hi ";
         debug(index);
 
         if(index!=-1) {
             pi temp = minw[index];
-            if(temp.first < width[i].w) {
-                ans[width[i].ind] = temp.second+1;
+            print(temp);
+            if(temp.first < arr[i].h) {
+                ans[arr[i].ind] = temp.second+1;
                 continue;
             }
         }
     }
+    
     for(auto i : ans) cout<<i<<" ";
     cout<<endl;
     

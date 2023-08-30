@@ -86,24 +86,29 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 void solve()
 {
-    int n;
-    cin>>n;
-    vpi ans;
-    int temp = ceil(sqrt(n));
-    int last = n;
-    n--;
-    while(n >= 2) {
-        if(n == temp) {
-            ans.pb({last, n}), ans.pb({last, n});
-            temp = ceil(sqrt(n));
-            last = n;
-        } else {
-            ans.pb({n,last});
-        }
-        n--;
+    int n,k;
+    cin>>n>>k;
+    string s;
+    cin>>s;
+    if(k%2==0) {
+        sort(all(s));
+        cout<<s<<endl;
+        return;
     }
-    cout<<ans.size()<<endl;
-    for(auto &i: ans) cout<<i.first<<" "<<i.second<<endl;
+    string odd = "";
+    string even = "";
+    for(int i = 0; i < n; i++) {
+        if(i%2) even+=s[i];
+        else odd+=s[i];
+    }
+    sort(all(odd));
+    sort(all(even));
+    int e = 0, o = 0;
+    for(int i = 0; i < n; i++) {
+        if(i%2) s[i] = even[e++];
+        else s[i] = odd[o++];
+    }
+    cout<<s<<endl;
 }
 
 int main()

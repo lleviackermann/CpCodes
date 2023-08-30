@@ -83,27 +83,47 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-
 void solve()
 {
-    int n;
-    cin>>n;
-    vpi ans;
-    int temp = ceil(sqrt(n));
-    int last = n;
-    n--;
-    while(n >= 2) {
-        if(n == temp) {
-            ans.pb({last, n}), ans.pb({last, n});
-            temp = ceil(sqrt(n));
-            last = n;
-        } else {
-            ans.pb({n,last});
+    int n,m;
+    cin>>n>>m;
+    vector<string> arr(n);
+    for(auto &i : arr) cin>>i;
+    vector<vi> dp(n, vi(m, -1));
+    for(int i = 0; i < m-1; i++) {
+        int flag = 0;
+        for(int j = 0; j < n; j++) {
+            if(arr[j][i]!='L') continue;
+            dp[j][i] = flag;
+            flag ^= 1;
+            dp[j][i+1] = flag;
         }
-        n--;
+        if(flag != 0) {
+            cout<<"-1\n";
+            return;
+        }
     }
-    cout<<ans.size()<<endl;
-    for(auto &i: ans) cout<<i.first<<" "<<i.second<<endl;
+    for(int i = 0; i < n-1; i++) {
+        int flag = 0;
+        for(int j = 0; j < m; j++) {
+            if(arr[i][j]!='U') continue;
+            dp[i][j] = flag;
+            flag ^= 1;
+            dp[i+1][j] = flag;
+        }
+        if(flag != 0) {
+            cout<<"-1\n";
+            return;
+        }
+    }
+    for(int i = 0; i < n; i++) {
+        // int flag = 0;
+        for(int j = 0; j < m; j++) {
+            if(dp[i][j]==0) arr[i][j] = 'B';
+            else if(dp[i][j]==1) arr[i][j] = 'W';
+        }
+    }
+    for(auto &i : arr) cout<<i<<endl;
 }
 
 int main()

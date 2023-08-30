@@ -86,24 +86,7 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 void solve()
 {
-    int n;
-    cin>>n;
-    vpi ans;
-    int temp = ceil(sqrt(n));
-    int last = n;
-    n--;
-    while(n >= 2) {
-        if(n == temp) {
-            ans.pb({last, n}), ans.pb({last, n});
-            temp = ceil(sqrt(n));
-            last = n;
-        } else {
-            ans.pb({n,last});
-        }
-        n--;
-    }
-    cout<<ans.size()<<endl;
-    for(auto &i: ans) cout<<i.first<<" "<<i.second<<endl;
+    
 }
 
 int main()

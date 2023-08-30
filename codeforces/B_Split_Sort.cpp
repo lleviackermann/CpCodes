@@ -88,22 +88,21 @@ void solve()
 {
     int n;
     cin>>n;
-    vpi ans;
-    int temp = ceil(sqrt(n));
-    int last = n;
-    n--;
-    while(n >= 2) {
-        if(n == temp) {
-            ans.pb({last, n}), ans.pb({last, n});
-            temp = ceil(sqrt(n));
-            last = n;
-        } else {
-            ans.pb({n,last});
+    vi arr(n);
+    read(arr);
+    vi parent(n+1, -1);
+    int ans = 0;
+    for(int i = 0; i < n; i++) {
+        int x = arr[i];
+        if(x == 1) ans++, parent[1] = 1;
+        else {
+            if(parent[x-1]==-1) {
+                ans++;
+                parent[x] = x;
+            }  else parent[x] = parent[x-1];
         }
-        n--;
     }
-    cout<<ans.size()<<endl;
-    for(auto &i: ans) cout<<i.first<<" "<<i.second<<endl;
+    cout<<ans-1<<endl;
 }
 
 int main()

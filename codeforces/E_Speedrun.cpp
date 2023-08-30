@@ -83,27 +83,32 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
+void dfs(vl graph[], vl &visited, vl &dist, int ind, vl &hours, ll current) {
+    for(auto &i : graph[ind]) {
+        if(hours[i] >= hours[ind])
+    }
+}
 
 void solve()
 {
-    int n;
-    cin>>n;
-    vpi ans;
-    int temp = ceil(sqrt(n));
-    int last = n;
-    n--;
-    while(n >= 2) {
-        if(n == temp) {
-            ans.pb({last, n}), ans.pb({last, n});
-            temp = ceil(sqrt(n));
-            last = n;
-        } else {
-            ans.pb({n,last});
-        }
-        n--;
+    int n, m, k;
+    cin>>n>>m>>k;
+    vl hours(n);
+    read(hours);
+    ll ans = 0;
+    vl graph[n+1];
+    while(m--) {
+        int a, b;
+        cin>>a>>b;
+        graph[a].pb(b);
     }
-    cout<<ans.size()<<endl;
-    for(auto &i: ans) cout<<i.first<<" "<<i.second<<endl;
+    ll low = 1e9;
+    vi visited(n+1, 0), dist(n+1, 0);
+    for(int i = 1; i < n; i++) {
+        if(graph[i].size()>0) continue;
+        low = min(low, hours[i-1]);
+        
+    }
 }
 
 int main()

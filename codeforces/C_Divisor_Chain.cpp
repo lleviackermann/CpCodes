@@ -86,24 +86,20 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 void solve()
 {
-    int n;
+    ll n;
     cin>>n;
-    vpi ans;
-    int temp = ceil(sqrt(n));
-    int last = n;
-    n--;
-    while(n >= 2) {
-        if(n == temp) {
-            ans.pb({last, n}), ans.pb({last, n});
-            temp = ceil(sqrt(n));
-            last = n;
-        } else {
-            ans.pb({n,last});
-        }
-        n--;
+    vi ans;
+    for(ll i = 0; i < 31; i++) {
+        if(n&(1<<i)) ans.pb(n), n = n - (1 << i);
+    }
+    ll temp = ans[ans.size()-1];
+    while(temp > 1) {
+        temp /= 2;
+        ans.pb(temp);
     }
     cout<<ans.size()<<endl;
-    for(auto &i: ans) cout<<i.first<<" "<<i.second<<endl;
+    for(auto &i : ans) cout<<i<<' ';
+    cout<<endl;
 }
 
 int main()
