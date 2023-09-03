@@ -86,52 +86,29 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 void solve()
 {
-    ll n, m, k;
-    cin>>n>>m>>k;
-    vl graph[n+1];
-    vl arr(n+1);
-    for(int i = 1; i <= n; i++) cin>>arr[i];
-    vl deg(n+1, 0);
-    while(m--) {
-        ll a,b;
-        cin>>a>>b;
-        graph[a].pb(b);
-        deg[b]++;
+    int n;
+    cin>>n;
+    vi arr(n);
+    read(arr);
+    vi dp(n,0);
+    for(int i = n-2; i >= 0; i--) {
+        if(arr[i]>=arr[i+1]) dp[i] = dp[i+1] + 1;
+        else dp[i] = dp[i+1];
     }
-    queue<ll> temp;
-    for(int i = 1; i <= n; i++) if(!deg[i]) temp.push(i);
-    vl topo;
-    while(!temp.empty()) {
-        ll a = temp.front();
-        temp.pop();
-        topo.push_back(a);
-        for(auto i : graph[a]) {
-            deg[i]--;
-            if(deg[i]==0) temp.push(i);
+
+    int ans = dp[0];
+    int temp = 0;
+    for(int i = 0; i < n; i++) {
+        if(i==0) {
+            temp++;
+        } else {
+            if(arr[i]>=arr[i-1]) temp++;
         }
-    }
-    print(topo);
-    vl dp(n+1, 0);
-    for(int i = n; i >= 1; i--) {
-        ll ano = topo[i-1];
-        for(auto it : graph[ano]) {
-            dp[ano] = max(dp[ano], dp[it] + (arr[it] - arr[ano] + k) % k);
-        }
-    }
-    for(int i = 1; i <= n; i++) dp[i] += arr[i];
-    vector<int> fake;
-    for(int i = 1; i <= n; i++) fake.pb(i);
-    ll ma = *max_element(all(dp));
-    sort(all(fake), [&](int fir, int sec) {
-        return arr[fir] < arr[sec];
-    });
-    print(fake);
-    ll ans = 1e18;
-    for(auto i : fake) {
-        ans = min(ans, ma - arr[i]);
-        ma = max(ma, dp[i] + k);
+        if(i!=n-1) ans = min(ans, temp+dp[i+1]);
+        else ans = min(ans, temp);
     }
     cout<<ans<<endl;
+    
 }
 
 int main()

@@ -42,7 +42,7 @@ typedef set<pair<ll, ll>> spl;
 typedef ordered_set<ll> osl;
 typedef ordered_set<pair<ll, ll>> ospl;
 
-const ll mod = 1e9 + 7;
+const ll mod = 998244353;
 
 bool comp2(pair<ll, ll> &arr, pair<ll, ll> &b)
 {
@@ -83,10 +83,105 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
+long long binpow(long long a, long long b, long long m) {
+    a %= m;
+    long long res = 1;
+    while (b > 0) {
+        if (b & 1)
+            res = res * a % m;
+        a = a * a % m;
+        b >>= 1;
+    }
+    return res;
+}
+
+struct node {
+    node* child[2];
+    int count;
+    node() {
+        count = 0;
+        for(auto &a : child) a = nullptr;
+    }
+};
+
+class Trie {
+public:
+    node* root = new node();
+    
+    
+    void insert(ll num) {
+        node* tra = root;
+        root->count = root->count + 1;
+        for(int i = 29; i >= 0; i--) {
+            int x = num & (1 << i);
+            if(x) x = 1;
+            // cout<<x<<" ";
+            if(!tra->child[x]) tra->child[x] = new node();
+            tra = tra->child[x];
+            tra->count++;
+        }
+    }
+
+    ll numer() {
+        ll ans = 0;
+        queue<pair<node*, ll>> arr;
+        node* temp = root;
+        arr.push({temp, 1});
+        while(!arr.empty()) {
+            node * ano = arr.front().first;
+            ll cou = arr.front().second;
+            arr.pop();
+            if(ano->child[0] != nullptr && ano->child[1] != nullptr) {
+                ll fir = ano->child[0]->count;
+                ll sec = ano->child[1]->count;
+                // cout<<fir<<" "<<sec<<" cou " << cou<< endl;
+                fir = fir * sec;
+                // if(cou % 2) {
+                    ans = ans + fir * (cou + cou + 1);
+                // } else {
+                    // ans = ans + fir * (cou + cou + 1);
+                // }
+            }
+            if(ano->child[0]!=nullptr) arr.push({ano->child[0], cou});
+            if(ano->child[1]!=nullptr) arr.push({ano->child[1], cou+1});
+        }
+        return ans;
+    }
+    
+    
+};
+
 
 void solve()
 {
-    
+    ll n;
+    cin>>n;
+    vl arr(n);
+    read(arr);
+    ll deno = n * n;
+    Trie trie;
+    map<ll, ll> m;
+    for(auto &i : arr) trie.insert(i), m[i]++;
+    // cout<<trie.root->count<<endl;
+    ll ans = trie.numer();
+    debug(ans);
+    for(auto i : arr) {
+        ll sec = m[i];
+        if(sec==0) continue;
+        // cout<<i<<" ";
+        int cou = 1;
+        for(int j = 0; j < 30; j++) {
+            if(i & (1 << j)) cou++;
+        }
+        ans = ans + sec * sec * cou;
+        m[i] = 0;
+    }
+    deno = binpow(deno, mod-2, mod);
+    ans = ans % mod;
+    // ans = 21;
+    debug(ans);
+    ans = ans * deno % mod;
+    cout<<ans<<endl;
 }
 
 int main()
