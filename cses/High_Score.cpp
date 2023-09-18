@@ -163,27 +163,32 @@ void solve()
     ll n,m;
     cin >> n >> m;
     vector<pair<ll, pl>> edges;
-    for (int i = 0; i < n; i++)
+    set<int> store;
+    for (int i = 0; i < m; i++)
     {
         ll sta, end, w;
         cin >> sta >> end >> w;
-        edges.push_back({sta, {end, w}});
+        edges.push_back({sta, {end, -1*w}});
+        if(end == n) store.insert(sta);
     }
-    vl dist(n+1,-1e14);
+    vl dist(n+1,1e14);
     dist[1] = 0;
-    for(int i = 1; i <= n; i++) {
-        for(int j = 0; j < n; j++) {
+    for(int i = 1; i <= 2*n; i++) {
+        for(int j = 0; j < m; j++) {
             int sta = edges[j].first, end = edges[j].second.first, wei = edges[j].second.second;
-            if(dist[sta]!=-1e14 && dist[end] < dist[sta] + wei) {
-                if(i == n) {
-                    cout<<"-1\n";
-                    return;
-                }
+            // debug3(sta, end, wei);
+            if(dist[sta]!=1e14 && dist[end] > dist[sta] + wei) {
                 dist[end] = dist[sta] + wei;
+                if(i >= n) {
+                    if(store.find(end)!=store.end()) {
+                        cout<<"-1\n";
+                        return;
+                    }
+                }
             }
         }
     }
-    cout<<dist[n]<<endl;
+    cout<<-1*dist[n]<<endl;
 }
 
 int main()
