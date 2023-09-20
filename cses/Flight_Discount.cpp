@@ -156,54 +156,48 @@ void print(T t) { cout << t << "\n"; }
 
 #endif
 
-
-
 void solve()
 {
-    ll n,m;
+    ll n, m;
     cin >> n >> m;
-    vector<pair<ll, pl>> edges;
-    set<int> store;
-    vl graph[n+1];
+    vpl graph[n + 1];
     for (int i = 0; i < m; i++)
     {
-        ll sta, end, w;
-        cin >> sta >> end >> w;
-        edges.push_back({sta, {end, -1*w}});
-        graph[sta].push_back(end);
-        if(end == n) store.insert(sta);
+        ll sta, end, we;
+        cin >> sta >> end >> we;
+        graph[sta].push_back({end, we});
     }
-    vl dist(n+1,1e14);
+    vl visited(n + 1, 0), dist(n + 1, 1e15);
+    priority_queue<pair<ll, pl>, vector<pair<ll, pl>>, greater<pair<ll, pl>>> bfs;
+    bfs.push({0, {1, 0}});
     dist[1] = 0;
-    for(int i = 1; i <= n; i++) {
-        for(int j = 0; j < m; j++) {
-            int sta = edges[j].first, end = edges[j].second.first, wei = edges[j].second.second;
-            // debug3(sta, end, wei);
-            if(dist[sta]!=1e14 && dist[end] > dist[sta] + wei) {
-                dist[end] = dist[sta] + wei;
-                if(i == n) {
-                    queue<int> bfs;
-                    bfs.push(end);
-                    vi flag(n+1, 0);
-                    while(!bfs.empty()) {
-                        int fir = bfs.front();
-                        bfs.pop();
-                        if(flag[fir]) continue;
-                        flag[fir] = 1;
-                        if(fir == n) {
-                            cout<<"-1\n";
-                            return;
-                        }
-                        for(auto &it : graph[fir]) {
-                            if(flag[it]) continue;
-                            bfs.push(it);
-                        }
-                    }
-                }
-            }
+    ll ans = 1e15;
+    ll count = 0;
+    while (!bfs.empty())
+    {
+        ll ind = bfs.top().second.first, ma = bfs.top().second.second, sum = bfs.top().first;
+        bfs.pop();
+        if (ind == n)
+        {
+            ans = min(ans, sum);
+        }
+        // if (visited[ind])
+        //     continue;
+        // visited[ind] = 1;
+        count++;
+        if(count >= 2*n) break;
+        for (auto &i : graph[ind])
+        {
+            // if (visited[i.first])
+            //     continue;
+            ll neigh = i.first, wei = i.second;
+            ll temp = max(ma, wei);
+            ll ano = sum + wei - ma/2 + ma - temp + temp / 2;
+            if(ano >= ans) continue;;
+            bfs.push({ano, {neigh, max(ma, wei)}});
         }
     }
-    cout<<-1*dist[n]<<endl;
+    cout << ans << endl;
 }
 
 int main()
