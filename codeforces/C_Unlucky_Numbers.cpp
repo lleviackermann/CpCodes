@@ -156,56 +156,99 @@ void print(T t) { cout << t << "\n"; }
 
 #endif
 
-void dijkstra(vector<vpl> &graph, ll src, vl &dist, ll dest) {
-    priority_queue<pl, vpl, greater<pl>> store;
-    dist[src] = 0;
-    store.push({0, src});
-    // vl visited(dist.size(), 0);
-    while(!store.empty()) {
-        ll num = store.top().second, dis = store.top().first;
-        store.pop();
-        if(dis > dist[num]) continue;
-        // if(visited[num]) continue;;
-        // visited[num] = 1;
-        // debug(num);
-        for(auto &i : graph[num]) {
-            ll nei = i.first, wei = i.second;
-            if(dist[nei] > dist[num] + wei) {
-                dist[nei] = dist[num] + wei;
-                store.push({dist[nei], nei});
-            }
+int ans = 1e9;
+string finalAns = "";
+int dp[4][20][10][10];
+int recur(string low, string high, int ind, int bound, int hnum, int lownum, int flag, string &curr)
+{
+    
+    debug(bound);
+    if (ind == low.size())
+    {
+        debug4(curr, hnum, lownum, ind);
+        if(ans > hnum-lownum) {
+            finalAns = curr;
+            ans = hnum - lownum;
         }
+        return dp[bound][ind][hnum][lownum] = hnum-lownum;
     }
-    // print(dist);
+    if(lownum != 1e9 && dp[bound][ind][hnum][lownum]!=-1) return dp[bound][ind][hnum][lownum];
+    int lb, ub;
+    if (bound == 3)
+        lb = low[ind] - '0', ub = high[ind] - '0';
+    else if (bound == 2)
+        lb = 0, ub = high[ind] - '0';
+    else if (bound == 1)
+        lb = low[ind] - '0', ub = 9;
+    else
+        lb = 0, ub = 9;
+    debug3(bound,lb,ub);
+    int temp = 1e9;
+    for (int i = lb; i <= ub; i++)
+    {
+        int newBound = 0;
+        if (bound == 3)
+        {
+            if (low[ind] == high[ind])
+                newBound = 3;
+            else if (i == lb)
+                newBound = 1;
+            else if (i == ub)
+                newBound = 2;
+        }
+        else if (bound == 2)
+        {
+            if (i == ub)
+                newBound = 2;
+        }
+        else if (bound == 1)
+        {
+            if (i == lb)
+                newBound = 1;
+        }
+        int ano;
+        if(flag > ind) ano = (ind == 0 ? 1 : 0);
+        else {
+            if(flag == ind) ano = i;
+            else ano = min(lownum, i);
+        }
+        curr.push_back(to_string(i)[0]);
+        int x = recur(low, high, ind + 1, newBound, max(hnum, i), ano, flag, curr);
+        curr.pop_back();
+        temp = min(temp, x);
+    }
+    if(lownum != 1e9) dp[bound][ind][hnum][lownum] = temp;
+    else dp[bound][ind][ub][lb] = temp;
+    return temp;
 }
 
+ll conver(string s) {
+    int n = s.size();
+    ll num = 0;
+    for(int i = 0; i < n; i++) {
+        num = num * 10 + (s[i]-'0');
+    }
+    return num;
+}
 void solve()
 {
     ll n, m;
     cin >> n >> m;
-    vector<vpl> graph(n+1, vpl());
-    vector<vpl> revgraph(n+1, vpl());
-    for (int i = 0; i < m; i++)
+    string low = to_string(n);
+    string high = to_string(m);
+    int flag = high.size() - low.size();
+    while (low.size() < high.size())
     {
-        ll sta, end, we;
-        cin >> sta >> end >> we;
-        graph[sta].push_back({end, we});
-        revgraph[end].pb({sta, we});
+        low = "0" + low;
     }
-    vl start(n+1, 1e15), end(n+1, 1e15);
-    dijkstra(graph, 1, start, n);
-    dijkstra(revgraph, n, end, 1);
-    ll ans = 1e15;
-    for(int i = 1; i <= n; i++) {
-        for(auto j : graph[i]) {
-            ll r = j.first;
-            ll w = j.second;
-            // if(start[i]!=1e15 && end[r]!=1e15) {
-                ans = min(ans, start[i]+end[r]+w/2);
-            // }
-        }
-    }
-    cout<<ans<<endl;
+    // debug2(low, high);
+    memset(dp, -1, sizeof dp);
+    string curr = "";
+    ans = 1e9;
+    finalAns = "";
+    recur(low, high, 0, 3, 0, 1e9, flag, curr);
+    ll temp = conver(finalAns);
+    cout << temp << endl;
 }
 
 int main()
@@ -214,7 +257,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    // cin >> t;
+    cin >> t;
     while (t--)
     {
         solve();
