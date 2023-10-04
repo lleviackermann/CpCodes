@@ -46,9 +46,9 @@ const ll mod = 1e9 + 7;
 
 bool comp2(pair<ll, ll> &arr, pair<ll, ll> &b)
 {
-	if (arr.first == b.first)
-		return arr.second < b.second;
-	return arr.first < b.first;
+    if (arr.first == b.first)
+        return arr.second < b.second;
+    return arr.first < b.first;
 };
 
 template <typename T> void read(T i, T n, vector<T> &arr) { for(T j = i; j < n; j++) cin >> arr[j]; }
@@ -83,106 +83,77 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-template <typename T>
-class SegmentTree
-{
-public:
-	T n;
-	vector<T> tree;
-	vector<T> lazyTree;
-
-	SegmentTree(vector<T> &arr)
-	{
-		this->n = arr.size();
-		tree.resize(4 * this->n + 1);
-		build(arr);
-	}
-
-	void build(T index, T start, T end, vector<T> &arr)
-	{
-		if (start == end)
-		{
-			tree[index] = arr[start];
-			return;
-		}
-		T mid = (start + end) / 2;
-		build(2 * index + 1, start, mid, arr);
-		build(2 * index + 2, mid + 1, end, arr);
-		tree[index] = tree[2 * index + 1] + tree[2 * index + 2];
-	}
-
-	T query(T index, T start, T end, T l, T r)
-	{
-		if (start > r || end < l)
-		{
-			return 0;
-		}
-		if (start >= l && end <= r)
-			return tree[index];
-
-		T mid = (start + end) / 2;
-		T first = query(2 * index + 1, start, mid, l, r);
-		T second = query(2 * index + 2, mid + 1, end, l, r);
-		return first + second;
-	}
-
-	void update(T index, T target, T value, T start, T end)
-	{
-		if (start == end)
-		{
-			tree[index] = value;
-			return;
-		}
-
-		T mid = (start + end) / 2;
-		if (target <= mid)
-		{
-			update(2 * index + 1, target, value, start, mid);
-		}
-		else
-		{
-			update(2 * index + 2, target, value, mid + 1, end);
-		}
-		tree[index] = tree[2 * index + 1] + tree[2 * index + 2];
-	}
-
-	void build(vector<T> &arr)
-	{
-		build(0, 0, arr.size() - 1, arr);
-	}
-
-	T query(T l, T r)
-	{
-		return query(0, 0, this->n - 1, l, r);
-	}
-
-	void update(T target, T value)
-	{
-		update(0, target, value, 0, this->n - 1);
-	}
-};
 
 void solve()
 {
-	
+    ll n;
+    cin>>n;
+    ll k;
+    cin>>k;
+    ll half = n / 2;
+    if(k < (n/2)*2 + (n/2)*1 || (half % 2 != k % 2) || k > half * 100000 + half * 99999) {
+        cout<<"-1\n";
+        return;
+    }
+    vl ans;
+    ll sum = 0;
+    for(ll i = 0; i < n/2; i++) {
+        ans.pb(2);
+        sum+=2;
+    }
+    for(ll i = 0; i < n/2-1; i++) {
+        ans.pb(1);
+        sum += 1;
+    }
+    ans.pb(k - (sum));
+    if(ans.back()<=1e5) {
+        for(auto i : ans) cout<<i<<" ";
+        cout<<endl;
+        return;
+    }
+    ll extra = ans.back() - 99999;
+    ans[n-1] = 99999;
+    for(ll i = n-2; i >= 0; i--) {
+        // cout<<extra<<endl;
+        if(extra <= 0) break;
+        
+        ll temp = 0;
+        if(ans[i]%2) {
+            temp = min(99998ll, extra);
+            if(temp % 2) temp++;
+        }
+        else {
+            temp = min(99998ll, extra);
+            if(temp % 2) {
+                if(temp) temp++;
+            }
+
+        }
+
+        extra = extra - temp;
+
+        ans[i] += temp;
+    }
+    for(auto i : ans) cout<<i<<" ";
+        cout<<endl;
 }
 
 int main()
 { 
-	suprit;
-	clock_t start = clock();
+    suprit;
+    clock_t start = clock();
 
-	int t = 1;
-	cin >> t;
-	while (t--)
-	{
-		solve();
-	}
-	clock_t end = clock();
-	double elapsed = double(end - start) / CLOCKS_PER_SEC;
-	
-	#ifndef ONLINE_JUDGE
-	cout << setprecision(10) << elapsed << endl;
-	#endif
-	return 0;
+    int t = 1;
+    cin >> t;
+    while (t--)
+    {
+        solve();
+    }
+    clock_t end = clock();
+    double elapsed = double(end - start) / CLOCKS_PER_SEC;
+    
+    #ifndef ONLINE_JUDGE
+    cout << setprecision(10) << elapsed << endl;
+    #endif
+    return 0;
 }

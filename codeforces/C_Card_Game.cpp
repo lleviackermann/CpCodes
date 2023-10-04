@@ -46,9 +46,9 @@ const ll mod = 1e9 + 7;
 
 bool comp2(pair<ll, ll> &arr, pair<ll, ll> &b)
 {
-	if (arr.first == b.first)
-		return arr.second < b.second;
-	return arr.first < b.first;
+    if (arr.first == b.first)
+        return arr.second < b.second;
+    return arr.first < b.first;
 };
 
 template <typename T> void read(T i, T n, vector<T> &arr) { for(T j = i; j < n; j++) cin >> arr[j]; }
@@ -83,106 +83,47 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-template <typename T>
-class SegmentTree
-{
-public:
-	T n;
-	vector<T> tree;
-	vector<T> lazyTree;
-
-	SegmentTree(vector<T> &arr)
-	{
-		this->n = arr.size();
-		tree.resize(4 * this->n + 1);
-		build(arr);
-	}
-
-	void build(T index, T start, T end, vector<T> &arr)
-	{
-		if (start == end)
-		{
-			tree[index] = arr[start];
-			return;
-		}
-		T mid = (start + end) / 2;
-		build(2 * index + 1, start, mid, arr);
-		build(2 * index + 2, mid + 1, end, arr);
-		tree[index] = tree[2 * index + 1] + tree[2 * index + 2];
-	}
-
-	T query(T index, T start, T end, T l, T r)
-	{
-		if (start > r || end < l)
-		{
-			return 0;
-		}
-		if (start >= l && end <= r)
-			return tree[index];
-
-		T mid = (start + end) / 2;
-		T first = query(2 * index + 1, start, mid, l, r);
-		T second = query(2 * index + 2, mid + 1, end, l, r);
-		return first + second;
-	}
-
-	void update(T index, T target, T value, T start, T end)
-	{
-		if (start == end)
-		{
-			tree[index] = value;
-			return;
-		}
-
-		T mid = (start + end) / 2;
-		if (target <= mid)
-		{
-			update(2 * index + 1, target, value, start, mid);
-		}
-		else
-		{
-			update(2 * index + 2, target, value, mid + 1, end);
-		}
-		tree[index] = tree[2 * index + 1] + tree[2 * index + 2];
-	}
-
-	void build(vector<T> &arr)
-	{
-		build(0, 0, arr.size() - 1, arr);
-	}
-
-	T query(T l, T r)
-	{
-		return query(0, 0, this->n - 1, l, r);
-	}
-
-	void update(T target, T value)
-	{
-		update(0, target, value, 0, this->n - 1);
-	}
-};
 
 void solve()
 {
-	
+    int n;
+    cin>>n;
+    vl arr(n+10, 0);
+    for(int i = 1; i <= n; i++) cin>>arr[i];
+    ll ans = 0;
+    ll odd = 0, even = 0;
+    vl dp(n+5, 0);
+    for(int i = n; i >= 1; i--) {
+        if(i%2) {
+            dp[i] = max({arr[i]+dp[i+1], dp[i+2]});
+            ans = max({ans, dp[i]});
+        } else {
+            dp[i] = max({dp[i+1], dp[i+2]});
+            ans = max({ans, dp[i]});
+            dp[i] = max(dp[i], arr[i]+dp[i]);
+        }
+        
+    }
+    cout<<ans<<endl;
+
 }
 
 int main()
 { 
-	suprit;
-	clock_t start = clock();
+    suprit;
+    clock_t start = clock();
 
-	int t = 1;
-	cin >> t;
-	while (t--)
-	{
-		solve();
-	}
-	clock_t end = clock();
-	double elapsed = double(end - start) / CLOCKS_PER_SEC;
-	
-	#ifndef ONLINE_JUDGE
-	cout << setprecision(10) << elapsed << endl;
-	#endif
-	return 0;
+    int t = 1;
+    cin >> t;
+    while (t--)
+    {
+        solve();
+    }
+    clock_t end = clock();
+    double elapsed = double(end - start) / CLOCKS_PER_SEC;
+    
+    #ifndef ONLINE_JUDGE
+    cout << setprecision(10) << elapsed << endl;
+    #endif
+    return 0;
 }

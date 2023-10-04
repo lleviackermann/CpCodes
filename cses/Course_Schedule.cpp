@@ -46,9 +46,9 @@ const ll mod = 1e9 + 7;
 
 bool comp2(pair<ll, ll> &arr, pair<ll, ll> &b)
 {
-	if (arr.first == b.first)
-		return arr.second < b.second;
-	return arr.first < b.first;
+    if (arr.first == b.first)
+        return arr.second < b.second;
+    return arr.first < b.first;
 };
 
 template <typename T> void read(T i, T n, vector<T> &arr) { for(T j = i; j < n; j++) cin >> arr[j]; }
@@ -83,106 +83,59 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-template <typename T>
-class SegmentTree
-{
-public:
-	T n;
-	vector<T> tree;
-	vector<T> lazyTree;
-
-	SegmentTree(vector<T> &arr)
-	{
-		this->n = arr.size();
-		tree.resize(4 * this->n + 1);
-		build(arr);
-	}
-
-	void build(T index, T start, T end, vector<T> &arr)
-	{
-		if (start == end)
-		{
-			tree[index] = arr[start];
-			return;
-		}
-		T mid = (start + end) / 2;
-		build(2 * index + 1, start, mid, arr);
-		build(2 * index + 2, mid + 1, end, arr);
-		tree[index] = tree[2 * index + 1] + tree[2 * index + 2];
-	}
-
-	T query(T index, T start, T end, T l, T r)
-	{
-		if (start > r || end < l)
-		{
-			return 0;
-		}
-		if (start >= l && end <= r)
-			return tree[index];
-
-		T mid = (start + end) / 2;
-		T first = query(2 * index + 1, start, mid, l, r);
-		T second = query(2 * index + 2, mid + 1, end, l, r);
-		return first + second;
-	}
-
-	void update(T index, T target, T value, T start, T end)
-	{
-		if (start == end)
-		{
-			tree[index] = value;
-			return;
-		}
-
-		T mid = (start + end) / 2;
-		if (target <= mid)
-		{
-			update(2 * index + 1, target, value, start, mid);
-		}
-		else
-		{
-			update(2 * index + 2, target, value, mid + 1, end);
-		}
-		tree[index] = tree[2 * index + 1] + tree[2 * index + 2];
-	}
-
-	void build(vector<T> &arr)
-	{
-		build(0, 0, arr.size() - 1, arr);
-	}
-
-	T query(T l, T r)
-	{
-		return query(0, 0, this->n - 1, l, r);
-	}
-
-	void update(T target, T value)
-	{
-		update(0, target, value, 0, this->n - 1);
-	}
-};
 
 void solve()
 {
-	
+    int n,m;
+    cin>>n>>m;
+    vi graph[n+1];
+    vi outdegree(n+1, 0);
+    for(int i = 0; i < m; i++) {
+        int a,b;
+        cin>>a>>b;
+        graph[b].pb(a);
+        outdegree[a]++;
+    }
+    vector<int> ans;
+    queue<int> store;
+    for(int i = 1; i <= n; i++) {
+        if(outdegree[i]==0) store.push(i);
+    }
+    while(store.size()) {
+        int fir = store.front();
+        store.pop();
+        ans.push_back(fir);
+        for(auto i : graph[fir]) {
+            // store.push(i);
+            outdegree[i]--;
+            if(outdegree[i]==0) store.push(i); 
+        }
+    }
+    if(ans.size()!=n) {
+        cout<<"IMPOSSIBLE\n";
+        return;
+    }
+    reverse(all(ans));
+    for(auto i : ans) cout<<i<<" ";
+    cout<<endl;
 }
 
 int main()
 { 
-	suprit;
-	clock_t start = clock();
+    suprit;
+    clock_t start = clock();
 
-	int t = 1;
-	cin >> t;
-	while (t--)
-	{
-		solve();
-	}
-	clock_t end = clock();
-	double elapsed = double(end - start) / CLOCKS_PER_SEC;
-	
-	#ifndef ONLINE_JUDGE
-	cout << setprecision(10) << elapsed << endl;
-	#endif
-	return 0;
+    int t = 1;
+    // cin >> t;
+    while (t--)
+    {
+        solve();
+    }
+    clock_t end = clock();
+    double elapsed = double(end - start) / CLOCKS_PER_SEC;
+    
+    #ifndef ONLINE_JUDGE
+    cout << setprecision(10) << elapsed << endl;
+    #endif
+    return 0;
 }

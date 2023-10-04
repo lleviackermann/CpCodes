@@ -43,12 +43,14 @@ typedef ordered_set<ll> osl;
 typedef ordered_set<pair<ll, ll>> ospl;
 
 const ll mod = 1e9 + 7;
+const ll base = 31;
+
 
 bool comp2(pair<ll, ll> &arr, pair<ll, ll> &b)
 {
-	if (arr.first == b.first)
-		return arr.second < b.second;
-	return arr.first < b.first;
+    if (arr.first == b.first)
+        return arr.second < b.second;
+    return arr.first < b.first;
 };
 
 template <typename T> void read(T i, T n, vector<T> &arr) { for(T j = i; j < n; j++) cin >> arr[j]; }
@@ -83,106 +85,91 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-template <typename T>
-class SegmentTree
-{
-public:
-	T n;
-	vector<T> tree;
-	vector<T> lazyTree;
+vector<int> basePower((int)(5e5+10), 1), prefixHash((int)(5e5+10), 1);
+int n;
 
-	SegmentTree(vector<T> &arr)
-	{
-		this->n = arr.size();
-		tree.resize(4 * this->n + 1);
-		build(arr);
+int substrHash(int l, int r) {
+    return (ll)(prefixHash[r+1]-prefixHash[l] + mod) * basePower[n-l] % mod;
+}
+
+string s;
+int cmp(int L1, int R1, int L2, int R2) {
+	if(substrHash(L1, R1) == substrHash(L2, R2)) {
+		return 0;
 	}
-
-	void build(T index, T start, T end, vector<T> &arr)
-	{
-		if (start == end)
-		{
-			tree[index] = arr[start];
-			return;
+	int low = L1, high = R1;
+	while(low < high) {
+		int mid = (low + high) / 2;
+		if(substrHash(L1, mid) == substrHash(L2, mid + L2 - L1)) {
+			low = mid + 1;
 		}
-		T mid = (start + end) / 2;
-		build(2 * index + 1, start, mid, arr);
-		build(2 * index + 2, mid + 1, end, arr);
-		tree[index] = tree[2 * index + 1] + tree[2 * index + 2];
-	}
-
-	T query(T index, T start, T end, T l, T r)
-	{
-		if (start > r || end < l)
-		{
-			return 0;
+		else {
+			high = mid;
 		}
-		if (start >= l && end <= r)
-			return tree[index];
-
-		T mid = (start + end) / 2;
-		T first = query(2 * index + 1, start, mid, l, r);
-		T second = query(2 * index + 2, mid + 1, end, l, r);
-		return first + second;
 	}
 
-	void update(T index, T target, T value, T start, T end)
-	{
-		if (start == end)
-		{
-			tree[index] = value;
-			return;
-		}
+	
+	int i = low;
+	int j = low + L2 - L1;
+	return s[i] < s[j] ? -1 : 1;
+}
 
-		T mid = (start + end) / 2;
-		if (target <= mid)
-		{
-			update(2 * index + 1, target, value, start, mid);
-		}
-		else
-		{
-			update(2 * index + 2, target, value, mid + 1, end);
-		}
-		tree[index] = tree[2 * index + 1] + tree[2 * index + 2];
-	}
-
-	void build(vector<T> &arr)
-	{
-		build(0, 0, arr.size() - 1, arr);
-	}
-
-	T query(T l, T r)
-	{
-		return query(0, 0, this->n - 1, l, r);
-	}
-
-	void update(T target, T value)
-	{
-		update(0, target, value, 0, this->n - 1);
-	}
-};
+int check(int l1, int r1, int l2, int r2) {
+    if(substrHash(l1, r1) == substrHash(l2, r2)) return 0;
+    int low = l1, high = r1;
+    while(low < high) {
+        int mid = (low + high) / 2;
+        if(substrHash(l1, mid) == substrHash(l2, l2+mid-l1)) low = mid+1;
+        else high = mid;
+    }
+    int i = low, j = l2+low-l1;
+    if(s[i]<s[j]) return 1;
+    return 2;
+}
 
 void solve()
 {
-	
+    int k;
+    cin>>n>>k;
+    cin>>s;
+	basePower[0] = 1;
+    for(int i = 1; i <= n; ++i) {
+		basePower[i] = (long long) basePower[i-1] * base % mod;
+		prefixHash[i] = (prefixHash[i-1] + (long long) basePower[i] * (s[i-1] - 'a')) % mod;
+	}
+
+    int best_end = 0;
+    for(int end = 1; end < n; end++) {
+        int x = check(0, end-best_end-1, best_end+1, end);
+        if(x!=0) {
+            if(x==2) best_end = end;
+            continue;
+        }
+        x = check(end-best_end, end, 0, best_end);
+        if(x==2) best_end = end;
+    }
+    string ans = s.substr(0, best_end+1);
+    while((int)ans.size() < k) ans += ans;
+    ans.resize(k);
+    cout<<ans<<endl;
 }
 
 int main()
 { 
-	suprit;
-	clock_t start = clock();
+    suprit;
+    clock_t start = clock();
 
-	int t = 1;
-	cin >> t;
-	while (t--)
-	{
-		solve();
-	}
-	clock_t end = clock();
-	double elapsed = double(end - start) / CLOCKS_PER_SEC;
-	
-	#ifndef ONLINE_JUDGE
-	cout << setprecision(10) << elapsed << endl;
-	#endif
-	return 0;
+    int t = 1;
+    // cin >> t;
+    while (t--)
+    {
+        solve();
+    }
+    clock_t end = clock();
+    double elapsed = double(end - start) / CLOCKS_PER_SEC;
+    
+    #ifndef ONLINE_JUDGE
+    cout << setprecision(10) << elapsed << endl;
+    #endif
+    return 0;
 }

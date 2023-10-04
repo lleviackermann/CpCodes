@@ -46,9 +46,9 @@ const ll mod = 1e9 + 7;
 
 bool comp2(pair<ll, ll> &arr, pair<ll, ll> &b)
 {
-	if (arr.first == b.first)
-		return arr.second < b.second;
-	return arr.first < b.first;
+    if (arr.first == b.first)
+        return arr.second < b.second;
+    return arr.first < b.first;
 };
 
 template <typename T> void read(T i, T n, vector<T> &arr) { for(T j = i; j < n; j++) cin >> arr[j]; }
@@ -83,106 +83,88 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-template <typename T>
-class SegmentTree
-{
-public:
-	T n;
-	vector<T> tree;
-	vector<T> lazyTree;
-
-	SegmentTree(vector<T> &arr)
-	{
-		this->n = arr.size();
-		tree.resize(4 * this->n + 1);
-		build(arr);
-	}
-
-	void build(T index, T start, T end, vector<T> &arr)
-	{
-		if (start == end)
-		{
-			tree[index] = arr[start];
-			return;
-		}
-		T mid = (start + end) / 2;
-		build(2 * index + 1, start, mid, arr);
-		build(2 * index + 2, mid + 1, end, arr);
-		tree[index] = tree[2 * index + 1] + tree[2 * index + 2];
-	}
-
-	T query(T index, T start, T end, T l, T r)
-	{
-		if (start > r || end < l)
-		{
-			return 0;
-		}
-		if (start >= l && end <= r)
-			return tree[index];
-
-		T mid = (start + end) / 2;
-		T first = query(2 * index + 1, start, mid, l, r);
-		T second = query(2 * index + 2, mid + 1, end, l, r);
-		return first + second;
-	}
-
-	void update(T index, T target, T value, T start, T end)
-	{
-		if (start == end)
-		{
-			tree[index] = value;
-			return;
-		}
-
-		T mid = (start + end) / 2;
-		if (target <= mid)
-		{
-			update(2 * index + 1, target, value, start, mid);
-		}
-		else
-		{
-			update(2 * index + 2, target, value, mid + 1, end);
-		}
-		tree[index] = tree[2 * index + 1] + tree[2 * index + 2];
-	}
-
-	void build(vector<T> &arr)
-	{
-		build(0, 0, arr.size() - 1, arr);
-	}
-
-	T query(T l, T r)
-	{
-		return query(0, 0, this->n - 1, l, r);
-	}
-
-	void update(T target, T value)
-	{
-		update(0, target, value, 0, this->n - 1);
-	}
-};
+vector<int> ans;
+int flag = 0;
+int addFlag = 0;
+int num = -1;
+void dfs(vi graph[], vi &visited, vi &count, int ind, int curr) {
+    // cout<<ind<<endl;
+    visited[ind] = 1;
+    count[ind] = curr;
+    for(auto &i : graph[ind]) {
+        if(visited[i]==1) {
+            // cout<<ind<<" i "<<i<<endl;
+            if(curr - count[i] >= 1) {
+                // cout<<i<<" "<<ind<<endl;
+                addFlag = 1;
+                flag = 1;
+                num = i;
+                ans.pb(i);
+                return;
+            }
+            continue;
+        }
+        if(visited[i]==0) dfs(graph, visited, count, i, curr+1);
+        if(addFlag) {
+            ans.push_back(i);
+            if(num == i) {
+                addFlag = 0;
+            }
+        }
+        if(flag) return;
+    }
+    visited[ind] = 2;
+}
 
 void solve()
 {
-	
+    int n,m;
+    cin>>n>>m;
+    vi graph[n+1];
+    for(int i = 0; i < m; i++) {
+        int x,y;
+        cin>>x>>y;
+        graph[x].push_back(y);
+    }
+    // for(int i = 1; i <= n; i++) {
+    //     cout<<i<<"->";
+    //     for(auto j : graph[i]) cout<<j<<",";
+    //     cout<<endl;
+    // }
+    vi visited(n+1, 0), count(n+1, 0);
+    for(int i = 1; i <= n; i++) {
+        if(visited[i]) continue;
+        // debug(i);
+        dfs(graph, visited, count, i, 1);
+        if(ans.size()>0) {
+            if(ans.back()!=ans[0]) ans.push_back(ans[0]);
+            cout<<ans.size()<<endl;
+            reverse(all(ans));
+            for(auto &it : ans) cout<<it<<" ";
+            cout<<endl;
+            return;
+        }
+    }
+    // dfs(graph, visited, count, 1, 1);
+    cout<<"IMPOSSIBLE\n";
 }
 
 int main()
 { 
-	suprit;
-	clock_t start = clock();
+    suprit;
+    clock_t start = clock();
 
-	int t = 1;
-	cin >> t;
-	while (t--)
-	{
-		solve();
-	}
-	clock_t end = clock();
-	double elapsed = double(end - start) / CLOCKS_PER_SEC;
-	
-	#ifndef ONLINE_JUDGE
-	cout << setprecision(10) << elapsed << endl;
-	#endif
-	return 0;
+    int t = 1;
+    // cin >> t;
+    while (t--)
+    {
+        solve();
+    }
+    clock_t end = clock();
+    double elapsed = double(end - start) / CLOCKS_PER_SEC;
+    
+    #ifndef ONLINE_JUDGE
+    cout << setprecision(10) << elapsed << endl;
+    #endif
+    return 0;
 }
