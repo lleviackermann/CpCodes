@@ -86,7 +86,38 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 void solve()
 {
-    
+    int n, k, x;
+    cin>>n>>k>>x;
+    vi flag(n+1, 0), collect;
+    int count = 0;
+    for(int i = 1; i <= n; i++) {
+        if(count == k-1) break;
+        if(flag[i]) continue;
+        if((i^x)<=n && i!=x) {
+            count++;
+            flag[i]=1;
+            flag[(i^x)]=1;
+            collect.pb(i);
+        }
+    }
+    if(count!=k-1) {
+        cout<<"NO\n";
+        return;
+    }
+    int remain = 0;
+    for(int i = 1; i <= n; i++) if(!flag[i]) remain ^= i;
+    if(remain==x) {
+        cout<<"YES\n";
+        for(auto i : collect) {
+            cout<<"2 "<<i<<" "<<(i^x)<<endl;
+        }
+        cout<<n-2*collect.size()<<" ";
+        for(int i = 1; i <= n; i++) if(!flag[i]) cout<<i<<" ";
+        cout<<endl;
+        return;
+    }
+    cout<<"NO\n";
+    // debug((4^5^6^7^10));
 }
 
 int main()

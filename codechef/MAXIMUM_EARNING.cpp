@@ -86,26 +86,36 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 void solve()
 {
-    ll n,limit;
-    cin>>n>>limit;
-    vl nums(n);
-    read(nums);
-    // debug(n*(n+1)/2);
-    set<pair<ll, ll>> maxi;
-    ll start=0;
-    ll ans=0;
-    ll prev = 0;
-    for(ll end = 0; end < n; end++) {
-        ll curr = nums[end];
-        maxi.insert({curr, end});
-        // mini.insert({curr, end});
-        while((*maxi.rbegin()).first - (*maxi.begin()).first > limit) {
-            maxi.erase({nums[prev], prev});
-            // maxi.erase({nums[prev], prev});
-            prev++;
+    ll n,k,x;
+    cin>>n>>k>>x;
+    vpl arr(n);
+    for(int i = 0; i < n; i++) cin>>arr[i].first;
+    for(int i = 0; i < n; i++) cin>>arr[i].second;
+    sort(all(arr));
+    // print(arr);
+    
+    multiset<pair<ll, ll>> temp;
+    ll ind = 0;
+    while(ind < n) {
+        if(arr[ind].first > x) break;
+        temp.insert({arr[ind].second, arr[ind].first});
+        ind++;
+    }
+    // cout<<temp.size()<<endl;
+    ll ans = x;
+    while(k--) {
+        debug2(temp.size(), k);
+        if(temp.size()==0) break;
+        auto it = temp.rbegin();
+        // if(it==temp.end()) break;
+        ans += (*it).first;
+        debug(ans);
+        debug2(arr[ind].first, ind);
+        temp.erase(temp.find({(*it).first, (*it).second}));
+        while(ind < n && arr[ind].first <= ans) {
+            temp.insert({arr[ind].second, arr[ind].first});
+            ind++;
         }
-        ans += (end - prev + 1);
-
     }
     cout<<ans<<endl;
 }
@@ -125,7 +135,7 @@ int main()
     double elapsed = double(end - start) / CLOCKS_PER_SEC;
     
     #ifndef ONLINE_JUDGE
-    // cout << setprecision(10) << elapsed << endl;
+    cout << setprecision(10) << elapsed << endl;
     #endif
     return 0;
 }

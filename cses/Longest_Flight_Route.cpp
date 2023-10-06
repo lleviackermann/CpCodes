@@ -86,28 +86,87 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 void solve()
 {
-    ll n,limit;
-    cin>>n>>limit;
-    vl nums(n);
-    read(nums);
-    // debug(n*(n+1)/2);
-    set<pair<ll, ll>> maxi;
-    ll start=0;
-    ll ans=0;
-    ll prev = 0;
-    for(ll end = 0; end < n; end++) {
-        ll curr = nums[end];
-        maxi.insert({curr, end});
-        // mini.insert({curr, end});
-        while((*maxi.rbegin()).first - (*maxi.begin()).first > limit) {
-            maxi.erase({nums[prev], prev});
-            // maxi.erase({nums[prev], prev});
-            prev++;
-        }
-        ans += (end - prev + 1);
-
+    int n,m;
+    cin>>n>>m;
+    
+    vvi graph(n+1, vi()), revgraph(n+1, vi());
+    vi outgoing(n+1, 0);
+    for(int i = 0; i < m; i++) {
+        int a,b;
+        cin>>a>>b;
+        graph[a].pb(b);
+        outgoing[a]++;
+        revgraph[b].pb(a);
     }
-    cout<<ans<<endl;
+    vi dest(n+1, 1e9);
+    queue<pi> bfs;
+    dest[1] = 0;
+    bfs.push({0,1});
+    while(!bfs.empty()) {
+        int num = bfs.front().second, dist = bfs.front().first;
+        // cout<<num<<" "<<dist<<endl;
+        bfs.pop();
+        if(dist > dest[num]) continue;
+        for(auto i : graph[num]) {
+            // cout<<i<<" ";
+            if(dest[num]+1 < dest[i]) {
+                dest[i] = dest[num] + 1;
+                bfs.push({dest[i], i});
+            }
+        }
+        // cout<<endl;
+    }
+    if(dest[n]==1e9) {
+        cout<<"IMPOSSIBLE\n";
+        return;
+    }
+    
+    queue<int> topo;
+    for(int i = 1; i <= n; i++) {
+        if(outgoing[i]==0) topo.push(i);
+    }
+    vi toposort;
+    while(!topo.empty()) {
+        int x = topo.front();
+        topo.pop();
+        toposort.push_back(x);
+        for(auto i : revgraph[x]) {
+            outgoing[i]--;
+            if(outgoing[i]==0) topo.push(i);
+        }
+    }
+    vector<int> ans(n+1, 1), parent(n+1, -1);
+    // while(toposort.back()!=1) ans[toposort.back()]=-1e6,toposort.pop_back();
+    reverse(all(toposort));
+    // print(toposort);
+    for(int i = 1; i < toposort.size(); i++) {
+        if(toposort[i]==1) {
+            ans[1] = 1;
+            continue;
+        }
+        if(dest[toposort[i]]==1e9) continue;
+        for(auto nei : revgraph[toposort[i]]) {
+            int ano = toposort[i];
+            if(dest[nei]==1e9) continue;
+
+            if(ans[ano] < ans[nei]+1) {
+                ans[ano] = ans[nei] + 1;
+                parent[ano] = nei;
+            }
+        }
+    }
+    cout<<ans[n]<<endl;
+    vi path;
+    int temp = n;
+    while(temp!=-1) {
+        path.pb(temp);
+        if(temp==1) break;
+        temp = parent[temp];
+    }
+    reverse(all(path));
+    for(auto i : path) cout<<i<<" ";
+    cout<<endl;
+
 }
 
 int main()
@@ -116,7 +175,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    cin >> t;
+    // cin >> t;
     while (t--)
     {
         solve();
@@ -125,7 +184,7 @@ int main()
     double elapsed = double(end - start) / CLOCKS_PER_SEC;
     
     #ifndef ONLINE_JUDGE
-    // cout << setprecision(10) << elapsed << endl;
+    cout << setprecision(10) << elapsed << endl;
     #endif
     return 0;
 }

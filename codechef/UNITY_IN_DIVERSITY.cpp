@@ -86,28 +86,24 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 void solve()
 {
-    ll n,limit;
-    cin>>n>>limit;
-    vl nums(n);
-    read(nums);
-    // debug(n*(n+1)/2);
-    set<pair<ll, ll>> maxi;
-    ll start=0;
-    ll ans=0;
-    ll prev = 0;
-    for(ll end = 0; end < n; end++) {
-        ll curr = nums[end];
-        maxi.insert({curr, end});
-        // mini.insert({curr, end});
-        while((*maxi.rbegin()).first - (*maxi.begin()).first > limit) {
-            maxi.erase({nums[prev], prev});
-            // maxi.erase({nums[prev], prev});
-            prev++;
-        }
-        ans += (end - prev + 1);
-
+    ll n;
+    cin>>n;
+    vl teams(n+1, 0);
+    vl arr(n);
+    read(arr);
+    sort(all(arr));
+    int temp = 1;
+    teams[1]++;
+    for(int i = 1; i < n; i++) {
+        if(arr[i]!=arr[i-1]) temp++;
+        teams[temp]++;
     }
-    cout<<ans<<endl;
+    ll ans = 1;
+    for(int i = 1; i <= n; i++) {
+        if(teams[i]==0) break;
+        ans = ans * (teams[i]+1) % mod;   
+    }
+    cout<<ans-1<<endl;
 }
 
 int main()
@@ -125,7 +121,7 @@ int main()
     double elapsed = double(end - start) / CLOCKS_PER_SEC;
     
     #ifndef ONLINE_JUDGE
-    // cout << setprecision(10) << elapsed << endl;
+    cout << setprecision(10) << elapsed << endl;
     #endif
     return 0;
 }

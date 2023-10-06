@@ -83,44 +83,60 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-void direct(int ind, vi &visited, vvi &graph, vi &store) {
-    visited[ind] = 1;
-    store.push_back(ind);
-
+void dfs(int ind, set<int> &visited, vvi &graph, int &count) {
+    count++;
+    visited.insert(ind);
     for(auto i : graph[ind]) {
-        if(!visited[i]) direct(i, visited, graph, store);
+        if(visited.count(i)==0) {
+            dfs(i, visited, graph, count);
+        }
     }
 }
-
 void solve()
 {
     int n;
     cin>>n;
     vi arr(n+1);
     for(int i = 1; i <= n; i++) cin>>arr[i];
-    set<int> cyclecheck;
-    int temp = 1;
-    while(temp > 0 && temp <= n) {
-        cyclecheck.insert(temp); 
-        temp = temp + arr[temp];
-        if(cyclecheck.count(temp) > 0) break;
-    }
-    vector<vi> graph(n+10, vi());
+    vvi graph(n+10, vi());
     for(int i = 1; i <= n; i++) {
-        int fake = i + arr[i];
-        if(fake < 1) fake = n+1;
-        fake = min(n+1, fake);
-        graph[fake].pb(i);
+        int temp = i + arr[i];
+        if(temp < 1 || temp > n) temp = n+1;
+        graph[temp].pb(i);
     }
-    vi store, visited(n+10, 0);
-    direct(n+1, visited, graph, store, cyclecheck);
-    if(temp > 0 && temp <= n) {
-        cout<<cyclecheck.size()*(store.size()) + cyclecheck.size()*n<<endl;
+    int node = 1;
+    set<int> visited;
+    vector<int> path;
+    bool cycle = false;
+    while(true) {
+        visited.insert(node);
+        path.push_back(node);
+        node = node + arr[node];
+        if(visited.count(node)>0) {
+            cycle = true;
+            break;
+        }
+        if(node < 1 || node > n) break;
+    }
+    int k = visited.size();
+    set<int> good;
+    int temp = 0;
+    dfs(n+1, good, graph, temp);
+    if(cycle) {
+        cout<<(ll)k*(good.size()+n)<<endl;
         return;
     }
-
-    cout<<"nocycle\n";
-
+    // cout<<"-1\n";
+    ll ans = (ll)n * (2*n+1);
+    set<int> bad;
+    temp = 0;
+    visited.clear();
+    for(auto i : path) {
+        dfs(i, visited, graph, temp);
+        ans -= temp;
+    }
+    ans = ans - (ll) k * (n+1 - good.size());
+    cout<<ans<<endl;
 }
 
 int main()
