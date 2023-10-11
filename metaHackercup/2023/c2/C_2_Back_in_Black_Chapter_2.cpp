@@ -83,90 +83,55 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-long long binpow(long long a, long long b, long long m) {
-    a %= m;
-    long long res = 1;
-    while (b > 0) {
-        if (b & 1)
-            res = res * a % m;
-        a = a * a % m;
-        b >>= 1;
-    }
-    return res;
-}
+// 1 2 5 6 7
+// 2 5 6 7
+// 2 3 5 7
+// 3 5 7
+// 3 5 6 7
+// 3 5 6
+// 3 4 5 6
+// 2 3 5 
+// 2 3
 
-class DoubleHash {
-public:
-    string s;
-    int n;
-    vl prefixHash1, prefixHash2, basepower1, basepower2;
-    ll p1, p2, modulo1, modulo2;
-
-    DoubleHash(string &temp) {
-        s = temp;
-        n = temp.length();
-        prefixHash1.resize(n+1, 0);
-        prefixHash2.resize(n+1, 0);
-        basepower1.resize(n+1, 1);
-        basepower2.resize(n+1, 1);
-        p1 = 31, p2 = 43, modulo1 = 1e9+7, modulo2 = 1e9+9;
-        computePrefixHash(p1, modulo1, prefixHash1, basepower1);
-        computePrefixHash(p2, modulo2, prefixHash2, basepower2);
-    }
- 
-    void computePrefixHash(ll p, ll modulo, vl &prefix, vl &basepower) {
-        for(int i = 1; i <= n; i++) basepower[i] = basepower[i-1] * p % modulo;
-        for(ll i = 0; i < n; i++) {
-            ll x = s[i] - 'a' + 1;
-            prefix[i+1] = (prefix[i] + basepower[i] * x) % modulo;
+vi ret(string &str) {
+    string s = str;
+    vi ans;
+    // debug(s);
+    for(int i = 1; i <= s.size()-1; i++) {
+        if(s[i]=='0') continue;
+        ans.pb(i);
+        for(int j = i; j <= s.size(); j+=i) {
+            if(s[j]=='0') s[j] = '1';
+            else s[j] = '0';
         }
     }
-
-    pl substrHash(ll l, ll r) {
-        //indexing should be 0 based
-        pl ans;
-        ans.first = (prefixHash1[r+1] - prefixHash1[l] + modulo1) * basepower1[n-l] % modulo1;
-        ans.second = (prefixHash2[r+1] - prefixHash2[l] + modulo2) * basepower2[n-l] % modulo2;
-        return ans;
-    }
-};
-
+    return ans;
+} 
 void solve()
 {
+    ll n;
+    cin>>n;
     string s;
     cin>>s;
-    DoubleHash str(s);
-    int n = s.length();
-    // string ans = "";
-    int ans = -1;
-    vi indices;
-    for(int i = 1; i < n; i++) {
-        pl first = str.substrHash(0, i-1);
-        pl second = str.substrHash(n-i, n-1);
-        // debug2(s.substr(0,i),s.substr(n-i));
-        // debug2(first, second);
-        if(first == second) {
-            indices.pb(i);
-        }
+    s = " " + s;
+    vi temp = ret(s);
+    // print(temp);
+    set<int> sear(temp.begin(), temp.end());
+    ll prev = temp.size();
+    ll ans = 0;
+    int q;
+    cin>>q;
+    while(q--) {
+        int ind;
+        cin>>ind;
+        if(sear.count(ind)>0) {
+            prev--;
+            sear.erase(ind);
+        } else prev++, sear.insert(ind);
+        ans += prev;
+
     }
-    int l = 0, r = indices.size() - 1;
-    while(l <= r) {
-        int mid = (l + r) / 2;
-        int te = mid;
-        mid = indices[mid];
-        pl check = str.substrHash(0, mid-1);
-        int flag = 0;
-        for(int i = 1; i < n - mid; i++) {
-            pl temp = str.substrHash(i, i+mid-1);
-            if(temp == check) flag=1;
-        }
-        // mid = te;
-        if(flag) ans = mid, l = te+1;
-        else r = te - 1;
-    }
-    // debug(ans);
-    if(ans==-1 || ans==0) cout<<"Just a legend\n";
-    else cout<<s.substr(0, ans)<<endl;
+    cout<<ans<<endl;
 }
 
 int main()
@@ -175,16 +140,18 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    // cin >> t;
+    cin >> t;
+    int count = 1;
     while (t--)
     {
+        cout<<"Case #"<<count++<<": ";
         solve();
     }
     clock_t end = clock();
     double elapsed = double(end - start) / CLOCKS_PER_SEC;
     
     #ifndef ONLINE_JUDGE
-    cout << setprecision(10) << elapsed << endl;
+    // cout << setprecision(10) << elapsed << endl;
     #endif
     return 0;
 }

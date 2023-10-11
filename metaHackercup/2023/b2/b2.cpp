@@ -156,83 +156,18 @@ void print(T t) { cout << t << "\n"; }
 
 #endif
 
-vl nums;
-vl finalans;
-int dp[42][42];
-bool recur(ll p, ll sum, vl &fun) {
-    if(sum == 0 && p == 1) {
-        if(fun.size()<finalans.size() || finalans.size()==0) {
-            finalans.clear();
-            finalans = fun;
-        }
-        return true;
-    }
-    if(sum == 0 || p < 1) return false;
-    if(dp[sum][fun.size()]!=-1) return false;
-    if(finalans.size()!=0 && finalans.size()<=fun.size()) return false;
-    bool flag = false;
-    for(auto i : nums) {
-        if(p%i || i > p || i > sum) continue;
-        fun.pb(i);
-        recur(p/i, sum-i, fun);
-        fun.pop_back();
-    }
-    dp[sum][fun.size()] = 0;
-    return false;
-}
+map<ll, vl> ans;
 void solve(int count)
 {
     ll p;
     cin >> p;
-    nums.clear();
-    finalans.clear();
-    bool flag = false;
-    memset(dp, -1, sizeof dp);
-    for (ll i = 1; i <= 41; i++)
-    {
-        if (p % i == 0)
-            nums.pb(i);
-    }
-    vector<set<pl>> ans(42);
-    vector<ll> temp;
-    // print(nums);
-    ans[0].insert({1, 0});
-    for (int i = 1; i <= 41; i++)
-    {
-        for (auto j : nums)
-        {
-            if (j > i || ans[i - j].size() == 0)
-                continue;
-            for (auto pa : ans[i - j])
-            {
-                if (pa.first * j > p || (p % (pa.first * j) != 0))
-                    continue;
-                ans[i].insert({pa.first * j, j});
-            }
-        }
-        if (i == 41)
-        {
-            for (auto it : ans[i])
-            {
-                if(it.first==p) {
-                    flag = true;
-                    break;
-                }
-            }
-        }
-    }
-    if(!flag) {
-        cout << "Case #" << count << ": -1\n";
+    if(ans.find(p) == ans.end()) {
+        cout<<"-1\n";
         return;
     }
-    reverse(all(nums));
-    // print(nums);
-    vl fun;
-    recur(p, 41, fun);
-    cout << "Case #" << count << ": " << finalans.size() << " ";
-    for (auto i : finalans)
-        cout << i << " ";
-    cout << endl;
+    cout<<ans[p].size()<<" ";
+    for(auto i : ans[p]) cout<<i<<" ";
+    cout<<endl;
 }
 
 int main()
@@ -242,9 +177,26 @@ int main()
 
     int t = 1;
     cin >> t;
+    vl temp;
+    auto dfs = [&](auto self, ll p, ll lower, ll sum)
+    {
+        if (sum == 41)
+        {
+            if(ans.find(p) == ans.end() || ans[p].size() > temp.size()) ans[p] = temp;
+            return;
+        }
+        for(ll i = lower; i <= 41; i++) {
+            if(i + sum > 41 || p*i > 1e9) continue;
+            temp.pb(i);
+            self(self, p*i, i, sum+i);
+            temp.pop_back();
+        }
+    };
+    dfs(dfs, 1ll, 1ll, 0ll);
     int count = 1;
     while (t--)
     {
+        cout<<"Case #"<<count<<": ";
         solve(count++);
     }
     clock_t end = clock();

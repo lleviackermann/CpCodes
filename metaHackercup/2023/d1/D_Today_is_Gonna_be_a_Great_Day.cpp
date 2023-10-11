@@ -83,90 +83,123 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-long long binpow(long long a, long long b, long long m) {
-    a %= m;
-    long long res = 1;
-    while (b > 0) {
-        if (b & 1)
-            res = res * a % m;
-        a = a * a % m;
-        b >>= 1;
-    }
-    return res;
-}
-
-class DoubleHash {
+template <typename T, typename V>
+class SegmentTree
+{
 public:
-    string s;
-    int n;
-    vl prefixHash1, prefixHash2, basepower1, basepower2;
-    ll p1, p2, modulo1, modulo2;
+    T n;
+    vector<V> tree;
+    vector<T> lazyTree;
 
-    DoubleHash(string &temp) {
-        s = temp;
-        n = temp.length();
-        prefixHash1.resize(n+1, 0);
-        prefixHash2.resize(n+1, 0);
-        basepower1.resize(n+1, 1);
-        basepower2.resize(n+1, 1);
-        p1 = 31, p2 = 43, modulo1 = 1e9+7, modulo2 = 1e9+9;
-        computePrefixHash(p1, modulo1, prefixHash1, basepower1);
-        computePrefixHash(p2, modulo2, prefixHash2, basepower2);
+    SegmentTree(vector<T> &arr)
+    {
+        this->n = arr.size();
+        tree.resize(4 * this->n + 1);
+        lazyTree.resize(4 * this->n + 1, 0);
+        build(arr);
     }
- 
-    void computePrefixHash(ll p, ll modulo, vl &prefix, vl &basepower) {
-        for(int i = 1; i <= n; i++) basepower[i] = basepower[i-1] * p % modulo;
-        for(ll i = 0; i < n; i++) {
-            ll x = s[i] - 'a' + 1;
-            prefix[i+1] = (prefix[i] + basepower[i] * x) % modulo;
+
+    void build(T index, T start, T end, vector<T> &arr)
+    {
+        if (start == end)
+        {
+            tree[index] = V(arr[start], start);
+            return;
         }
+        T mid = (start + end) / 2;
+        build(2 * index + 1, start, mid, arr);
+        build(2 * index + 2, mid + 1, end, arr);
+        tree[index] = V::merge(tree[2 * index + 1] , tree[2 * index + 2]);
     }
 
-    pl substrHash(ll l, ll r) {
-        //indexing should be 0 based
-        pl ans;
-        ans.first = (prefixHash1[r+1] - prefixHash1[l] + modulo1) * basepower1[n-l] % modulo1;
-        ans.second = (prefixHash2[r+1] - prefixHash2[l] + modulo2) * basepower2[n-l] % modulo2;
-        return ans;
+    void update(T index, T l, T r, T start, T end)
+    {
+        if(lazyTree[index]) {
+            tree[index] = V::flip(tree[index]);
+            if(start!=end) {
+                lazyTree[2 * index + 1] ^= 1;
+                lazyTree[2 * index + 2] ^= 1;
+            }
+            lazyTree[index] = 0;
+        }
+        if (end < l || start > r || start > end)
+            return;
+        if (start == end)
+        {
+            tree[index] = V::flip(tree[index]);
+            return;
+        }
+        if (start >= l && end <= r)
+        {
+            tree[index] = V::flip(tree[index]);
+            lazyTree[2 * index + 1] ^= 1;
+            lazyTree[2 * index + 2] ^= 1;
+            return;
+        }
+
+        T mid = (start + end) / 2;
+        update(2 * index + 1, l, r, start, mid);
+        update(2 * index + 2, l, r, mid + 1, end);
+
+        tree[index] = V::merge(tree[2 * index + 1] , tree[2 * index + 2]);
+
+    }
+
+    void build(vector<T> &arr)
+    {
+        build(0, 0, arr.size() - 1, arr);
+    }
+
+    void update(T l, T r)
+    {
+        update(0, l, r, 0, this->n - 1);
+    }
+};
+
+struct item {
+    ll ma, mi, mai, mii;
+
+    item() {}
+    item(ll n, ll ind) {
+        ma = n, mi = n, mai = ind, mii = ind;
+    }
+
+    static item merge(item fir, item sec) {
+        item tem;
+        tem = fir;
+        if(fir.ma < sec.ma) tem.ma = sec.ma, tem.mai = sec.mai;
+        if(fir.mi > sec.mi) tem.mi = sec.mi, tem.mii = sec.mii;
+        return tem;
+    }
+
+    static item flip(item fir) {
+        item tem;
+        tem.ma = mod - fir.mi;
+        tem.mai = fir.mii;
+        tem.mi = mod - fir.ma;
+        tem.mii = fir.mai;
+        return tem;
     }
 };
 
 void solve()
 {
-    string s;
-    cin>>s;
-    DoubleHash str(s);
-    int n = s.length();
-    // string ans = "";
-    int ans = -1;
-    vi indices;
-    for(int i = 1; i < n; i++) {
-        pl first = str.substrHash(0, i-1);
-        pl second = str.substrHash(n-i, n-1);
-        // debug2(s.substr(0,i),s.substr(n-i));
-        // debug2(first, second);
-        if(first == second) {
-            indices.pb(i);
-        }
+    ll n;
+    cin>>n;
+    vl arr(n);
+    read(arr);
+
+    SegmentTree<ll, item> segtree(arr);
+    ll ans = 0;
+    int q;
+    cin>>q;
+    while(q--) {
+        ll l,r;
+        cin>>l>>r;
+        segtree.update(--l,--r);
+        ans += segtree.tree[0].mai + 1;
     }
-    int l = 0, r = indices.size() - 1;
-    while(l <= r) {
-        int mid = (l + r) / 2;
-        int te = mid;
-        mid = indices[mid];
-        pl check = str.substrHash(0, mid-1);
-        int flag = 0;
-        for(int i = 1; i < n - mid; i++) {
-            pl temp = str.substrHash(i, i+mid-1);
-            if(temp == check) flag=1;
-        }
-        // mid = te;
-        if(flag) ans = mid, l = te+1;
-        else r = te - 1;
-    }
-    // debug(ans);
-    if(ans==-1 || ans==0) cout<<"Just a legend\n";
-    else cout<<s.substr(0, ans)<<endl;
+    cout<<ans<<endl;
 }
 
 int main()
@@ -175,16 +208,18 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    // cin >> t;
+    cin >> t;
+    int count = 1;
     while (t--)
     {
+        cout<<"Case #"<<count++<<": ";
         solve();
     }
     clock_t end = clock();
     double elapsed = double(end - start) / CLOCKS_PER_SEC;
     
     #ifndef ONLINE_JUDGE
-    cout << setprecision(10) << elapsed << endl;
+    // cout << setprecision(10) << elapsed << endl;
     #endif
     return 0;
 }

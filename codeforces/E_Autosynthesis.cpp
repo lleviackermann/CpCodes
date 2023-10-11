@@ -83,90 +83,60 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-long long binpow(long long a, long long b, long long m) {
-    a %= m;
-    long long res = 1;
-    while (b > 0) {
-        if (b & 1)
-            res = res * a % m;
-        a = a * a % m;
-        b >>= 1;
-    }
-    return res;
-}
-
-class DoubleHash {
+class SingleHash {
 public:
     string s;
     int n;
-    vl prefixHash1, prefixHash2, basepower1, basepower2;
-    ll p1, p2, modulo1, modulo2;
-
-    DoubleHash(string &temp) {
+    vl prefixHash1;
+    ll p1, modulo1;
+    vl basepower;
+ 
+    SingleHash(string &temp) {
         s = temp;
         n = temp.length();
         prefixHash1.resize(n+1, 0);
-        prefixHash2.resize(n+1, 0);
-        basepower1.resize(n+1, 1);
-        basepower2.resize(n+1, 1);
-        p1 = 31, p2 = 43, modulo1 = 1e9+7, modulo2 = 1e9+9;
-        computePrefixHash(p1, modulo1, prefixHash1, basepower1);
-        computePrefixHash(p2, modulo2, prefixHash2, basepower2);
+        basepower.resize(n+1, 1);
+        p1 = 31, modulo1 = 1e9+7;
+        computePrefixHash(p1, modulo1, prefixHash1);
     }
  
-    void computePrefixHash(ll p, ll modulo, vl &prefix, vl &basepower) {
-        for(int i = 1; i <= n; i++) basepower[i] = basepower[i-1] * p % modulo;
+    void computePrefixHash(ll p, ll modulo, vl &prefix) {
+        ll power_p = 1;
         for(ll i = 0; i < n; i++) {
+            if(i!=0) basepower[i] = basepower[i-1] * p1 % modulo;
             ll x = s[i] - 'a' + 1;
-            prefix[i+1] = (prefix[i] + basepower[i] * x) % modulo;
+            prefix[i+1] = (prefix[i-1] + basepower[i] * x) % modulo;
         }
     }
 
-    pl substrHash(ll l, ll r) {
-        //indexing should be 0 based
-        pl ans;
-        ans.first = (prefixHash1[r+1] - prefixHash1[l] + modulo1) * basepower1[n-l] % modulo1;
-        ans.second = (prefixHash2[r+1] - prefixHash2[l] + modulo2) * basepower2[n-l] % modulo2;
+    ll substrHash(ll l, ll r) {
+        ll ans = (prefixHash1[r+1] - prefixHash1[l] + modulo1) * basepower[n-l] % modulo1;
         return ans;
     }
+ 
+    static ll getHash(string &t, ll p, ll modulo) {
+        int len = t.length();
+        ll ans = 0;
+        ll power_p = 1;
+        for(ll i = 0; i < len; i++) {
+            ll x = t[i] - 'a' + 1;
+            ans += x * power_p;
+            power_p = (power_p * p) % modulo;
+            ans %= modulo;
+        }
+        return ans;
+    }
+ 
+    static ll getHashString(string t) {
+        ll ans;
+        ans = getHash(t, 31, 1e9+7);
+        return ans;
+ 
+    }
 };
-
 void solve()
 {
-    string s;
-    cin>>s;
-    DoubleHash str(s);
-    int n = s.length();
-    // string ans = "";
-    int ans = -1;
-    vi indices;
-    for(int i = 1; i < n; i++) {
-        pl first = str.substrHash(0, i-1);
-        pl second = str.substrHash(n-i, n-1);
-        // debug2(s.substr(0,i),s.substr(n-i));
-        // debug2(first, second);
-        if(first == second) {
-            indices.pb(i);
-        }
-    }
-    int l = 0, r = indices.size() - 1;
-    while(l <= r) {
-        int mid = (l + r) / 2;
-        int te = mid;
-        mid = indices[mid];
-        pl check = str.substrHash(0, mid-1);
-        int flag = 0;
-        for(int i = 1; i < n - mid; i++) {
-            pl temp = str.substrHash(i, i+mid-1);
-            if(temp == check) flag=1;
-        }
-        // mid = te;
-        if(flag) ans = mid, l = te+1;
-        else r = te - 1;
-    }
-    // debug(ans);
-    if(ans==-1 || ans==0) cout<<"Just a legend\n";
-    else cout<<s.substr(0, ans)<<endl;
+    
 }
 
 int main()
@@ -175,7 +145,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    // cin >> t;
+    cin >> t;
     while (t--)
     {
         solve();

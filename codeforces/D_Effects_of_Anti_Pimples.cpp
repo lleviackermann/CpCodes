@@ -42,7 +42,7 @@ typedef set<pair<ll, ll>> spl;
 typedef ordered_set<ll> osl;
 typedef ordered_set<pair<ll, ll>> ospl;
 
-const ll mod = 1e9 + 7;
+const ll mod = 998244353;
 
 bool comp2(pair<ll, ll> &arr, pair<ll, ll> &b)
 {
@@ -83,6 +83,87 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
+template <typename T>
+class SegmentTree
+{
+public:
+    T n;
+    vector<T> tree;
+    // vector<T> lazyTree;
+
+    SegmentTree(vector<T> &arr)
+    {
+        this->n = arr.size();
+        tree.resize(4 * this->n + 1);
+        // lazyTree.resize(4 * this->n + 1, 0);
+        build(arr);
+    }
+
+    void build(T index, T start, T end, vector<T> &arr)
+    {
+        if (start == end)
+        {
+            tree[index] = arr[start];
+            return;
+        }
+        T mid = (start + end) / 2;
+        build(2 * index + 1, start, mid, arr);
+        build(2 * index + 2, mid + 1, end, arr);
+        tree[index] = tree[2 * index + 1] + tree[2 * index + 2];
+    }
+
+    T query(T index, T start, T end, T l, T r)
+    {
+        if (start > r || end < l)
+        {
+            return 0;
+        }
+        if (start >= l && end <= r)
+            return tree[index];
+
+        T mid = (start + end) / 2;
+        T first = query(2 * index + 1, start, mid, l, r);
+        T second = query(2 * index + 2, mid + 1, end, l, r);
+        return first + second;
+    }
+
+    void update(T index, T target, T value, T start, T end)
+    {
+        if (start == end)
+        {
+            tree[index] = value;
+            return;
+        }
+
+        T mid = (start + end) / 2;
+        if (target <= mid)
+        {
+            update(2 * index + 1, target, value, start, mid);
+        }
+        else
+        {
+            update(2 * index + 2, target, value, mid + 1, end);
+        }
+        tree[index] = tree[2 * index + 1] + tree[2 * index + 2];
+    }
+
+    void build(vector<T> &arr)
+    {
+        build(0, 0, arr.size() - 1, arr);
+    }
+
+    T query(T l, T r)
+    {
+        return query(0, 0, this->n - 1, l, r);
+    }
+
+    void update(T target, T value)
+    {
+        update(0, target, value, 0, this->n - 1);
+    }
+
+};
+
 long long binpow(long long a, long long b, long long m) {
     a %= m;
     long long res = 1;
@@ -95,78 +176,31 @@ long long binpow(long long a, long long b, long long m) {
     return res;
 }
 
-class DoubleHash {
-public:
-    string s;
-    int n;
-    vl prefixHash1, prefixHash2, basepower1, basepower2;
-    ll p1, p2, modulo1, modulo2;
-
-    DoubleHash(string &temp) {
-        s = temp;
-        n = temp.length();
-        prefixHash1.resize(n+1, 0);
-        prefixHash2.resize(n+1, 0);
-        basepower1.resize(n+1, 1);
-        basepower2.resize(n+1, 1);
-        p1 = 31, p2 = 43, modulo1 = 1e9+7, modulo2 = 1e9+9;
-        computePrefixHash(p1, modulo1, prefixHash1, basepower1);
-        computePrefixHash(p2, modulo2, prefixHash2, basepower2);
-    }
- 
-    void computePrefixHash(ll p, ll modulo, vl &prefix, vl &basepower) {
-        for(int i = 1; i <= n; i++) basepower[i] = basepower[i-1] * p % modulo;
-        for(ll i = 0; i < n; i++) {
-            ll x = s[i] - 'a' + 1;
-            prefix[i+1] = (prefix[i] + basepower[i] * x) % modulo;
-        }
-    }
-
-    pl substrHash(ll l, ll r) {
-        //indexing should be 0 based
-        pl ans;
-        ans.first = (prefixHash1[r+1] - prefixHash1[l] + modulo1) * basepower1[n-l] % modulo1;
-        ans.second = (prefixHash2[r+1] - prefixHash2[l] + modulo2) * basepower2[n-l] % modulo2;
-        return ans;
-    }
-};
-
 void solve()
 {
-    string s;
-    cin>>s;
-    DoubleHash str(s);
-    int n = s.length();
-    // string ans = "";
-    int ans = -1;
-    vi indices;
-    for(int i = 1; i < n; i++) {
-        pl first = str.substrHash(0, i-1);
-        pl second = str.substrHash(n-i, n-1);
-        // debug2(s.substr(0,i),s.substr(n-i));
-        // debug2(first, second);
-        if(first == second) {
-            indices.pb(i);
-        }
+    ll n;
+    cin>>n;
+    vl arr(n+1);
+    for(int i = 1; i <= n; i++) cin>>arr[i];
+    vl count(100010, 0);
+    for(int i = 1; i <= n; i++) {
+        ll ma = -1;
+        for(int j = i; j <= n; j+=i) ma = max(ma, arr[j]);
+        count[ma]++;
     }
-    int l = 0, r = indices.size() - 1;
-    while(l <= r) {
-        int mid = (l + r) / 2;
-        int te = mid;
-        mid = indices[mid];
-        pl check = str.substrHash(0, mid-1);
-        int flag = 0;
-        for(int i = 1; i < n - mid; i++) {
-            pl temp = str.substrHash(i, i+mid-1);
-            if(temp == check) flag=1;
-        }
-        // mid = te;
-        if(flag) ans = mid, l = te+1;
-        else r = te - 1;
+    SegmentTree<ll> segtree(count);
+    ll ans = 0;
+    for(int i = 1; i <= 100000; i++) {
+        if(count[i]==0) continue;
+        ll sum = segtree.query(0, i-1);
+        debug2(sum, i);
+        // sum--;
+        ll temp = (binpow(2,count[i],mod)-1)*binpow(2,sum, mod) % mod;
+        ans = ans + i*temp;
+        debug(ans);
+        ans %= mod;
     }
-    // debug(ans);
-    if(ans==-1 || ans==0) cout<<"Just a legend\n";
-    else cout<<s.substr(0, ans)<<endl;
+    cout<<ans<<endl;
 }
 
 int main()
