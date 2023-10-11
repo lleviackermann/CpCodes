@@ -101,7 +101,7 @@ public:
     int n;
     vl prefixHash1, prefixHash2, basepower1, basepower2;
     ll p1, p2, modulo1, modulo2;
-
+    // vl inverseValue1, inverseValue2;
     DoubleHash(string &temp) {
         s = temp;
         n = temp.length();
@@ -109,11 +109,21 @@ public:
         prefixHash2.resize(n+1, 0);
         basepower1.resize(n+1, 1);
         basepower2.resize(n+1, 1);
+        // inverseValue1.resize(n+1, 0);
+        // inverseValue2.resize(n+1, 0);
         p1 = 31, p2 = 43, modulo1 = 1e9+7, modulo2 = 1e9+9;
         computePrefixHash(p1, modulo1, prefixHash1, basepower1);
         computePrefixHash(p2, modulo2, prefixHash2, basepower2);
+        // computeInverse(inverseValue1, p1, modulo1);
+        // computeInverse(inverseValue2, p2, modulo2);
     }
  
+    // void computeInverse(vl &inverse, ll p, ll modulo) {
+    //     ll temp = binpow(p, n-1, modulo);
+    //     inverse[n-1] = binpow(temp, modulo-2, modulo);
+    //     for(ll i = n-2; i >=0; i--) inverse[i] = (inverse[i+1] * (p)) % modulo;
+    // }
+
     void computePrefixHash(ll p, ll modulo, vl &prefix, vl &basepower) {
         for(int i = 1; i <= n; i++) basepower[i] = basepower[i-1] * p % modulo;
         for(ll i = 0; i < n; i++) {
@@ -127,6 +137,52 @@ public:
         pl ans;
         ans.first = (prefixHash1[r+1] - prefixHash1[l] + modulo1) * basepower1[n-l] % modulo1;
         ans.second = (prefixHash2[r+1] - prefixHash2[l] + modulo2) * basepower2[n-l] % modulo2;
+        // ans.first = (prefixHash1[r+1] - prefixHash1[l] + modulo1) * inverseValue1[l] % modulo1;
+        // ans.second = (prefixHash2[r+1] - prefixHash2[l] + modulo2) * inverseValue2[l] % modulo2;
+        return ans;
+    }
+};
+
+class SingleHash {
+public:
+    string s;
+    int n;
+    vl prefixHash;
+    ll p, modulo;
+    vl basepower;
+    // vl inverseValue;
+ 
+    SingleHash(string &temp) {
+        s = temp;
+        n = temp.length();
+        prefixHash.resize(n+1, 0);
+        basepower.resize(n+1, 1);
+        // inverseValue.resize(n+1,0);
+        p = 31, modulo = 1e9+7;
+        computePrefixHash();
+        // computeInverse();
+    }
+    
+    // void computeInverse() {
+    //     ll temp = binpow(p, n-1, modulo);
+    //     inverseValue[n-1] = binpow(temp, modulo-2, modulo);
+    //     for(ll i = n-2; i >=0; i--) inverseValue[i] = (inverseValue[i+1] * (p)) % modulo;
+    // }
+
+    void computePrefixHash() {
+        ll power_p = 1;
+        for(int i = 1; i <= n; i++) basepower[i] = basepower[i-1] * p % modulo;
+        // print(basepower);
+        for(ll i = 0; i < n; i++) {
+            ll x = s[i] - 'a' + 1;
+            prefixHash[i+1] = (prefixHash[i] + basepower[i] * x) % modulo;
+        }
+    }
+
+    ll substrHash(ll l, ll r) {
+        ll ans = (prefixHash[r+1] - prefixHash[l] + modulo) * basepower[n-l] % modulo;
+        // ll ans = (prefixHash[r+1] - prefixHash[l] + modulo) * inverseValue[l] % modulo;
+        
         return ans;
     }
 };
@@ -135,14 +191,14 @@ void solve()
 {
     string s;
     cin>>s;
-    DoubleHash str(s);
+    SingleHash str(s);
     int n = s.length();
     // string ans = "";
     int ans = -1;
     vi indices;
     for(int i = 1; i < n; i++) {
-        pl first = str.substrHash(0, i-1);
-        pl second = str.substrHash(n-i, n-1);
+        ll first = str.substrHash(0, i-1);
+        ll second = str.substrHash(n-i, n-1);
         // debug2(s.substr(0,i),s.substr(n-i));
         // debug2(first, second);
         if(first == second) {
@@ -154,10 +210,10 @@ void solve()
         int mid = (l + r) / 2;
         int te = mid;
         mid = indices[mid];
-        pl check = str.substrHash(0, mid-1);
+        ll check = str.substrHash(0, mid-1);
         int flag = 0;
         for(int i = 1; i < n - mid; i++) {
-            pl temp = str.substrHash(i, i+mid-1);
+            ll temp = str.substrHash(i, i+mid-1);
             if(temp == check) flag=1;
         }
         // mid = te;
