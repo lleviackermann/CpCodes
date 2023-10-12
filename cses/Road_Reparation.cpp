@@ -3,10 +3,10 @@
 #include <ext/pb_ds/tree_policy.hpp>
 using namespace std;
 using namespace __gnu_pbds;
- 
+
 template <typename T> 
 using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
- 
+
 #define endl "\n"
 #define fo(i, n) for (i = 0; i < n; i++)
 #define Fo(i, k, n) for (i = k; k < n; k++)
@@ -22,7 +22,7 @@ using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statisti
 #define PI 3.1415926535897932384626
 #define suprit ios_base::sync_with_stdio(0); cout.tie(0); cin.tie(0);
 #define line cout << endl;
- 
+
 typedef pair<int, int> pi;
 typedef pair<ll, ll> pl;
 typedef vector<int> vi;
@@ -41,21 +41,14 @@ typedef set<ll> sl;
 typedef set<pair<ll, ll>> spl;
 typedef ordered_set<ll> osl;
 typedef ordered_set<pair<ll, ll>> ospl;
- 
+
 const ll mod = 1e9 + 7;
- 
-bool comp2(pair<ll, ll> &arr, pair<ll, ll> &b)
-{
-    if (arr.first == b.first)
-        return arr.second < b.second;
-    return arr.first < b.first;
-};
- 
+
 template <typename T> void read(T i, T n, vector<T> &arr) { for(T j = i; j < n; j++) cin >> arr[j]; }
 template <typename T> void read(vector<T> &arr) { for(auto &j : arr) cin>>j; }
- 
+
 #ifndef ONLINE_JUDGE
- 
+
 template <typename T, typename V> void print(set<pair<T, V>> &arr) { for(auto &it : arr) cout<<it.first<<" "<<it.second<<endl; line}
 template <typename T, typename V> void print(pair<T, V>& pa) { cout<<pa.first<<" "<<pa.second<<endl; }
 template <typename T> void print(T i, T last, vector<T> &arr) { for(T j = i; j < last; j++) cout<<arr[j]<<" "; line} 
@@ -72,74 +65,84 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 #define debug2(x, y) cout<<#x<<" "<<x<<" "<<#y<<" "<<y<<endl;
 #define debug3(x, y, z) cout<<#x<<" "<<x<<" "<<#y<<" "<<y<<" "<<#z<<" "<<z<<endl;
 #define debug4(x, y, z, a) cout<<#x<<" "<<x<<" "<<#y<<" "<<y<<" "<<#z<<" "<<z<<" "<<#a<<" "<<a<<endl;
- 
+
 #else
- 
+
 #define print(x) 
 #define debug(x)
 #define debug2(x, y)
 #define debug3(x, y, z)
 #define debug4(x, y, z, a)
- 
+
 #endif
- 
-int binary[200005][22];
-int visited[200005];
-int len[200005];
 
- 
-int binarylifting(int u, int k) {
-    if(k<=0) return u;
-    int i = 0;
-    while(k>0) {
-        if(k&1) u = binary[u][i];
-        i++;
-        k>>=1;
-    }
-    return u;
-}   
-
-int dfs(int u) {
-    if(visited[u]) {
-        if(len[u]==0) return 0;
-        int origin = binarylifting(u,len[u]);
-        if(len[origin]>=len[u]) return len[origin];
-        return len[u];
-    }
-    visited[u] = 1;
-    return len[u] = dfs(binary[u][0]) + 1;
-}
-
- 
-void solve()
-{
+#define N_MAX 100005
+int parent[N_MAX];
+int setSize[N_MAX];
+class DSU {
+public:
     int n;
-    cin>>n;
-    // cout<<binary[10][10]<<endl;
-    for(int i = 0; i < n; i++) {
-        int x;
-        cin>>x;
-        binary[i][0] = x-1;
+
+    DSU(int n) {
+        this->n = n;
+        for(int i = 1; i <= n; i++) parent[i] = i,setSize[i] = 1;
     }
-    for(int k = 1; k < 21; k++) {
-        for(int i = 0; i < n; i++) {
-            if(k>0 && binary[i][k-1]==-1) binary[i][k] = -1;
-            else binary[i][k] = binary[binary[i][k-1]][k-1];
+
+    int find_parent(int u) {
+        return parent[u] = (parent[u] == u ? u : find_parent(parent[u]));
+    }
+
+    void union_sets(int u, int v) {
+        u = find_parent(u);
+        v = find_parent(v);
+        if(u!=v) {
+            if(setSize[u]<setSize[v]) swap(u,v);
+            parent[v] = u;
+            setSize[u] += setSize[v];
         }
     }
-    for(int i = 0; i < n; i++) if(!visited[i]) dfs(i);
-    for(int i = 0; i < n; i++) {
-        int par = binarylifting(i,len[i]);
-        cout<<max(len[par],len[i])<<" ";
+};
+
+void solve()
+{
+    int n,m;
+    cin>>n>>m;
+    priority_queue<pair<int, pi>, vector<pair<int, pi>>, greater<pair<int, pi>>> store;
+    for(int i = 0; i < m; i++) {
+        int st,en,wei;
+        cin>>st>>en>>wei;
+        store.push({wei, {st,en}});
     }
-    cout<<endl;
+
+    ll ans = 0;
+    DSU dsu(n+1);
+    while(store.size()) {
+        pair<int, pi> first = store.top();
+        store.pop();
+        int st = first.second.first, en = first.second.second;
+        int fir = dsu.find_parent(st), sec = dsu.find_parent(en);
+        debug4(st,fir,en,sec);
+        if(dsu.find_parent(st)==dsu.find_parent(en)) continue;
+        debug2(first.first,st);
+        
+        ans += first.first;
+        dsu.union_sets(st,en);
+    }
+    for(int i = 1; i <= n; i++) dsu.find_parent(i);
+    for(int i = 2; i <= n; i++) {
+        if(parent[i]!=parent[i-1]) {
+            cout<<"IMPOSSIBLE\n";
+            return;
+        }
+    }
+    cout<<ans<<endl;
 }
- 
+
 int main()
 { 
     suprit;
     clock_t start = clock();
- 
+
     int t = 1;
     // cin >> t;
     while (t--)
