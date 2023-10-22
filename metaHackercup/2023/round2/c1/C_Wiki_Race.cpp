@@ -60,7 +60,7 @@ template <typename T, typename V> void print(set<pair<T, V>> &arr) { for(auto &i
 template <typename T, typename V> void print(pair<T, V>& pa) { cout<<pa.first<<" "<<pa.second<<endl; }
 template <typename T> void print(T i, T last, vector<T> &arr) { for(T j = i; j < last; j++) cout<<arr[j]<<" "; line} 
 template <typename T> void print(T i, vector<T> &arr) { for(T j = i; j < arr.size(); j++) cout<<arr[j]<<" "; line} 
-template <typename T> void print(vector<T> &arr) { for(auto &i : arr) cout<<i.gcd<<" "; line}
+template <typename T> void print(vector<T> &arr) { for(auto &i : arr) cout<<i<<" "; line}
 template <typename T, typename V> void print(unordered_map<T, V>& arr) { for(auto &it : arr) cout<<it.first<<" "<<it.second<<endl; line}
 template <typename T, typename V> void print(map<T, V>& arr) { for(auto &it : arr) cout<<it.first<<" "<<it.second<<endl;}
 template <typename T> void print(unordered_set<T> &arr) { for(auto &it : arr) cout<<it<<" "; line }
@@ -82,122 +82,85 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 #define debug4(x, y, z, a)
 
 #endif
-struct item {
-    int gcd, ans, total, count;
 
-    item() {}
-
-    item(int n) {
-        this->gcd = n;
-        this->count = 1;
-        this->total = 1;
-        this->ans = 0;
+vvi graph(1e6+1, vi());
+vector<set<int>> store(1e6+1);
+int ans = 0;
+set<int> tocheck;
+void dfs(int ind, map<int, int> &check, map<int, int> &fake) {
+    map<int, int> temp;
+    for(auto i : store[ind]) fake[i] = fake[i]++;
+    for(auto i : graph[ind]) dfs(i, temp, fake);
+    for(auto i : store[ind]) temp[i]++;
+    if(graph[ind].size()<=1) {
+        for(auto i : temp) check[i.first] += i.second;
+        // print(check);
+        return;
     }
-
-    static item merge(item fa, item sa) {
-        item first = fa;
-        item second = sa;
-        item temp;
-        if(first.gcd > second.gcd) swap(first, second);
-        if(first.gcd == second.gcd) {
-            temp.gcd = first.gcd;
-            temp.count = first.count + second.count;
-            temp.total = first.total+ second.total;
-            temp.ans = temp.total - temp.count;
-        } else if(__gcd(first.gcd, second.gcd) == first.gcd) {
-            temp.gcd = first.gcd;
-            temp.count = first.count;
-            temp.total = first.total + second.total;
-            temp.ans = temp.total - temp.count;
-        } else {
-            temp.gcd = __gcd(first.gcd, second.gcd);
-            temp.count = 0;
-            temp.total = first.total + second.total;
-            temp.ans = temp.total;
-        }
-        return temp;
+    set<int> todo;
+    // for(auto i : temp) {
+    //     debug3(i.first, i.second)
+    //     if(i.second >= graph[ind].size()) check[i.first] += 1;
+    //     else check[i.first] = 0;
+    // }
+    for(auto i : tocheck) {
+        // debug3(ind, i, temp[i]);
+        if(temp[i]+min(0,fake[i])>=graph[ind].size()) check[i] += 1;
+        else check[i]=0,todo.insert(i); 
     }
-};
-
-template <typename T>
-class SegmentTree
-{
-public:
-    T n;
-    vector<item> tree;
-
-    SegmentTree(vector<T> &arr)
-    {
-        this->n = arr.size();
-        tree.resize(4 * this->n + 1);
-        build(arr);
-    }
-
-    void build(T index, T start, T end, vector<T> &arr)
-    {
-        if (start == end)
-        {
-            tree[index] = item(arr[start]);
-            return;
-        }
-        T mid = (start + end) / 2;
-        build(2 * index + 1, start, mid, arr);
-        build(2 * index + 2, mid + 1, end, arr); 
-        // print(index);
-        // print(this->tree);
-        tree[index] = item::merge(tree[2 * index + 1], tree[2*index + 2]);
-        // print(this->tree[index].gcd);
-    }
-
-    item query(T index, T start, T end, T l, T r)
-    {
-        if (start > r || end < l)
-        {
-            item temp;
-            temp.ans = -1;
-            return temp;
-        }
-        if (start >= l && end <= r)
-            return tree[index];
-
-        T mid = (start + end) / 2;
-        item first = query(2 * index + 1, start, mid, l, r);
-        item second = query(2 * index + 2, mid + 1, end, l, r);
-        if(first.ans == -1 && second.ans != -1) return second;
-        else if(first.ans!= -1 && second.ans == -1) return first; 
-        return item::merge(first, second);
-    }
-
-    void build(vector<T> &arr)
-    {
-        build(0, 0, arr.size() - 1, arr);
-    }
-
-    item query(T l, T r)
-    {
-        return query(0, 0, this->n - 1, --l, --r);
-    }
-};
-
-
+    // print(check);
+    for(auto i : todo) tocheck.erase(i);
+    // print(tocheck);
+}
 
 void solve()
 {
     int n;
     cin>>n;
-    vi arr(n);
-    read(arr);
-    SegmentTree<int> segtree(arr);
-    int q;
-    cin>>q;
-    // print(segtree.tree);
-
-    while(q--) {
-        int l, r;
-        cin>>l>>r;
-        cout<<segtree.query(l,r).ans<<endl;
+    // graph.clear();
+    for(int i = 1; i <= n; i++) graph[i].clear(), store[i].clear();
+    // graph.resize(n+1, vi());
+    for(int i = 0; i < n-1; i++) {
+        int x;
+        cin>>x;
+        graph[x].push_back(i+2);
+        // graph[i+2].pb(x);
     }
-
+    // for(int i = 1; i <= n; i++) {
+    //     cout<<i<<"->";
+    //     print(graph[i]);
+        
+    // }
+    // store.clear();
+    // store.resize(n+1, vi());
+    map<string, int>words;
+    int count = 0;
+    for(int i = 1; i <= n; i++) {
+        int num;
+        cin>>num;
+        for(int j = 0; j < num; j++) {
+            string s;
+            cin>>s;
+            if(words[s]!=0) store[i].insert(words[s]);
+            else {
+                words[s] = ++count;
+                store[i].insert(words[s]);
+            }
+        }
+    }
+    tocheck.clear();
+    for(int i = 1; i <= count; i++) tocheck.insert(i);
+    // for(int i = 1; i <= n; i++) {
+    //     cout<<i<<"->";
+    //     print(store[i]);
+    // }
+    map<int, int> check, fake;
+    dfs(1, check, fake);
+    // print(tocheck);
+    cout<<tocheck.size()<<endl;
+    // int ans = 0;
+    // for(auto i : check) if(i.second > 0) ans++;
+    // cout<<ans<<endl;
 }
 
 int main()
@@ -206,16 +169,18 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    // cin >> t;
+    cin >> t;
+    int count = 1;
     while (t--)
     {
+        cout<<"Case #"<<count++<<": ";
         solve();
     }
     clock_t end = clock();
     double elapsed = double(end - start) / CLOCKS_PER_SEC;
     
     #ifndef ONLINE_JUDGE
-    cout << setprecision(10) << elapsed << endl;
+    // cout << setprecision(10) << elapsed << endl;
     #endif
     return 0;
 }

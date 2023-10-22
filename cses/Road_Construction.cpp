@@ -83,10 +83,52 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
+#define N_MAX 100005
+int parent[N_MAX];
+int setSize[N_MAX];
+class DSU {
+public:
+    int n;
+
+    DSU(int n) {
+        this->n = n;
+        for(int i = 1; i <= n; i++) parent[i] = i,setSize[i] = 1;
+    }
+
+    int find_parent(int u) {
+        return parent[u] = (parent[u] == u ? u : find_parent(parent[u]));
+    }
+
+    void union_sets(int u, int v) {
+        u = find_parent(u);
+        v = find_parent(v);
+        if(u!=v) {
+            if(setSize[u]<setSize[v]) swap(u,v);
+            parent[v] = u;
+            setSize[u] += setSize[v];
+        }
+    }
+};
 
 void solve()
 {
-    
+    int n,m;
+    cin>>n>>m;
+    int mx = -1;
+    DSU dsu(n+1);
+    int number = n;
+    for(int i = 0; i < m; i++) {
+        int a,b;
+        cin>>a>>b;
+        if(dsu.find_parent(a) == dsu.find_parent(b)) {
+            cout<<number<<" "<<mx<<endl;
+            continue;
+        }
+        number--;
+        dsu.union_sets(a,b);
+        mx = max({mx, setSize[parent[a]], setSize[parent[b]]});
+        cout<<number<<" "<<mx<<endl;
+    }
 }
 
 int main()
@@ -95,7 +137,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    cin >> t;
+    // cin >> t;
     while (t--)
     {
         solve();

@@ -60,7 +60,7 @@ template <typename T, typename V> void print(set<pair<T, V>> &arr) { for(auto &i
 template <typename T, typename V> void print(pair<T, V>& pa) { cout<<pa.first<<" "<<pa.second<<endl; }
 template <typename T> void print(T i, T last, vector<T> &arr) { for(T j = i; j < last; j++) cout<<arr[j]<<" "; line} 
 template <typename T> void print(T i, vector<T> &arr) { for(T j = i; j < arr.size(); j++) cout<<arr[j]<<" "; line} 
-template <typename T> void print(vector<T> &arr) { for(auto &i : arr) cout<<i.gcd<<" "; line}
+template <typename T> void print(vector<T> &arr) { for(auto &i : arr) cout<<i<<" "; line}
 template <typename T, typename V> void print(unordered_map<T, V>& arr) { for(auto &it : arr) cout<<it.first<<" "<<it.second<<endl; line}
 template <typename T, typename V> void print(map<T, V>& arr) { for(auto &it : arr) cout<<it.first<<" "<<it.second<<endl;}
 template <typename T> void print(unordered_set<T> &arr) { for(auto &it : arr) cout<<it<<" "; line }
@@ -82,122 +82,47 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 #define debug4(x, y, z, a)
 
 #endif
-struct item {
-    int gcd, ans, total, count;
-
-    item() {}
-
-    item(int n) {
-        this->gcd = n;
-        this->count = 1;
-        this->total = 1;
-        this->ans = 0;
-    }
-
-    static item merge(item fa, item sa) {
-        item first = fa;
-        item second = sa;
-        item temp;
-        if(first.gcd > second.gcd) swap(first, second);
-        if(first.gcd == second.gcd) {
-            temp.gcd = first.gcd;
-            temp.count = first.count + second.count;
-            temp.total = first.total+ second.total;
-            temp.ans = temp.total - temp.count;
-        } else if(__gcd(first.gcd, second.gcd) == first.gcd) {
-            temp.gcd = first.gcd;
-            temp.count = first.count;
-            temp.total = first.total + second.total;
-            temp.ans = temp.total - temp.count;
-        } else {
-            temp.gcd = __gcd(first.gcd, second.gcd);
-            temp.count = 0;
-            temp.total = first.total + second.total;
-            temp.ans = temp.total;
-        }
-        return temp;
-    }
-};
-
-template <typename T>
-class SegmentTree
-{
-public:
-    T n;
-    vector<item> tree;
-
-    SegmentTree(vector<T> &arr)
-    {
-        this->n = arr.size();
-        tree.resize(4 * this->n + 1);
-        build(arr);
-    }
-
-    void build(T index, T start, T end, vector<T> &arr)
-    {
-        if (start == end)
-        {
-            tree[index] = item(arr[start]);
-            return;
-        }
-        T mid = (start + end) / 2;
-        build(2 * index + 1, start, mid, arr);
-        build(2 * index + 2, mid + 1, end, arr); 
-        // print(index);
-        // print(this->tree);
-        tree[index] = item::merge(tree[2 * index + 1], tree[2*index + 2]);
-        // print(this->tree[index].gcd);
-    }
-
-    item query(T index, T start, T end, T l, T r)
-    {
-        if (start > r || end < l)
-        {
-            item temp;
-            temp.ans = -1;
-            return temp;
-        }
-        if (start >= l && end <= r)
-            return tree[index];
-
-        T mid = (start + end) / 2;
-        item first = query(2 * index + 1, start, mid, l, r);
-        item second = query(2 * index + 2, mid + 1, end, l, r);
-        if(first.ans == -1 && second.ans != -1) return second;
-        else if(first.ans!= -1 && second.ans == -1) return first; 
-        return item::merge(first, second);
-    }
-
-    void build(vector<T> &arr)
-    {
-        build(0, 0, arr.size() - 1, arr);
-    }
-
-    item query(T l, T r)
-    {
-        return query(0, 0, this->n - 1, --l, --r);
-    }
-};
-
-
 
 void solve()
 {
-    int n;
+    ll n;
     cin>>n;
-    vi arr(n);
+    vl arr(n);
     read(arr);
-    SegmentTree<int> segtree(arr);
-    int q;
-    cin>>q;
-    // print(segtree.tree);
-
-    while(q--) {
-        int l, r;
-        cin>>l>>r;
-        cout<<segtree.query(l,r).ans<<endl;
+    ll mul = 1;
+    for(auto i : arr) {
+        if(mul > 1e6) break;
+        mul *= i;
     }
-
+    if(mul > 1e6) {
+        int st = 0, en = n-1;
+        while(arr[st]==1) st++;
+        while(arr[en]==1) en--;
+        cout<<st+1<<" "<<en+1<<endl;
+        return;
+    }
+    ll sum = 0;
+    vl mult(n,1), prefix(n,0), suffix(n,0);
+    mult[0] = arr[0];
+    prefix[0] = arr[0], suffix[n-1]=arr[n-1];
+    for(int i = 1; i < n; i++) mult[i] = mult[i-1] * arr[i], prefix[i] = prefix[i-1] + arr[i];
+    for(int i = n-2; i >= 0; i--) suffix[i] = suffix[i+1] + arr[i];
+    ll left = -1, right = -1;
+    vl notone;
+    for(int i = 0; i < n; i++) if(arr[i]!=1) notone.pb(i);
+    int k = notone.size();
+    for(int i = 0; i < k; i++) {
+        for(int j = k-1; j >= i; j--) {
+            ll temp = 0;
+            ll t2 = mult[notone[j]];
+            if(notone[i]!=0) temp += prefix[notone[i]-1], t2 /= mult[notone[i]-1];
+            if(notone[j]!=n-1) temp += suffix[notone[j]+1];
+            temp += t2;
+            if(temp > sum) sum = temp, left = notone[i]+1, right = notone[j] + 1;
+        }
+    }
+    if(left==-1) left=1,right=1;
+    cout<<left<<" "<<right<<endl;
 }
 
 int main()
@@ -206,7 +131,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    // cin >> t;
+    cin >> t;
     while (t--)
     {
         solve();

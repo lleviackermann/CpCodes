@@ -60,7 +60,7 @@ template <typename T, typename V> void print(set<pair<T, V>> &arr) { for(auto &i
 template <typename T, typename V> void print(pair<T, V>& pa) { cout<<pa.first<<" "<<pa.second<<endl; }
 template <typename T> void print(T i, T last, vector<T> &arr) { for(T j = i; j < last; j++) cout<<arr[j]<<" "; line} 
 template <typename T> void print(T i, vector<T> &arr) { for(T j = i; j < arr.size(); j++) cout<<arr[j]<<" "; line} 
-template <typename T> void print(vector<T> &arr) { for(auto &i : arr) cout<<i.gcd<<" "; line}
+template <typename T> void print(vector<T> &arr) { for(auto &i : arr) cout<<i<<" "; line}
 template <typename T, typename V> void print(unordered_map<T, V>& arr) { for(auto &it : arr) cout<<it.first<<" "<<it.second<<endl; line}
 template <typename T, typename V> void print(map<T, V>& arr) { for(auto &it : arr) cout<<it.first<<" "<<it.second<<endl;}
 template <typename T> void print(unordered_set<T> &arr) { for(auto &it : arr) cout<<it<<" "; line }
@@ -82,54 +82,22 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 #define debug4(x, y, z, a)
 
 #endif
-struct item {
-    int gcd, ans, total, count;
-
-    item() {}
-
-    item(int n) {
-        this->gcd = n;
-        this->count = 1;
-        this->total = 1;
-        this->ans = 0;
-    }
-
-    static item merge(item fa, item sa) {
-        item first = fa;
-        item second = sa;
-        item temp;
-        if(first.gcd > second.gcd) swap(first, second);
-        if(first.gcd == second.gcd) {
-            temp.gcd = first.gcd;
-            temp.count = first.count + second.count;
-            temp.total = first.total+ second.total;
-            temp.ans = temp.total - temp.count;
-        } else if(__gcd(first.gcd, second.gcd) == first.gcd) {
-            temp.gcd = first.gcd;
-            temp.count = first.count;
-            temp.total = first.total + second.total;
-            temp.ans = temp.total - temp.count;
-        } else {
-            temp.gcd = __gcd(first.gcd, second.gcd);
-            temp.count = 0;
-            temp.total = first.total + second.total;
-            temp.ans = temp.total;
-        }
-        return temp;
-    }
-};
 
 template <typename T>
 class SegmentTree
 {
 public:
     T n;
-    vector<item> tree;
+    vector<T> tree;
+    vector<T> lazyTree;
+    vector<ll> count;
 
     SegmentTree(vector<T> &arr)
     {
         this->n = arr.size();
         tree.resize(4 * this->n + 1);
+        lazyTree.resize(4 * this->n + 1, 0);
+        count.resize(4*this->n+1, 0);
         build(arr);
     }
 
@@ -137,35 +105,88 @@ public:
     {
         if (start == end)
         {
-            tree[index] = item(arr[start]);
+            tree[index] = arr[start];
             return;
         }
         T mid = (start + end) / 2;
         build(2 * index + 1, start, mid, arr);
-        build(2 * index + 2, mid + 1, end, arr); 
-        // print(index);
-        // print(this->tree);
-        tree[index] = item::merge(tree[2 * index + 1], tree[2*index + 2]);
-        // print(this->tree[index].gcd);
+        build(2 * index + 2, mid + 1, end, arr);
+        tree[index] = tree[2 * index + 1] + tree[2 * index + 2];
     }
 
-    item query(T index, T start, T end, T l, T r)
+    T lazyQuery(T index, T start, T end, T l, T r)
     {
+        forward(start, end, index);
+
         if (start > r || end < l)
         {
-            item temp;
-            temp.ans = -1;
-            return temp;
+            return 0;
         }
-        if (start >= l && end <= r)
+        if (start == end)
+        {
             return tree[index];
+        }
+
+        if (start >= l && end <= r)
+        {
+            return tree[index];
+        }
 
         T mid = (start + end) / 2;
-        item first = query(2 * index + 1, start, mid, l, r);
-        item second = query(2 * index + 2, mid + 1, end, l, r);
-        if(first.ans == -1 && second.ans != -1) return second;
-        else if(first.ans!= -1 && second.ans == -1) return first; 
-        return item::merge(first, second);
+        T first = lazyQuery(2 * index + 1, start, mid, l, r);
+        T second = lazyQuery(2 * index + 2, mid + 1, end, l, r);
+        return first + second;
+    }
+
+    void update(T index, T l, T r, T value, T start, T end)
+    {
+        forward(start, end, index);
+        if (end < l || start > r || start > end)
+            return;
+        if (start == end)
+        {
+            tree[index] += value + start - l;
+            return;
+        }
+        if (start >= l && end <= r)
+        {
+            lazyTree[index] += (value + start - l);
+            count[index]++;
+            forward(start, end, index);
+            return;
+        }
+
+        T mid = (start + end) / 2;
+        // if (l <= mid)
+        // {
+            update(2 * index + 1, l, r, value, start, mid);
+        // }
+        // if (end > mid)
+        // {
+            update(2 * index + 2, l, r, value, mid + 1, end);
+        // }
+        tree[index] = tree[2 * index + 1] + tree[2 * index + 2];
+    }
+
+    void forward(T start, T end, T index) {
+        if(lazyTree[index]!=0) {
+            T first = lazyTree[index];
+            T num = count[index];
+            // debug4(first, num, start, end);
+            // debug(tree[index]);
+            tree[index] += ((end-start+1)*(2*first + num*(end-start)) / 2);
+            // debug(tree[index]);
+            if(start!=end) {
+                T mid = (start+end) / 2;
+                lazyTree[2*index+1] += first;
+                T diff = mid - start + 1;
+                count[2*index+1] += num;
+                count[2*index+2] += num;
+                lazyTree[2*index+2] += (first + diff*num);
+            }
+            lazyTree[index] = 0;
+            count[index] = 0;
+        }
     }
 
     void build(vector<T> &arr)
@@ -173,31 +194,34 @@ public:
         build(0, 0, arr.size() - 1, arr);
     }
 
-    item query(T l, T r)
+    T lazyQuery(T l, T r)
     {
-        return query(0, 0, this->n - 1, --l, --r);
+        return lazyQuery(0, 0, this->n - 1, --l, --r);
+    }
+
+    void update(T l, T r, T value)
+    {
+        update(0, --l, --r, value, 0, this->n - 1);
     }
 };
 
-
-
 void solve()
 {
-    int n;
-    cin>>n;
-    vi arr(n);
+    ll n,q;
+    cin>>n>>q;
+    vl arr(n);
     read(arr);
-    SegmentTree<int> segtree(arr);
-    int q;
-    cin>>q;
-    // print(segtree.tree);
+    SegmentTree<ll> segtree(arr);
 
     while(q--) {
-        int l, r;
-        cin>>l>>r;
-        cout<<segtree.query(l,r).ans<<endl;
+        ll sign, l, r;
+        cin>>sign>>l>>r;
+        if(sign == 1) {
+            segtree.update(l,r,1);
+        } else {
+            cout<<segtree.lazyQuery(l,r)<<endl;
+        }
     }
-
 }
 
 int main()
@@ -215,7 +239,7 @@ int main()
     double elapsed = double(end - start) / CLOCKS_PER_SEC;
     
     #ifndef ONLINE_JUDGE
-    cout << setprecision(10) << elapsed << endl;
+    // cout << setprecision(10) << elapsed << endl;
     #endif
     return 0;
 }

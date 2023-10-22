@@ -60,7 +60,7 @@ template <typename T, typename V> void print(set<pair<T, V>> &arr) { for(auto &i
 template <typename T, typename V> void print(pair<T, V>& pa) { cout<<pa.first<<" "<<pa.second<<endl; }
 template <typename T> void print(T i, T last, vector<T> &arr) { for(T j = i; j < last; j++) cout<<arr[j]<<" "; line} 
 template <typename T> void print(T i, vector<T> &arr) { for(T j = i; j < arr.size(); j++) cout<<arr[j]<<" "; line} 
-template <typename T> void print(vector<T> &arr) { for(auto &i : arr) cout<<i.gcd<<" "; line}
+template <typename T> void print(vector<T> &arr) { for(auto &i : arr) cout<<i<<" "; line}
 template <typename T, typename V> void print(unordered_map<T, V>& arr) { for(auto &it : arr) cout<<it.first<<" "<<it.second<<endl; line}
 template <typename T, typename V> void print(map<T, V>& arr) { for(auto &it : arr) cout<<it.first<<" "<<it.second<<endl;}
 template <typename T> void print(unordered_set<T> &arr) { for(auto &it : arr) cout<<it<<" "; line }
@@ -82,54 +82,18 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 #define debug4(x, y, z, a)
 
 #endif
-struct item {
-    int gcd, ans, total, count;
-
-    item() {}
-
-    item(int n) {
-        this->gcd = n;
-        this->count = 1;
-        this->total = 1;
-        this->ans = 0;
-    }
-
-    static item merge(item fa, item sa) {
-        item first = fa;
-        item second = sa;
-        item temp;
-        if(first.gcd > second.gcd) swap(first, second);
-        if(first.gcd == second.gcd) {
-            temp.gcd = first.gcd;
-            temp.count = first.count + second.count;
-            temp.total = first.total+ second.total;
-            temp.ans = temp.total - temp.count;
-        } else if(__gcd(first.gcd, second.gcd) == first.gcd) {
-            temp.gcd = first.gcd;
-            temp.count = first.count;
-            temp.total = first.total + second.total;
-            temp.ans = temp.total - temp.count;
-        } else {
-            temp.gcd = __gcd(first.gcd, second.gcd);
-            temp.count = 0;
-            temp.total = first.total + second.total;
-            temp.ans = temp.total;
-        }
-        return temp;
-    }
-};
 
 template <typename T>
 class SegmentTree
 {
 public:
     T n;
-    vector<item> tree;
+    vector<vi> tree;
 
     SegmentTree(vector<T> &arr)
     {
         this->n = arr.size();
-        tree.resize(4 * this->n + 1);
+        tree.resize(4 * this->n + 1, vi(26, 0));
         build(arr);
     }
 
@@ -137,35 +101,60 @@ public:
     {
         if (start == end)
         {
-            tree[index] = item(arr[start]);
+            tree[index][arr[start]] = 1;
             return;
         }
         T mid = (start + end) / 2;
         build(2 * index + 1, start, mid, arr);
-        build(2 * index + 2, mid + 1, end, arr); 
-        // print(index);
-        // print(this->tree);
-        tree[index] = item::merge(tree[2 * index + 1], tree[2*index + 2]);
-        // print(this->tree[index].gcd);
+        build(2 * index + 2, mid + 1, end, arr);
+        for(int i = 0; i < 26; i++) {
+            if(tree[2*index+1][i] > 0 || tree[2*index+2][i] > 0) tree[index][i] = 1;
+        }
     }
 
-    item query(T index, T start, T end, T l, T r)
+    void query(T index, T start, T end, T l, T r, vi &count)
     {
         if (start > r || end < l)
         {
-            item temp;
-            temp.ans = -1;
-            return temp;
+            return;
         }
-        if (start >= l && end <= r)
-            return tree[index];
+        if (start >= l && end <= r) {
+            for(int i = 0; i < 26; i++) if(tree[index][i]>0) count[i]=1;
+            return;
+        }
 
         T mid = (start + end) / 2;
-        item first = query(2 * index + 1, start, mid, l, r);
-        item second = query(2 * index + 2, mid + 1, end, l, r);
-        if(first.ans == -1 && second.ans != -1) return second;
-        else if(first.ans!= -1 && second.ans == -1) return first; 
-        return item::merge(first, second);
+        query(2 * index + 1, start, mid, l, r, count);
+        query(2 * index + 2, mid + 1, end, l, r, count);
+    }
+
+    void update(T index, T target, T value, T start, T end)
+    {
+        if (start == end)
+        {
+            // print(tree[index]);
+            tree[index].clear();
+            // debug4(start, end, value, tree[index][value]);
+            tree[index].resize(26, 0);
+            tree[index][value]=1;
+            // print(tree[index]);
+
+            return;
+        }
+
+        T mid = (start + end) / 2;
+        if (target <= mid)
+        {
+            update(2 * index + 1, target, value, start, mid);
+        }
+        else
+        {
+            update(2 * index + 2, target, value, mid + 1, end);
+        }
+        for(int i = 0; i < 26; i++) {
+            tree[index][i] = 0;
+            if(tree[2*index+1][i] > 0 || tree[2*index+2][i] > 0) tree[index][i] = 1;
+        }
     }
 
     void build(vector<T> &arr)
@@ -173,31 +162,49 @@ public:
         build(0, 0, arr.size() - 1, arr);
     }
 
-    item query(T l, T r)
+    int query(T l, T r)
     {
-        return query(0, 0, this->n - 1, --l, --r);
+        vi add(26, 0);
+        query(0, 0, this->n - 1, --l, --r, add);
+        // print(add);
+        return accumulate(add.begin(), add.end(), 0);
+    }
+
+    void update(T target, T value)
+    {
+        update(0, --target, value, 0, this->n - 1);
     }
 };
 
-
-
 void solve()
 {
-    int n;
-    cin>>n;
+    string s;
+    cin>>s;
+    int n = s.size();
     vi arr(n);
-    read(arr);
+    for(int i = 0; i < n; i++) arr[i] = (s[i]-'a');
     SegmentTree<int> segtree(arr);
     int q;
     cin>>q;
-    // print(segtree.tree);
-
     while(q--) {
-        int l, r;
-        cin>>l>>r;
-        cout<<segtree.query(l,r).ans<<endl;
-    }
+        int sign;
+        cin>>sign;
+        if(sign == 2) {
+            int l,r;
+            cin>>l>>r;
+            cout<<segtree.query(l,r)<<endl;
+        } else {
+            int target;
+            cin>>target;
+            char c;
+            cin>>c;
+            int value = c - 'a';
+            // print(segtree.tree[target-1]);
 
+            segtree.update(target, value);
+            // print(segtree.tree[target-1]);
+        }
+    }
 }
 
 int main()
