@@ -46,9 +46,9 @@ const ll mod = 1e9 + 7;
 
 bool comp2(pair<ll, ll> &arr, pair<ll, ll> &b)
 {
-	if (arr.first == b.first)
-		return arr.second < b.second;
-	return arr.first < b.first;
+    if (arr.first == b.first)
+        return arr.second < b.second;
+    return arr.first < b.first;
 };
 
 template <typename T> void read(T i, T n, vector<T> &arr) { for(T j = i; j < n; j++) cin >> arr[j]; }
@@ -86,53 +86,55 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 void solve()
 {
-	long long x = 8, y = 4;
-	// 1 1 2 3 5 8
-	// 1 2 4 7 12 20
-	vl fib(50, 0);
-	fib[1] = 1, fib[2] = 1;
-	for(int i = 3; i < 50; i++) fib[i] = fib[i-1] + fib[i-2];
-	for(int i = 1; i < 50; i++) fib[i] += fib[i-1];
-	ll sum = 12;
-	int count = 3;
-	while(count < 50) {
-		sum = sum + x + y;
-		ll temp = x;
-		x = x + y;
-		y = temp;
-		// debug3(sum, x, y);
-		count++;
-	}
-	count--;
-	ll temp = 4 * (fib[count-2]+1) + 8 * fib[count-1];
-	debug2(sum, temp);
+    int n,q;
+    cin>>n>>q;
+    string s;
+    cin>>s;
+    vector<int> count[26];
+    for(int i = 1; i <= n; i++) count[s[i-1]-'a'].push_back(i);
+    while(q--) {
+        int l, r, k;
+        cin>>l>>r>>k;
+        if(k) {
+            int cnt = l;
+            for(int i = 0; i < 26; i++) {
+                int lb = lower_bound(all(count[i]), l) - count[i].begin();
+                int ub = upper_bound(all(count[i]), r) - count[i].begin();
+                for(int j = lb; j < ub; j++) count[i][j] = cnt++;
+            }
+        } else {
+            int cnt = l;
+            for(int i = 25; i >= 0; i--) {
+                int lb = lower_bound(all(count[i]), l) - count[i].begin();
+                int ub = upper_bound(all(count[i]), r) - count[i].begin();
+                for(int j = lb; j < ub; j++) count[i][j] = cnt++;
+            }
+        }
+    }
+    for(int i = 0; i < 26; i++) {
+        for(int j = 0; j < count[i].size(); j++) {
+            s[count[i][j]-1] = (char)(97+i);
+        }
+    }
+    cout<<s<<endl;
 }
 
 int main()
 { 
-	suprit;
-	clock_t start = clock();
+    suprit;
+    clock_t start = clock();
 
-	int t = 1;
-	// cin >> t;
-	while (t--)
-	{
-		solve();
-	}
-	clock_t end = clock();
-	double elapsed = double(end - start) / CLOCKS_PER_SEC;
-	
-	#ifndef ONLINE_JUDGE
-	cout << setprecision(10) << elapsed << endl;
-	#endif
-	return 0;
+    int t = 1;
+    // cin >> t;
+    while (t--)
+    {
+        solve();
+    }
+    clock_t end = clock();
+    double elapsed = double(end - start) / CLOCKS_PER_SEC;
+    
+    #ifndef ONLINE_JUDGE
+    cout << setprecision(10) << elapsed << endl;
+    #endif
+    return 0;
 }
-
-// 3 4 3+4 3+4+4 3+4+4+3+4  
-
-// 1,0    0,1    1,1    1,2     2,3   3,5
-
-// 1 1 2 3 5
-
-
-// 4 8 12 20 32
