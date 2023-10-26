@@ -83,25 +83,38 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-const int NMAX = 5001;
-int dp[NMAX][NMAX];
+long long binpow(long long a, long long b, long long m) {
+    a %= m;
+    long long res = 1;
+    while (b > 0) {
+        if (b & 1)
+            res = res * a % m;
+        a = a * a % m;
+        b >>= 1;
+    }
+    return res;
+}
 
 void solve()
 {
-    string s,t;
-    cin>>s>>t;
-    if(s.size()>t.size()) swap(s,t);
-    int n = s.size(), m = t.size();
-    for(int i = 0; i < n; i++) {
-        for(int j = 0; j < m; j++) {
-            if(i == 0) dp[i][j] = j + (s[i]!=t[j]);
-            else if(j == 0) dp[i][j] = i + (s[i]!=t[j]);
-            else {
-                dp[i][j] = min({dp[i-1][j-1]+(s[i]!=t[j]), dp[i-1][j]+1, dp[i][j-1]+1});
-            }
-        }
+    int n;
+    cin>>n;
+    int sum = n*(n+1) / 2;
+    if(sum%2) {
+        cout<<"0\n";
+        return;
     }
-    cout<<dp[n-1][m-1]<<endl;
+    ll deno = binpow(2, mod-2, mod);
+    vi dp(sum/2+1, 0);
+    dp[0] = 1;
+    for(int i = 1; i <= n; i++) {
+        vi temp = dp;
+        for(int j = i; j <= sum/2; j++) {
+            temp[j] = (dp[j] + dp[j-i]) % mod;
+        }
+        dp = temp;
+    }
+    cout<<dp[sum/2] * deno % mod<<endl;
 }
 
 int main()
@@ -123,15 +136,3 @@ int main()
     #endif
     return 0;
 }
-
-// song
-// sonmg
-
-//    0 1 2 3 4 
-//  0
-//  1
-//  2
-//  3
-//  4
-//  5
-//  6

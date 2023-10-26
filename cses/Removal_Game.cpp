@@ -84,24 +84,26 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 #endif
 
 const int NMAX = 5001;
-int dp[NMAX][NMAX];
+ll dp[NMAX][NMAX][2];
+
+ll recur(int flag, int i, int j, vl &arr) {
+    if(i > j) return 0;
+    if(dp[i][j][flag]!=-1000000000000000) return dp[i][j][flag];
+    ll temp = 0;
+    if(flag) temp = max(arr[i]+recur(flag^1, i+1, j, arr), arr[j]+recur(flag^1, i, j-1, arr));
+    else temp = min(recur(flag^1, i+1, j, arr), recur(flag^1, i, j-1, arr));
+    return dp[i][j][flag] = temp;
+}
 
 void solve()
 {
-    string s,t;
-    cin>>s>>t;
-    if(s.size()>t.size()) swap(s,t);
-    int n = s.size(), m = t.size();
-    for(int i = 0; i < n; i++) {
-        for(int j = 0; j < m; j++) {
-            if(i == 0) dp[i][j] = j + (s[i]!=t[j]);
-            else if(j == 0) dp[i][j] = i + (s[i]!=t[j]);
-            else {
-                dp[i][j] = min({dp[i-1][j-1]+(s[i]!=t[j]), dp[i-1][j]+1, dp[i][j-1]+1});
-            }
-        }
-    }
-    cout<<dp[n-1][m-1]<<endl;
+    ll n;
+    cin>>n;
+    // memset(dp, -10000000000000ll, sizeof dp);
+    for(int i = 0; i < NMAX; i++) for(int j = 0; j < NMAX; j++) for(int k = 0; k < 2; k++) dp[i][j][k] = -1000000000000000;
+    vl arr(n);
+    read(arr);
+    cout<<recur(1, 0, n-1, arr)<<endl;
 }
 
 int main()
@@ -124,14 +126,4 @@ int main()
     return 0;
 }
 
-// song
-// sonmg
-
-//    0 1 2 3 4 
-//  0
-//  1
-//  2
-//  3
-//  4
-//  5
-//  6
+// 1 2 3 1 2 5 -1

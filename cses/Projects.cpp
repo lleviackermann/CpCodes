@@ -83,25 +83,10 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-const int NMAX = 5001;
-int dp[NMAX][NMAX];
 
 void solve()
 {
-    string s,t;
-    cin>>s>>t;
-    if(s.size()>t.size()) swap(s,t);
-    int n = s.size(), m = t.size();
-    for(int i = 0; i < n; i++) {
-        for(int j = 0; j < m; j++) {
-            if(i == 0) dp[i][j] = j + (s[i]!=t[j]);
-            else if(j == 0) dp[i][j] = i + (s[i]!=t[j]);
-            else {
-                dp[i][j] = min({dp[i-1][j-1]+(s[i]!=t[j]), dp[i-1][j]+1, dp[i][j-1]+1});
-            }
-        }
-    }
-    cout<<dp[n-1][m-1]<<endl;
+    
 }
 
 int main()
@@ -110,7 +95,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    // cin >> t;
+    cin >> t;
     while (t--)
     {
         solve();
@@ -123,15 +108,3 @@ int main()
     #endif
     return 0;
 }
-
-// song
-// sonmg
-
-//    0 1 2 3 4 
-//  0
-//  1
-//  2
-//  3
-//  4
-//  5
-//  6
