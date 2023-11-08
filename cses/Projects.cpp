@@ -83,10 +83,48 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
+// ll dp[]
+
+struct Project {
+    ll start, end, value;
+
+    bool operator<(Project &temp) {
+        return (start == temp.start ? end < temp.end : start < temp.start);
+    }
+};
 
 void solve()
 {
-    
+    ll n;
+    cin>>n;
+    vector<Project> arr(n);
+    set<int> store;
+    for(int i = 0; i < n; i++) {
+        cin>>arr[i].start>>arr[i].end>>arr[i].value;
+        store.insert(arr[i].start);
+        store.insert(arr[i].end);
+    }
+    map<int, int> mapped;
+    int count = 1;
+    for(auto i : store) mapped[i] = count++;
+    for(auto &i : arr) {
+        i.start = mapped[i.start], i.end = mapped[i.end];
+    }
+    sort(all(arr));
+    // for(auto i : arr) cout<<i.start<<" "<<i.end<<" "<<i.value<<endl;
+    vl dp(2*n+5, 0);
+    count = 1;
+    ll ans = 0;
+    for(int i = 0; i < n; i++) {
+        while(count < arr[i].start) {
+            if(dp[count]==0 || dp[count] < dp[count-1]) dp[count] = dp[count-1];
+            count++;
+        }
+        dp[arr[i].end] = max(dp[arr[i].end], arr[i].value + dp[arr[i].start-1]);
+        ans = max(ans, dp[arr[i].end]);
+    }
+    cout<<ans<<endl;
+
 }
 
 int main()
@@ -95,7 +133,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    cin >> t;
+    // cin >> t;
     while (t--)
     {
         solve();
