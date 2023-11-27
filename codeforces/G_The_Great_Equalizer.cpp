@@ -79,7 +79,73 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 void solve()
 {
-    
+    ll n;
+    cin>>n;
+    vl arr(n);
+    read(arr);
+    int q;
+    cin>>q;
+    if(n == 1) {
+        while(q--) {
+            int l,r;
+            cin>>l>>r;
+            cout<<r<<" ";
+        }
+        cout<<endl;
+        return;
+    }
+    multiset<int> store, diff;
+    for(auto i : arr) store.insert(i);
+    // for(int i = 1; i < n; i++) diff.insert(arr[i] - arr[i-1]);
+    for(auto it = ++store.begin(); it != store.end(); it++) {
+        auto bac = it; 
+        --bac;
+        diff.insert(*it - *bac);
+    }
+    // print(diff);
+    // for(auto it : diff) cout<<it<<" ";
+    // cout<<endl;
+    while(q--) {
+        int l, r;
+        cin>>l>>r;
+        l--;
+        auto pos = store.find(arr[l]);
+        auto bac = pos, nex = pos;
+        bac--, nex++;
+        int curr, prev, fro;
+        if(pos == store.begin()) curr = *pos, fro = *nex;
+        else if(pos == --store.end()) prev = *bac, curr = *pos;
+        else curr = *pos, fro = *nex, prev = *bac;
+        if(pos == store.begin()) {
+            diff.erase(diff.find(fro - curr));
+        }
+        else if(pos == --store.end()) {
+            diff.erase(diff.find(curr - prev));
+        }
+        else {
+            diff.erase(diff.find(fro - curr)), diff.erase(diff.find(curr - prev)), diff.insert(fro - prev);
+        }
+        store.erase(pos);
+        store.insert(r);
+        pos = store.find(r);
+        bac = pos, nex = pos;
+        bac--, nex++;
+        if(pos == store.begin()) curr = *pos, fro = *nex;
+        else if(pos == --store.end()) prev = *bac, curr = *pos;
+        else curr = *pos, fro = *nex, prev = *bac;
+        if(pos == store.begin()) {
+            diff.insert(fro - curr);
+        }
+        else if(pos == --store.end()) {
+            diff.insert(curr - prev);
+        }
+        else {
+            diff.insert(fro - curr), diff.insert(curr - prev), diff.erase(diff.find(fro - prev));
+        }
+        arr[l] = r;
+        cout<<(ll)*(--store.end()) + (ll)*(--diff.end())<<" ";
+    }
+    cout<<endl;
 }
 
 int main()
@@ -102,17 +168,5 @@ int main()
     return 0;
 }
 
-// 2 4 8 10 12
-// 2 4 2 2
-// 7 8 11 12 13
-// 12 12 14 14 14
-// 14 15
-// 16 16
-
-// 1 5 6 7 10
-// 4 1 1 3
-// 4 + 2 + 2 + 1
-
-// 1 6 10
-// 5 4
-// 3 + 3 + 3 + 3 + 2
+// 2 4 8 6 10 1
+// 1 2 4 6 8 10

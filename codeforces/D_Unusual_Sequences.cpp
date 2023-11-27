@@ -83,10 +83,51 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
+long long binpow(long long a, long long b, long long m) {
+    // debug3(a, b, m);
+    a %= m;
+    long long res = 1;
+    while (b > 0) {
+        if (b & 1)
+            res = res * a % m;
+        a = a * a % m;
+        b >>= 1;
+    }
+    // debug(res);
+    return res;
+}
+
 
 void solve()
 {
-    
+    ll n,m;
+    cin>>n>>m;
+    if(m%n) {
+        cout<<"0\n";
+        return;
+    }
+    vl divi;
+    m = m / n;
+    for(ll i = 1; i * i <= m; i++) {
+        if(m%i) continue;
+        divi.push_back(i);
+        if(i * i != m) divi.pb(m/i);
+    }
+    sort(all(divi));
+    print(divi);
+    n = divi.size();
+    vl dp(n, 0);
+    dp[0] = 1;
+    for(int i = 1; i < n; i++) {
+        dp[i] = binpow(2, divi[i] - 1, mod);
+        for(int j = 0; j < i; j++) {
+            if(divi[i] % divi[j] == 0) {
+                dp[i] = (dp[i] - dp[j] + mod) % mod;
+            }
+        }
+    }
+    print(dp);
+    cout<<dp[n-1]<<endl;
 }
 
 int main()
@@ -109,3 +150,5 @@ int main()
     return 0;
 }
 
+// 12 -> 1, 2, 3, 4, 6, 12
+// 
