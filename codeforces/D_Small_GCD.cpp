@@ -83,10 +83,47 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
+const int nmax = 1e5 + 5;
+vvi factors(nmax);
+
+void preprocess() {
+    for(int i = 1; i < nmax; i++) {
+        for(int j = 1; j * j <= i; j++) {
+            if(i%j) continue;
+            factors[i].pb(j);
+            if(j * j != i) factors[i].pb(i / j);
+        }
+        sort(all(factors[i]));
+    }
+}
 
 void solve()
 {
-    
+    int n;
+    cin>>n;
+    vi arr(n);
+    read(arr);
+    sort(all(arr));
+    ll ans = 0;
+    int ma = *max_element(all(arr));
+    vvi store(ma+1);
+    vl countt(ma+1, 0);
+    for(int i = 0; i < n; i++) {
+        for(auto j : factors[arr[i]]) {
+            countt[j] += 1ll * store[j].size() * (n-1-i);
+            store[j].pb(n-1-i);
+        }
+    }
+
+    print(countt);
+    for(int i = ma; i >= 1; i--) {
+        for(int j = i + i; j <= ma; j += i) {
+            countt[i] -= countt[j];
+        }
+    }
+    print(countt);
+    for(int i = 1; i <= ma; i++) ans += (ll)i * countt[i];
+    cout<<ans<<endl;
 }
 
 int main()
@@ -95,6 +132,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
+    preprocess();
     cin >> t;
     while (t--)
     {

@@ -1,112 +1,175 @@
-#include <bits/stdc++.h>
-#include <ext/pb_ds/assoc_container.hpp>
-#include <ext/pb_ds/tree_policy.hpp>
+#include "bits/stdc++.h"
 using namespace std;
-using namespace __gnu_pbds;
 
-template <typename T> 
-using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
+const int N = 2e5 + 5;
+const int D = 19;
+const int S = (1 << D);
 
-#define endl "\n"
-#define fo(i, n) for (i = 0; i < n; i++)
-#define Fo(i, k, n) for (i = k; k < n; k++)
-#define pb push_back
-#define ll long long
-#define mp make_pair
-#define ff first
-#define ss second
-#define all(x) x.begin(), x.end()
-#define clr(x) memset(x, 0, sizeof(x))
-#define sortall(x) sort(all(x))
-#define tr(it, arr) for (auto it = arr.begin(); it != arr.end(); it++)
-#define PI 3.1415926535897932384626
-#define suprit ios_base::sync_with_stdio(0); cout.tie(0); cin.tie(0);
-#define line cout << endl;
+int n, q, v[N];
+vector<int> adj[N];
 
-typedef pair<int, int> pi;
-typedef pair<ll, ll> pl;
-typedef vector<int> vi;
-typedef vector<ll> vl;
-typedef vector<pi> vpi;
-typedef vector<pl> vpl;
-typedef vector<vi> vvi;
-typedef vector<vl> vvl;
-typedef map<ll, ll> ml;
-typedef map<string, ll> msl;
-typedef map<ll, string> mls;
-typedef unordered_map<ll, ll> uml;
-typedef unordered_map<string, ll> umsl;
-typedef unordered_map<ll, string> umls;
-typedef set<ll> sl;
-typedef set<pair<ll, ll>> spl;
-typedef ordered_set<ll> osl;
-typedef ordered_set<pair<ll, ll>> ospl;
+int sz[N], p[N][D], dep[N];
+int st[S], id[N], tp[N];
 
-const ll mod = 1e9 + 7;
-
-bool comp2(pair<ll, ll> &arr, pair<ll, ll> &b)
+void update(int idx, int val, int i = 1, int l = 1, int r = n)
 {
-    if (arr.first == b.first)
-        return arr.second < b.second;
-    return arr.first < b.first;
-};
-
-template <typename T> void read(T i, T n, vector<T> &arr) { for(T j = i; j < n; j++) cin >> arr[j]; }
-template <typename T> void read(vector<T> &arr) { for(auto &j : arr) cin>>j; }
-
-#ifndef ONLINE_JUDGE
-
-template <typename T, typename V> void print(set<pair<T, V>> &arr) { for(auto &it : arr) cout<<it.first<<" "<<it.second<<endl; line}
-template <typename T, typename V> void print(pair<T, V>& pa) { cout<<pa.first<<" "<<pa.second<<endl; }
-template <typename T> void print(T i, T last, vector<T> &arr) { for(T j = i; j < last; j++) cout<<arr[j]<<" "; line} 
-template <typename T> void print(T i, vector<T> &arr) { for(T j = i; j < arr.size(); j++) cout<<arr[j]<<" "; line} 
-template <typename T> void print(vector<T> &arr) { for(auto &i : arr) cout<<i<<" "; line}
-template <typename T, typename V> void print(unordered_map<T, V>& arr) { for(auto &it : arr) cout<<it.first<<" "<<it.second<<endl; line}
-template <typename T, typename V> void print(map<T, V>& arr) { for(auto &it : arr) cout<<it.first<<" "<<it.second<<endl;}
-template <typename T> void print(unordered_set<T> &arr) { for(auto &it : arr) cout<<it<<" "; line }
-template <typename T> void print(ordered_set<T> &arr) { for(auto &it : arr) cout<<it<<" "; line }
-template <typename T> void print(set<T> &arr) { for(auto &it : arr) cout<<it<<" "; line }
-template <typename T, typename... Args> void print(T t, Args... args) { cout << t << " "; print(args...); }
-template <typename T> void print(T t) { cout<<t<<"\n"; }
-#define debug(x) cout<<#x<<" "<<x<<endl;
-#define debug2(x, y) cout<<#x<<" "<<x<<" "<<#y<<" "<<y<<endl;
-#define debug3(x, y, z) cout<<#x<<" "<<x<<" "<<#y<<" "<<y<<" "<<#z<<" "<<z<<endl;
-#define debug4(x, y, z, a) cout<<#x<<" "<<x<<" "<<#y<<" "<<y<<" "<<#z<<" "<<z<<" "<<#a<<" "<<a<<endl;
-
-#else
-
-#define print(x) 
-#define debug(x)
-#define debug2(x, y)
-#define debug3(x, y, z)
-#define debug4(x, y, z, a)
-
-#endif
-
-
-void solve()
+    if (l == r)
+    {
+        st[i] = val;
+        return;
+    }
+    int m = (l + r) / 2;
+    if (idx <= m)
+        update(idx, val, i * 2, l, m);
+    else
+        update(idx, val, i * 2 + 1, m + 1, r);
+    st[i] = max(st[i * 2], st[i * 2 + 1]);
+}
+int query(int lo, int hi, int i = 1, int l = 1, int r = n)
 {
-    pl temp = {4, 5}, t2 = {6, 7};
-    pl ans = temp + t2;
-    cout<<ans.ff<<" "<<ans.ss<<endl;
+    if (lo > r || hi < l)
+        return 0;
+    if (lo <= l && r <= hi)
+        return st[i];
+    int m = (l + r) / 2;
+    return max(query(lo, hi, i * 2, l, m), query(lo, hi, i * 2 + 1, m + 1, r));
 }
 
+int dfs_sz(int cur, int par)
+{
+    sz[cur] = 1;
+    for (int chi : adj[cur])
+    {
+        if (chi == par)
+            continue;
+        dep[chi] = dep[cur] + 1;
+        p[chi][0] = cur;
+        sz[cur] += dfs_sz(chi, cur);
+    }
+    return sz[cur];
+}
+void init_lca()
+{
+    for (int d = 1; d < 18; d++)
+        for (int i = 1; i <= n; i++)
+            p[i][d] = p[p[i][d - 1]][d - 1];
+}
+int ct = 1;
+void dfs_hld(int cur, int par, int top)
+{
+    id[cur] = ct++;
+    tp[cur] = top;
+    update(id[cur], v[cur]);
+    int h_chi = -1, h_sz = -1;
+    for (int chi : adj[cur])
+    {
+        if (chi == par)
+            continue;
+        if (sz[chi] > h_sz)
+        {
+            h_sz = sz[chi];
+            h_chi = chi;
+        }
+    }
+    if (h_chi == -1)
+        return;
+    dfs_hld(h_chi, cur, top);
+    for (int chi : adj[cur])
+    {
+        if (chi == par || chi == h_chi)
+            continue;
+        dfs_hld(chi, cur, chi);
+    }
+}
+int lca(int a, int b)
+{
+    if (dep[a] < dep[b])
+        swap(a, b);
+    for (int d = D - 1; d >= 0; d--)
+    {
+        if (dep[a] - (1 << d) >= dep[b])
+        {
+            a = p[a][d];
+        }
+    }
+    for (int d = D - 1; d >= 0; d--)
+    {
+        if (p[a][d] != p[b][d])
+        {
+            a = p[a][d];
+            b = p[b][d];
+        }
+    }
+    if (a != b)
+    {
+        a = p[a][0];
+        b = p[b][0];
+    }
+    return a;
+}
+int path(int chi, int par)
+{
+    int ret = 0;
+    while (chi != par)
+    {
+        if (tp[chi] == chi)
+        {
+            ret = max(ret, v[chi]);
+            chi = p[chi][0];
+        }
+        else if (dep[tp[chi]] > dep[par])
+        {
+            ret = max(ret, query(id[tp[chi]], id[chi]));
+            chi = p[tp[chi]][0];
+        }
+        else
+        {
+            ret = max(ret, query(id[par] + 1, id[chi]));
+            break;
+        }
+    }
+    return ret;
+}
 int main()
-{ 
-    suprit;
+{
     clock_t start = clock();
 
-    int t = 1;
-    // cin >> t;
-    while (t--)
+    scanf("%d%d", &n, &q);
+    for (int i = 1; i <= n; i++)
+        scanf("%d", &v[i]);
+    for (int i = 2; i <= n; i++)
     {
-        solve();
+        int a, b;
+        scanf("%d%d", &a, &b);
+        adj[a].push_back(b);
+        adj[b].push_back(a);
+    }
+    dfs_sz(1, 1);
+    init_lca();
+    memset(st, 0, sizeof st);
+    dfs_hld(1, 1, 1);
+    while (q--)
+    {
+        int t;
+        scanf("%d", &t);
+        if (t == 1)
+        {
+            int s, x;
+            scanf("%d%d", &s, &x);
+            v[s] = x;
+            update(id[s], v[s]);
+        }
+        else
+        {
+            int a, b;
+            scanf("%d%d", &a, &b);
+            int c = lca(a, b);
+            int res = max(max(path(a, c), path(b, c)), v[c]);
+            printf("%d ", res);
+        }
     }
     clock_t end = clock();
     double elapsed = double(end - start) / CLOCKS_PER_SEC;
-    
-    #ifndef ONLINE_JUDGE
+
     cout << setprecision(10) << elapsed << endl;
-    #endif
-    return 0;
 }
