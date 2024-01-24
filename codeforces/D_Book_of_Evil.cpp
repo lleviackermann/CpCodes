@@ -42,7 +42,7 @@ typedef set<pair<ll, ll>> spl;
 typedef ordered_set<ll> osl;
 typedef ordered_set<pair<ll, ll>> ospl;
 
-const ll mod = 998244353;
+const ll mod = 1e9 + 7;
 
 bool comp2(pair<ll, ll> &arr, pair<ll, ll> &b)
 {
@@ -83,27 +83,58 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-int add(int a, int b) {
-    return a + b > mod ? a + b - mod : a + b;
+const int nmax = 1e5 + 10;
+int n, m, d;
+vvi adj(nmax);
+int subtree[nmax], outsub[nmax], first[nmax], secmax[nmax], marked[nmax];
+
+void dfs1(int child, int par) {
+    subtree[child] = secmax[child] = -1e9;
+    outsub[child] = -1e9;
+
+    if(marked[child]) subtree[child] = 0, outsub[child] = 0;
+
+    for(auto i : adj[child]) {
+        if(i == par) continue;
+        dfs1(i, child);
+
+        if(subtree[i]+1 >= subtree[child]) secmax[child] = subtree[child], subtree[child] = subtree[i] + 1, first[child] = i;
+        else if(subtree[i] + 1 > secmax[child]) secmax[child] = subtree[i] + 1;
+    }
 }
-// 0 0 0 b 0 0
-const int nmax = 2505;
-int dp[nmax][nmax];
+
+int dfs2(int child, int par) {
+    if(par != -1) {
+        outsub[child] = outsub[par] + 1;
+        if(first[par] == child) outsub[child] = max(outsub[child], secmax[par] + 1);
+        else outsub[child] = max(outsub[child], 1 + subtree[par]);
+    }
+
+    for(auto i : adj[child]) {
+        if(i != par) dfs2(i, child);
+    }
+}
 
 void solve()
 {
-    int n, k;
-    cin>>n>>k;
-    for(int i = 0; i <= n; i++) for(int j = 0; j <= k; j++) dp[i][j] = 0;
-    fill(dp[0] + 1, dp[0] + k + 1, 1);
+    cin>>n>>m>>d;
+    for(int i = 0; i < m; i++) {
+        int ma;
+        cin>>ma;
+        marked[ma] = 1;
+    }
+    for(int i = 0; i < n-1; i++) {
+        int st, en;
+        cin>>st>>en;
+        adj[st].pb(en);
+        adj[en].pb(st);
+    }
+    dfs1(1, -1);
+    dfs2(1, -1); 
+    for(int i = 1; i <= n; i++) debug3(i, subtree[i], outsub[i]);
     int ans = 0;
     for(int i = 1; i <= n; i++) {
-        for(int j = 1; j <= k; j++) {
-            for(int p = 1; p <= min(i/j, k + 1 - j); p++) {
-                dp[i][j] = add(dp[i][j], dp[i - j * p][p]);
-            }
-            if(i == n) ans = add(ans, dp[i][j]);
-        }
+        if(max(subtree[i], outsub[i]) <= d) ans++;
     }
     cout<<ans<<endl;
 }
@@ -114,7 +145,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    cin >> t;
+    // cin >> t;
     while (t--)
     {
         solve();

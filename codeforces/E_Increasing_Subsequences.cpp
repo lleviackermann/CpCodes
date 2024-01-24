@@ -42,7 +42,7 @@ typedef set<pair<ll, ll>> spl;
 typedef ordered_set<ll> osl;
 typedef ordered_set<pair<ll, ll>> ospl;
 
-const ll mod = 998244353;
+const ll mod = 1e9 + 7;
 
 bool comp2(pair<ll, ll> &arr, pair<ll, ll> &b)
 {
@@ -83,29 +83,33 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-int add(int a, int b) {
-    return a + b > mod ? a + b - mod : a + b;
-}
-// 0 0 0 b 0 0
-const int nmax = 2505;
-int dp[nmax][nmax];
+// 1 2 3 4 5    
+
 
 void solve()
 {
-    int n, k;
-    cin>>n>>k;
-    for(int i = 0; i <= n; i++) for(int j = 0; j <= k; j++) dp[i][j] = 0;
-    fill(dp[0] + 1, dp[0] + k + 1, 1);
-    int ans = 0;
-    for(int i = 1; i <= n; i++) {
-        for(int j = 1; j <= k; j++) {
-            for(int p = 1; p <= min(i/j, k + 1 - j); p++) {
-                dp[i][j] = add(dp[i][j], dp[i - j * p][p]);
-            }
-            if(i == n) ans = add(ans, dp[i][j]);
+    ll n;
+    cin>>n;
+    ll leftbit = 60;
+    for(ll i = 60; i >= 0; i--) {
+        if(n&(1ll << i)) {
+            leftbit = i;
+            break;
         }
     }
-    cout<<ans<<endl;
+    vl ans;
+    ll count = 1;
+    for(int i = 0; i < leftbit; i++) {
+        ans.pb(count++);
+    }
+    for(ll i = leftbit-1; i >= 0; i--) {
+        if(n & (1ll << i)) {
+            ans.insert(ans.begin()+i, count++);
+        }
+    }
+    cout<<ans.size()<<endl;
+    for(auto i : ans) cout<<i<<" ";
+    cout<<endl;
 }
 
 int main()

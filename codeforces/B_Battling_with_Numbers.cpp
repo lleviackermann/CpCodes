@@ -83,27 +83,37 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-int add(int a, int b) {
-    return a + b > mod ? a + b - mod : a + b;
-}
-// 0 0 0 b 0 0
-const int nmax = 2505;
-int dp[nmax][nmax];
 
 void solve()
 {
-    int n, k;
-    cin>>n>>k;
-    for(int i = 0; i <= n; i++) for(int j = 0; j <= k; j++) dp[i][j] = 0;
-    fill(dp[0] + 1, dp[0] + k + 1, 1);
-    int ans = 0;
-    for(int i = 1; i <= n; i++) {
-        for(int j = 1; j <= k; j++) {
-            for(int p = 1; p <= min(i/j, k + 1 - j); p++) {
-                dp[i][j] = add(dp[i][j], dp[i - j * p][p]);
-            }
-            if(i == n) ans = add(ans, dp[i][j]);
+    ll n;
+    cin>>n;
+    map<ll, ll> lcm;
+    vl arr(n);
+    read(arr);
+    for(int i = 0; i < n; i++) {
+        ll x;
+        cin>>x;
+        lcm[arr[i]] = x;
+    }
+    cin>>n;
+    arr.clear();
+    arr.resize(n);
+    read(arr);
+    print(arr);
+    debug(n);
+    for(int i = 0; i < n; i++) {
+        ll x;
+        cin>>x;
+        if(lcm[arr[i]] < x) {
+            cout<<"0\n";
+            return;
         }
+        lcm[arr[i]] -= x;
+    }
+    ll ans = 1;
+    for(auto [fir, sec] : lcm) {
+        if(sec > 0) ans = ans * 2 % mod;
     }
     cout<<ans<<endl;
 }
@@ -114,7 +124,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    cin >> t;
+    // cin >> t;
     while (t--)
     {
         solve();
