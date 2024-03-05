@@ -1,42 +1,24 @@
-#include <bits/stdc++.h>
-
+#include <iostream>
+#include <vector>
 using namespace std;
 
-void login(int noOfDigitsForThePalindrome, string userId, string password) {
-    for(int i = 0; i < userId.size(); i++) {    
-        if(!isalnum(userId[i])) {
-            cout<<"Invalid input\n";
-            return;
-        }
-    }
-    for(int i = 0; i < password.size(); i++) {    
-        if(!isalnum(password[i])) {
-            cout<<"Invalid input\n";
-            return;
-        }
-    }
-    if(noOfDigitsForThePalindrome <= 0) {
-        cout<<"Invalid input\n";
-        return;
-    }
-
-    string palindromeans = "1";
-    for(int i = 0; i < noOfDigitsForThePalindrome - 2; i++) palindromeans += "0";
-    if(noOfDigitsForThePalindrome != 1) palindromeans += "1";
-    for(int i = 1; i <= 5; i++) {
-        string tempUser = "user" + to_string(i);
-
-        string tempPass = "pass" + to_string(i);
-        // cout<<tempUser<<" "<<tempPass<<endl;
-        if(userId == tempUser && password == tempPass) {
-            cout<<"Welcome " << userId <<" and the generated token is: token-" << palindromeans << endl;
-            return;
-        }
-    }
-    cout<<"UserId or password is not valid, pls try again." << endl;
-}
-
 int main() {
-    login(3, "user1", "pass1");
+    int n, m;
+    cin>>n>>m;
+    vector<vector<int>> mat(n);
+    for(int i = 0; i < n; i++) {
+        for(int j = 0; j < m; j++) {
+            int x;
+            cin>>x;
+            mat[i].push_back(x);
+        }
+    }
+    int ans = -1e9;
+    for(int i = 0; i < n; i++) {
+        for(int j = 0; j < m; j++) {
+            
+        }
+    }
+    cout<<ans<<endl;
     return 0;
 }

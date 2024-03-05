@@ -22,7 +22,7 @@ using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statisti
 #define PI 3.1415926535897932384626
 #define suprit ios_base::sync_with_stdio(0); cout.tie(0); cin.tie(0);
 #define line cout << endl;
-
+#define roots fsdafdf
 typedef pair<int, int> pi;
 typedef pair<ll, ll> pl;
 typedef vector<int> vi;
@@ -83,90 +83,108 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
+const int nmax = 1e5+10;
+vvi edges(nmax);
+vvi reverseEdges(nmax);
+int used[nmax];
+vi sortedNode;
+vi components;
+vi first_mem(nmax, 0);
+vvi adj_scc(nmax);
+ll val[nmax];
+
+void dfs1(int u) {
+    used[u] = true;
+    for(auto i : edges[u]) {
+        if(used[i]) continue;
+        dfs1(i);
+    }
+    sortedNode.push_back(u);
+}
+
+void dfs2(int u, int k) {
+    components.pb(u);
+    used[u] = k;
+    for(auto i : reverseEdges[u]) {
+        if(used[i]) continue;
+        dfs2(i, k);
+    }
+}
 
 void solve()
 {
-    int n;
-    cin>>n;
-    vi attack(n), damage(n);
-    read(attack);
-    read(damage);
-    set<int> store;
-    for(int i = 0; i < n; i++) store.insert(i);
-    queue<int> prev;
-    vector<int> died(n, 0);
-    vector<int> ans(n, 0);
-    for(int i = 0; i < n; i++) {
-        int dam = (i != 0 ? attack[i-1] : 0) + (i != n-1 ? attack[i+1] : 0);
-        if(dam > damage[i]) {
-            prev.push(i);
-            store.erase(i);
-            died[i] = 1;
-            ans[0]++;
+    int n, m;
+    cin>>n>>m;
+    vi arr(n+1);
+    for(int i = 1; i <= n; i++) cin>>arr[i];
+
+    for(int i = 0; i < m; i++) {
+        int st, en;
+        cin>>st>>en;
+        edges[st].pb(en);
+        reverseEdges[en].pb(st);
+    }
+    memset(used, 0, sizeof used);
+    for(int i = 1; i <= n; i++) {
+        if(!used[i]) dfs1(i);
+    }
+    memset(used, 0, sizeof used);
+    int k = 0;
+    reverse(all(sortedNode));
+    for(auto i : sortedNode) {
+        if(!used[i]) {
+            dfs2(i, ++k);
+            int root = components.front();
+            for(auto u : components) {
+                first_mem[u] = root;
+                val[root] += arr[u];
+            }
+            components.clear();
         }
     }
-    print(store);
-    int count = 0;
-    while(prev.size()) {
-        int sz = prev.size();
-        count++;
-        queue<int> temp;
-        for(int i = 0; i < sz; i++) {
-            int to = prev.front();
-            // debug(to);
-            prev.pop();
-            auto it = store.lower_bound(to);
-            int las = -1, low = -1;
-            if(it != store.end()) las = *it;
-            if(it != store.begin()) {
-                it--;
-                low = *it;
-            }
-            // debug2(las, low);
-            if(las != -1 && died[las] == 0) {
-                int dama = (low == -1 ? 0 : attack[low]);
-                it = store.upper_bound(las);
-                if(it != store.end()) {
-                    // debug3(to, dama, *it);
-                    dama += attack[(*it)];
-                }
-                if(dama > damage[las]) {
-                    ans[count]++;
-                    debug(las);
-                    died[las] = 1;
-                    prev.push(las);
-                    temp.push(las);
-                }
-            }
-            if(low != -1 && died[low] == 0) {
-                int dama = (las == -1 ? 0 : attack[las]);
-                it = store.lower_bound(low);
-                if(it != store.begin()) {
-                    it--;
-                    // debug3(to-1, dama, *it);
-                    dama += attack[*it];
-                }
-                if(dama > damage[low]) {
-                    died[low] = 1;
-                    ans[count]++;
-                    debug(low);
-                    prev.push(low);
-                    temp.push(low);
-                }
+    for(int v = 1; v <= n; v++) {
+        for(auto nei : edges[v]) {
+            int root_v = first_mem[v], root_nei = first_mem[nei];
+            if(root_v != root_nei) {
+                adj_scc[root_v].pb(root_nei);
             }
         }
-        sz = temp.size();
-        for(int i = 0; i < sz; i++) {
-            int to = temp.front();
-            temp.pop();
-            // cout<<to<<" ";
-            store.erase(to);
-        }
-        // line
-        print(store);
     }
-    for(auto i : ans) cout<<i<<" ";
-    line
+    // for(int i = 1; i <= n; i++) {
+    //     cout<<i<<" ->";
+    //     for(auto j : edges[i]) cout<<" "<<j<<" ";
+    //     cout<<endl;
+    // }
+    // for(int i = 1; i <= n; i++) debug3(i, first_mem[i], val[i]);
+    // for(int i = 1; i <= n; i++) {
+    //     cout<<i<<" ->";
+    //     for(auto j : adj_scc[i]) cout<<" "<<j<<" ";
+    //     cout<<endl;
+    // }
+    for(int i = 1; i <= n; i++) val[i] = -1 * val[i];
+    vl coins(n+1, 1e17);
+    ll ans = 0;
+    for(int i = 1; i <= n; i++) {
+        ll root = first_mem[i];
+        if(coins[root] != 1e17) continue;
+        priority_queue<pl, vector<pl>, greater<pl>> store;
+        coins[root] = val[root];
+        store.push({coins[root], root});
+        while(store.size()) {
+            auto [tempcoins, ind] = store.top();
+            store.pop();
+            if(tempcoins > coins[ind]) continue;
+            ans = max(ans, -1*coins[ind]);
+            for(auto nei : adj_scc[ind]) {
+                if(coins[nei] > coins[ind] + val[nei]) {
+                    coins[nei] = coins[ind] + val[nei];
+                    store.push({coins[nei], nei});
+                }
+            }
+        }
+    }
+    // cout<<-1*coins[fa]<<endl;
+    cout<<ans<<endl;
 }
 
 int main()
@@ -175,7 +193,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    cin >> t;
+    // cin >> t;
     while (t--)
     {
         solve();
@@ -184,7 +202,7 @@ int main()
     
     #ifndef ONLINE_JUDGE
     double elapsed = double(end - start) / CLOCKS_PER_SEC;
-    cout << setprecision(10) << elapsed << endl;
+    // cout << setprecision(10) << elapsed << endl;
     #endif
     return 0;
 }

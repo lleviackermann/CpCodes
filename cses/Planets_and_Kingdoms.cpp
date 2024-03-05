@@ -83,90 +83,51 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
+const int nmax = 1e5+10;
+vvi edges(nmax);
+vvi reverseEdges(nmax);
+int used[nmax];
+vi sortedNode;
+void dfs1(int u) {
+    used[u] = true;
+    for(auto i : edges[u]) {
+        if(used[i]) continue;
+        dfs1(i);
+    }
+    sortedNode.push_back(u);
+}
+
+void dfs2(int u, int k) {
+    used[u] = k;
+    for(auto i : reverseEdges[u]) {
+        if(used[i]) continue;
+        dfs2(i, k);
+    }
+}
 
 void solve()
 {
-    int n;
-    cin>>n;
-    vi attack(n), damage(n);
-    read(attack);
-    read(damage);
-    set<int> store;
-    for(int i = 0; i < n; i++) store.insert(i);
-    queue<int> prev;
-    vector<int> died(n, 0);
-    vector<int> ans(n, 0);
-    for(int i = 0; i < n; i++) {
-        int dam = (i != 0 ? attack[i-1] : 0) + (i != n-1 ? attack[i+1] : 0);
-        if(dam > damage[i]) {
-            prev.push(i);
-            store.erase(i);
-            died[i] = 1;
-            ans[0]++;
-        }
+    int n, m;
+    cin>>n>>m;
+    for(int i = 0; i < m; i++) {
+        int st, en;
+        cin>>st>>en;
+        edges[st].pb(en);
+        reverseEdges[en].pb(st);
     }
-    print(store);
-    int count = 0;
-    while(prev.size()) {
-        int sz = prev.size();
-        count++;
-        queue<int> temp;
-        for(int i = 0; i < sz; i++) {
-            int to = prev.front();
-            // debug(to);
-            prev.pop();
-            auto it = store.lower_bound(to);
-            int las = -1, low = -1;
-            if(it != store.end()) las = *it;
-            if(it != store.begin()) {
-                it--;
-                low = *it;
-            }
-            // debug2(las, low);
-            if(las != -1 && died[las] == 0) {
-                int dama = (low == -1 ? 0 : attack[low]);
-                it = store.upper_bound(las);
-                if(it != store.end()) {
-                    // debug3(to, dama, *it);
-                    dama += attack[(*it)];
-                }
-                if(dama > damage[las]) {
-                    ans[count]++;
-                    debug(las);
-                    died[las] = 1;
-                    prev.push(las);
-                    temp.push(las);
-                }
-            }
-            if(low != -1 && died[low] == 0) {
-                int dama = (las == -1 ? 0 : attack[las]);
-                it = store.lower_bound(low);
-                if(it != store.begin()) {
-                    it--;
-                    // debug3(to-1, dama, *it);
-                    dama += attack[*it];
-                }
-                if(dama > damage[low]) {
-                    died[low] = 1;
-                    ans[count]++;
-                    debug(low);
-                    prev.push(low);
-                    temp.push(low);
-                }
-            }
-        }
-        sz = temp.size();
-        for(int i = 0; i < sz; i++) {
-            int to = temp.front();
-            temp.pop();
-            // cout<<to<<" ";
-            store.erase(to);
-        }
-        // line
-        print(store);
+    memset(used, 0, sizeof used);
+    for(int i = 1; i <= n; i++) {
+        if(!used[i]) dfs1(i);
     }
-    for(auto i : ans) cout<<i<<" ";
-    line
+    memset(used, 0, sizeof used);
+    int k = 0;
+    reverse(all(sortedNode));
+    for(auto i : sortedNode) {
+        if(!used[i]) dfs2(i, ++k);
+    }
+    cout<<k<<endl;
+    for(int i = 1; i <= n; i++) cout<<used[i]<<" ";
+    cout<<endl;
 }
 
 int main()
@@ -175,7 +136,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    cin >> t;
+    // cin >> t;
     while (t--)
     {
         solve();
@@ -184,7 +145,7 @@ int main()
     
     #ifndef ONLINE_JUDGE
     double elapsed = double(end - start) / CLOCKS_PER_SEC;
-    cout << setprecision(10) << elapsed << endl;
+    // cout << setprecision(10) << elapsed << endl;
     #endif
     return 0;
 }

@@ -83,90 +83,92 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
+const int nmax = 5e5+5;
+
+int segtree[2*nmax+2][2];
+
+void build(int index, int start, int end, vi &arr) {
+    if(start == end) {
+        segtree[index][0] = arr[start];
+        segtree[index][1] = start;
+        return;
+    }
+    int mid = (start + end) / 2;
+    build(index+1, start, mid, arr);
+    build(index+2*(mid-start+1), mid+1, end, arr);
+    segtree[index][0] = min(segtree[index+1][0], segtree[index+2*(mid-start+1)][0]);
+    if(segtree[index][0] == segtree[index+2*(mid-start+1)][0]) segtree[index][1] = segtree[index+2*(mid-start+1)][1];
+    else segtree[index][1] = segtree[index+1][1];
+}
+
+pi query(int index, int start, int end, int l, int r) {
+    if(r < start || l > end) {
+        pi temp = {1e9, 1e9};
+        return temp;
+    }
+    if(l <= start && r >= end) {
+        pi temp = {segtree[index][0], segtree[index][1]};
+        return temp;
+    }
+    int mid = (start + end) / 2;
+    pi first = query(index+1, start, mid, l, r);
+    pi sec = query(index+2*(mid-start+1), mid+1, end, l, r);
+    pi ans;
+    ans.ff = min(first.ff, sec.ff);
+    if(ans.ff == sec.ff) ans.ss = sec.ss;
+    else ans.ss = first.ss;
+    return ans;
+}
+
+void update(int index, int start, int end, int toUpdate) {
+    if(start == end) {
+        segtree[index][0] = 1e9;
+        return;
+    }
+    int mid = (start + end) / 2;
+    if(toUpdate <= mid) update(index+1, start, mid, toUpdate);
+    else update(index+2*(mid-start+1), mid+1, end, toUpdate);
+    segtree[index][0] = min(segtree[index+1][0], segtree[index+2*(mid-start+1)][0]);
+    if(segtree[index][0] == segtree[index+2*(mid-start+1)][0]) segtree[index][1] = segtree[index+2*(mid-start+1)][1];
+    else segtree[index][1] = segtree[index+1][1];
+}
 
 void solve()
 {
     int n;
     cin>>n;
-    vi attack(n), damage(n);
-    read(attack);
-    read(damage);
-    set<int> store;
-    for(int i = 0; i < n; i++) store.insert(i);
-    queue<int> prev;
-    vector<int> died(n, 0);
-    vector<int> ans(n, 0);
+    vpi arr(n);
+    for(auto &i : arr) cin>>i.first>>i.second;
+    vi dp(n+1);
+    ordered_set<int> store;
+    for(int i = 1; i <= n; i++) store.insert(i);
+    reverse(all(arr));
     for(int i = 0; i < n; i++) {
-        int dam = (i != 0 ? attack[i-1] : 0) + (i != n-1 ? attack[i+1] : 0);
-        if(dam > damage[i]) {
-            prev.push(i);
-            store.erase(i);
-            died[i] = 1;
-            ans[0]++;
-        }
+        auto [ind, val] = arr[i];
+        int currIndex = *store.find_by_order(ind-1);
+        dp[currIndex] = val;
+        store.erase(currIndex);
     }
-    print(store);
-    int count = 0;
-    while(prev.size()) {
-        int sz = prev.size();
-        count++;
-        queue<int> temp;
-        for(int i = 0; i < sz; i++) {
-            int to = prev.front();
-            // debug(to);
-            prev.pop();
-            auto it = store.lower_bound(to);
-            int las = -1, low = -1;
-            if(it != store.end()) las = *it;
-            if(it != store.begin()) {
-                it--;
-                low = *it;
-            }
-            // debug2(las, low);
-            if(las != -1 && died[las] == 0) {
-                int dama = (low == -1 ? 0 : attack[low]);
-                it = store.upper_bound(las);
-                if(it != store.end()) {
-                    // debug3(to, dama, *it);
-                    dama += attack[(*it)];
-                }
-                if(dama > damage[las]) {
-                    ans[count]++;
-                    debug(las);
-                    died[las] = 1;
-                    prev.push(las);
-                    temp.push(las);
-                }
-            }
-            if(low != -1 && died[low] == 0) {
-                int dama = (las == -1 ? 0 : attack[las]);
-                it = store.lower_bound(low);
-                if(it != store.begin()) {
-                    it--;
-                    // debug3(to-1, dama, *it);
-                    dama += attack[*it];
-                }
-                if(dama > damage[low]) {
-                    died[low] = 1;
-                    ans[count]++;
-                    debug(low);
-                    prev.push(low);
-                    temp.push(low);
-                }
-            }
-        }
-        sz = temp.size();
-        for(int i = 0; i < sz; i++) {
-            int to = temp.front();
-            temp.pop();
-            // cout<<to<<" ";
-            store.erase(to);
-        }
-        // line
-        print(store);
+    // print(dp);
+    build(0, 1, n, dp);
+    set<int> present, removed;
+    for(int i = 1; i <= n; i++) present.insert(i);
+    arr.clear();
+    for(int i = 1; i <= n; i++) {
+        int fir = *present.begin();
+        auto it = removed.upper_bound(fir);
+        int sec;
+        if(it == removed.end()) sec = n;
+        else sec = (*it) - 1;
+        debug2(fir, sec);
+        pi toremove = query(0, 1, n, fir, sec);
+        debug2(toremove.ff, toremove.ss);
+        update(0, 1, n, toremove.ss);
+        arr.pb({fir, toremove.ff});
+        present.erase(toremove.ss);
+        removed.insert(toremove.ss);
     }
-    for(auto i : ans) cout<<i<<" ";
-    line
+    for(auto i : arr) cout<<i.ff<<" "<<i.ss<<endl;
 }
 
 int main()

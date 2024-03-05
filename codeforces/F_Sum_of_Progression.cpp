@@ -83,89 +83,47 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-
 void solve()
 {
-    int n;
-    cin>>n;
-    vi attack(n), damage(n);
-    read(attack);
-    read(damage);
-    set<int> store;
-    for(int i = 0; i < n; i++) store.insert(i);
-    queue<int> prev;
-    vector<int> died(n, 0);
-    vector<int> ans(n, 0);
-    for(int i = 0; i < n; i++) {
-        int dam = (i != 0 ? attack[i-1] : 0) + (i != n-1 ? attack[i+1] : 0);
-        if(dam > damage[i]) {
-            prev.push(i);
-            store.erase(i);
-            died[i] = 1;
-            ans[0]++;
+    int n, q;
+    cin>>n>>q;
+    ll pivot = 1;
+    while(pivot * pivot < n) pivot++;
+    vl arr(n+1);
+    for(int i = 1; i <= n; i++) cin>>arr[i];
+    vvl premularr(pivot+1, vl(n+10, 0)), presumarr(pivot+1, vl(n+10, 0));
+    for(int i = 1; i <= pivot; i++) {
+        for(int j = 1; j <= n; j++) {
+            presumarr[i][j] = arr[j] + presumarr[i][max(0,j-i)];
+            premularr[i][j] = premularr[i][max(0,j-i)] + arr[j] * ((j+i-1)/i);
         }
     }
-    print(store);
-    int count = 0;
-    while(prev.size()) {
-        int sz = prev.size();
-        count++;
-        queue<int> temp;
-        for(int i = 0; i < sz; i++) {
-            int to = prev.front();
-            // debug(to);
-            prev.pop();
-            auto it = store.lower_bound(to);
-            int las = -1, low = -1;
-            if(it != store.end()) las = *it;
-            if(it != store.begin()) {
-                it--;
-                low = *it;
+    debug(pivot);
+    // for(int i = 1; i <= pivot; i++) {
+    //     for(int j = 1; j <= n; j++) cout<<premularr[i][j]<<" ";
+    //     cout<<endl;
+    // }
+    while(q--) {
+        ll s, d, k;
+        cin>>s>>d>>k;
+        ll ans = 0;
+        if(d >= pivot) {
+            ll count = 1;
+            ll right = s + (k-1) * d;
+            for(int i = s; i <= right; i += d) {
+                ans += arr[i] * count++;
             }
-            // debug2(las, low);
-            if(las != -1 && died[las] == 0) {
-                int dama = (low == -1 ? 0 : attack[low]);
-                it = store.upper_bound(las);
-                if(it != store.end()) {
-                    // debug3(to, dama, *it);
-                    dama += attack[(*it)];
-                }
-                if(dama > damage[las]) {
-                    ans[count]++;
-                    debug(las);
-                    died[las] = 1;
-                    prev.push(las);
-                    temp.push(las);
-                }
-            }
-            if(low != -1 && died[low] == 0) {
-                int dama = (las == -1 ? 0 : attack[las]);
-                it = store.lower_bound(low);
-                if(it != store.begin()) {
-                    it--;
-                    // debug3(to-1, dama, *it);
-                    dama += attack[*it];
-                }
-                if(dama > damage[low]) {
-                    died[low] = 1;
-                    ans[count]++;
-                    debug(low);
-                    prev.push(low);
-                    temp.push(low);
-                }
-            }
+        } else {
+            ll right = s + (k-1) * d;
+            ll temp = presumarr[d][right];
+            ans = premularr[d][right];
+            ll left = (s+d-1) / d;
+            debug4(right, temp, left, ans);
+            if(s - d >= 0) ans -= premularr[d][s-d], temp -= presumarr[d][s-d];
+            if(left > 0) ans = ans - temp * (left-1); 
         }
-        sz = temp.size();
-        for(int i = 0; i < sz; i++) {
-            int to = temp.front();
-            temp.pop();
-            // cout<<to<<" ";
-            store.erase(to);
-        }
-        // line
-        print(store);
+        cout<<ans<<" ";
     }
-    for(auto i : ans) cout<<i<<" ";
     line
 }
 

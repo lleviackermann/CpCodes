@@ -86,7 +86,15 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 void solve()
 {
-    
+    int n, k;
+    cin>>n>>k;
+    string s = "";
+    for(int i = 0; i < k; i++) {
+        s += (char)(97+i);
+    }
+    string ans = s;
+    for(int i = 0; i < n-1; i++) ans += s;
+    cout<<ans<<endl;
 }
 
 int main()
@@ -101,9 +109,9 @@ int main()
         solve();
     }
     clock_t end = clock();
-    double elapsed = double(end - start) / CLOCKS_PER_SEC;
     
     #ifndef ONLINE_JUDGE
+    double elapsed = double(end - start) / CLOCKS_PER_SEC;
     cout << setprecision(10) << elapsed << endl;
     #endif
     return 0;

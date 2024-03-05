@@ -83,90 +83,49 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
+int matches[45][2] = {{1,10},{2,9},{3,8},{4,7},{5,6},
+                    {1,9}, {10,8}, {2, 7}, {3,6}, {4,5}
+                    , {1, 8}, {9,7}, {10,6},{2,5},{3,4},
+                    {1,7},{8,6},{9,5},{10,4},{2,3},
+                    {1,6},{7,5},{8,4},{9,3},{10,2},
+                    {1,5},{6,4},{7,3},{8,2},{9,10},
+                    {1,4},{5,3},{6,2},{7,10},{8,9},
+                    {1,3},{4,2},{5,10},{6,9},{7,8},
+                    {1,2},{3,10},{4,9},{5,8},{6,7}};
+
 
 void solve()
 {
-    int n;
-    cin>>n;
-    vi attack(n), damage(n);
-    read(attack);
-    read(damage);
-    set<int> store;
-    for(int i = 0; i < n; i++) store.insert(i);
-    queue<int> prev;
-    vector<int> died(n, 0);
-    vector<int> ans(n, 0);
-    for(int i = 0; i < n; i++) {
-        int dam = (i != 0 ? attack[i-1] : 0) + (i != n-1 ? attack[i+1] : 0);
-        if(dam > damage[i]) {
-            prev.push(i);
-            store.erase(i);
-            died[i] = 1;
-            ans[0]++;
+    int k;
+    cin>>k;
+    string s;
+    cin>>s;
+    if(k <= 20) {
+        cout<<"YES\n";
+        return;
+    }
+    vi oldpoints(11, 0);
+    for(int i = 0; i < k; i++) {
+        int left = matches[i][0], right = matches[i][1];
+        if(s[i] == '1') oldpoints[left]++;
+        else oldpoints[right]++;
+    }
+    for(int bit = 0; bit < (1 << 45-k); bit++) {
+        vi newpoints = oldpoints;
+        for(int pos = 0; pos < 45-k; pos++) {
+            if(bit & (1 << pos)) newpoints[matches[k+pos][0]]++;
+            else newpoints[matches[k+pos][1]]++;
+        }
+        int freq = newpoints[1];
+        sort(all(newpoints));
+        reverse(all(newpoints));
+        int ind = find(all(newpoints), freq) - newpoints.begin();
+        if(ind <= 3) {
+            cout<<"YES\n";
+            return;
         }
     }
-    print(store);
-    int count = 0;
-    while(prev.size()) {
-        int sz = prev.size();
-        count++;
-        queue<int> temp;
-        for(int i = 0; i < sz; i++) {
-            int to = prev.front();
-            // debug(to);
-            prev.pop();
-            auto it = store.lower_bound(to);
-            int las = -1, low = -1;
-            if(it != store.end()) las = *it;
-            if(it != store.begin()) {
-                it--;
-                low = *it;
-            }
-            // debug2(las, low);
-            if(las != -1 && died[las] == 0) {
-                int dama = (low == -1 ? 0 : attack[low]);
-                it = store.upper_bound(las);
-                if(it != store.end()) {
-                    // debug3(to, dama, *it);
-                    dama += attack[(*it)];
-                }
-                if(dama > damage[las]) {
-                    ans[count]++;
-                    debug(las);
-                    died[las] = 1;
-                    prev.push(las);
-                    temp.push(las);
-                }
-            }
-            if(low != -1 && died[low] == 0) {
-                int dama = (las == -1 ? 0 : attack[las]);
-                it = store.lower_bound(low);
-                if(it != store.begin()) {
-                    it--;
-                    // debug3(to-1, dama, *it);
-                    dama += attack[*it];
-                }
-                if(dama > damage[low]) {
-                    died[low] = 1;
-                    ans[count]++;
-                    debug(low);
-                    prev.push(low);
-                    temp.push(low);
-                }
-            }
-        }
-        sz = temp.size();
-        for(int i = 0; i < sz; i++) {
-            int to = temp.front();
-            temp.pop();
-            // cout<<to<<" ";
-            store.erase(to);
-        }
-        // line
-        print(store);
-    }
-    for(auto i : ans) cout<<i<<" ";
-    line
+    cout<<"NO\n";
 }
 
 int main()
@@ -176,6 +135,7 @@ int main()
 
     int t = 1;
     cin >> t;
+    
     while (t--)
     {
         solve();

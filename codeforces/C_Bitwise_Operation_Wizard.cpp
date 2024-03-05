@@ -7,7 +7,7 @@ using namespace __gnu_pbds;
 template <typename T> 
 using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
 
-#define endl "\n"
+// #define endl "\n"
 #define fo(i, n) for (i = 0; i < n; i++)
 #define Fo(i, k, n) for (i = k; k < n; k++)
 #define pb push_back
@@ -83,90 +83,66 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
+int sol(int l, int r)
+{
+    int lXr = l ^ r;
+
+    int msbPos = 0;
+    while (lXr)
+    {
+        msbPos++;
+        lXr >>= 1;
+    }
+
+    return (((1 << msbPos) -1)^r);
+}
+
 
 void solve()
 {
-    int n;
+    ll n;
     cin>>n;
-    vi attack(n), damage(n);
-    read(attack);
-    read(damage);
-    set<int> store;
-    for(int i = 0; i < n; i++) store.insert(i);
-    queue<int> prev;
-    vector<int> died(n, 0);
-    vector<int> ans(n, 0);
+    // debug2(fir, sec);
+    int ind = 0;
+    int inc = 1;
+    for(int i = 0; i < n-1; i++) {
+        cout<<"? "<<ind<<" "<<ind<<" "<<inc<<" "<<inc<<endl;
+        cout.flush();
+
+        char c;
+        cin>>c;
+        if(c == '<') ind = inc;
+        else if(c == '=') ind = inc;
+        inc++;
+    }
+    inc = 0;
+    int ano = 0;
     for(int i = 0; i < n; i++) {
-        int dam = (i != 0 ? attack[i-1] : 0) + (i != n-1 ? attack[i+1] : 0);
-        if(dam > damage[i]) {
-            prev.push(i);
-            store.erase(i);
-            died[i] = 1;
-            ans[0]++;
+        if(inc == ind) inc++;
+        if(ano == inc) {
+            ano++;
+            // continue;
         }
+        if(ano == ind) ano++;
+        if(ano == inc) ano++;
+        if(ano >= n) break;
+        cout<<"? "<<ind<<" "<<inc<<" "<<ind<<" "<<ano<<endl;
+        cout.flush();
+
+        char c; 
+        cin>>c;
+        if(c == '<') inc = ano;
+        else if(c == '=') {
+            cout<<"? "<<inc<<" "<<inc<<" "<<ano<<" "<<ano<<endl;
+            cout.flush();
+            char d;
+            cin>>d;
+            if(d == '>') inc = ano;
+        }
+        ano++;
     }
-    print(store);
-    int count = 0;
-    while(prev.size()) {
-        int sz = prev.size();
-        count++;
-        queue<int> temp;
-        for(int i = 0; i < sz; i++) {
-            int to = prev.front();
-            // debug(to);
-            prev.pop();
-            auto it = store.lower_bound(to);
-            int las = -1, low = -1;
-            if(it != store.end()) las = *it;
-            if(it != store.begin()) {
-                it--;
-                low = *it;
-            }
-            // debug2(las, low);
-            if(las != -1 && died[las] == 0) {
-                int dama = (low == -1 ? 0 : attack[low]);
-                it = store.upper_bound(las);
-                if(it != store.end()) {
-                    // debug3(to, dama, *it);
-                    dama += attack[(*it)];
-                }
-                if(dama > damage[las]) {
-                    ans[count]++;
-                    debug(las);
-                    died[las] = 1;
-                    prev.push(las);
-                    temp.push(las);
-                }
-            }
-            if(low != -1 && died[low] == 0) {
-                int dama = (las == -1 ? 0 : attack[las]);
-                it = store.lower_bound(low);
-                if(it != store.begin()) {
-                    it--;
-                    // debug3(to-1, dama, *it);
-                    dama += attack[*it];
-                }
-                if(dama > damage[low]) {
-                    died[low] = 1;
-                    ans[count]++;
-                    debug(low);
-                    prev.push(low);
-                    temp.push(low);
-                }
-            }
-        }
-        sz = temp.size();
-        for(int i = 0; i < sz; i++) {
-            int to = temp.front();
-            temp.pop();
-            // cout<<to<<" ";
-            store.erase(to);
-        }
-        // line
-        print(store);
-    }
-    for(auto i : ans) cout<<i<<" ";
-    line
+    cout<<"! "<<ind<<" "<<inc<<endl;
+    cout.flush();
 }
 
 int main()
