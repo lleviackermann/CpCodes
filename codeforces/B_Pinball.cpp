@@ -83,34 +83,77 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-bool check(string &s, int a, int b) {
-    if(s[a] == '?' || s[b] == '?' || s[a] == s[b]) return true;
-    return false;
+void nextChar(string &s, char c, vi &temp) {
+    stack<int> store;
+    s.push_back(c);
+    int n = s.size();
+    for(int i = 0; i < n; i++) {
+        while(store.size() && s[i] == c) temp[store.top()] = i, store.pop();
+        store.push(i);
+    }
+    s.pop_back();
+}
+
+void prevChar(string &s, char c, vi &temp) {
+    stack<int> store;
+    int n = s.size();
+    for(int i = n-1; i >= 0; i--) {
+        while(store.size() && s[i] == c) temp[store.top()] = i, store.pop();
+        store.push(i);
+    }
+    while(store.size()) temp[store.top()] = -1, store.pop();
+}
+
+int brute(string &s, int ind) {
+    string temp = s;
+    int ans = 0;
+    int n = s.size();
+    while(ind > 0 && ind < n) {
+        ans++;
+        int ano = ind;
+        ind = (s[ind] == '<') ? ind - 1 : ind + 1;
+        s[ano] = (s[ano] == '<') ? '>' : '<';
+    }
+    s = temp;
+    return ans;
 }
 
 void solve()
 {
+    ll n;
+    cin>>n;
     string s;
     cin>>s;
-    int n = s.size();
-    int d = n / 2;
-    int ans = 0;
-    for(int i = 1; i <= d; i++) {
-        int counter = 0;
-        for(int j = 0; j < n-i; j++) {
-            if(check(s, j, j + i)) {
-                counter++;
+    s = " " + s;
+    vl pre(n+2, 0), suf(n+2, 0), sl(n+2, 0), sr(n+2, 0);
+    for(int i = 1; i <= n; i++) {
+        pre[i] = pre[i-1];
+        if(s[i] == '>') pre[i]++, sr[pre[i]] = sr[pre[i-1]] + i;
+    }
+    for(int i = n; i >= 1; i--) {
+        suf[i] = suf[i+1];
+        if(s[i] == '<') suf[i]++, sl[suf[i]] = sl[suf[i+1]] + i;
+    }
+    for(int i = 1; i <= n; i++) {
+        ll le = pre[i-1], ri = suf[i+1];
+        ll ans = 0;
+        if(s[i] == '>') {
+            if(le >= ri) {
+                ans = 2ll * (sl[ri] - ri * i) + 2ll * (ri*i - (sr[le] - sr[le-ri])) + n - i + 1;
             } else {
-                counter = 0;
+                ans = 2ll * (le * i - sr[le]) + 2ll * (sl[ri] - sl[ri-le-1] - (le+1) * i) + i;
             }
-            debug3(i, j, counter);
-            if(counter == i) {
-                ans = 2 * i;
-                break;
+        } else {
+            if(le <= ri) {
+                ans = 2ll * (le * i - sr[le]) + 2ll * (sl[ri] - sl[ri-le] - le * i) + i;
+            } else {
+                ans = 2ll * (sl[ri] - ri * i) + 2ll * ((ri+1)*i - (sr[le] - sr[le-ri-1])) + n + 1 - i;
             }
         }
+        debug3(ans, s, brute(s, i));
+        cout<<ans<<" ";
     }
-    cout<<ans<<endl;
+    line
 }
 
 int main()
@@ -132,5 +175,3 @@ int main()
     #endif
     return 0;
 }
-
-// a?af?bas??dasf???

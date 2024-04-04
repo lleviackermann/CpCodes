@@ -83,34 +83,131 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-bool check(string &s, int a, int b) {
-    if(s[a] == '?' || s[b] == '?' || s[a] == s[b]) return true;
-    return false;
+vvi adj(100005);
+int pos = 0, maxlen = 0;
+vl population(1e5+10);
+int start_node, end_node;
+void fartehst(int u, int v, int counter)
+{
+    // debug3(u, v, counter);
+    if (counter > maxlen)
+    {
+        maxlen = counter;
+        pos = u;
+    }
+    for (auto i : adj[u])
+    {
+        // debug2(i,u);
+        if (i == v)
+            continue;
+        fartehst(i, u, counter + 1);
+    }
+}
+
+
+ll costcalc = 0;
+void calccost(int u, int v, ll counter) {
+    costcalc += 1ll * ((counter+1)/2) * population[u] % mod; 
+    for(auto nei : adj[u]) {
+        if(nei == v) continue;
+        calccost(nei, u, counter+1);
+    }
+    costcalc %= mod;
+}
+
+const int nodemax = 1e5 + 5;
+const int l = 21;
+int parents[nodemax][l];
+int tin[nodemax], tout[nodemax], depth[nodemax];
+int timer = 0;
+
+void dfs(int u, int par)
+{
+    tin[u] = ++timer;
+    if(u == 0) depth[u] = 0;
+    else depth[u] = depth[par] + 1;
+    parents[u][0] = par;
+
+    for (auto i : adj[u])
+    {
+        if (i == par)
+            continue;
+        dfs(i, u);
+    }
+    tout[u] = ++timer;
+}
+
+bool isAncestor(int u, int v)
+{
+    return (tin[u] <= tin[v] && tout[u] >= tout[v]);
+}
+
+int lca(int u, int v)
+{
+    if (isAncestor(u, v))
+        return u;
+    if (isAncestor(v, u))
+        return v;
+
+    for (int i = l - 1; i >= 0; i--)
+    {
+        if (parents[u][i] == -1)
+            continue;
+        if (!isAncestor(parents[u][i], v))
+            u = parents[u][i];
+    }
+    // cout<<u<<endl;
+    return parents[u][0];
+}
+
+void preprocess(int n)
+{
+    dfs(0, -1);
+    for (int i = 1; i < l; i++)
+    {
+        for (int j = 0; j < n; j++)
+        {
+            parents[j][i] = ((parents[j][i - 1] == -1) ? -1 : parents[parents[j][i - 1]][i - 1]);
+        }
+    }
 }
 
 void solve()
 {
-    string s;
-    cin>>s;
-    int n = s.size();
-    int d = n / 2;
-    int ans = 0;
-    for(int i = 1; i <= d; i++) {
-        int counter = 0;
-        for(int j = 0; j < n-i; j++) {
-            if(check(s, j, j + i)) {
-                counter++;
-            } else {
-                counter = 0;
-            }
-            debug3(i, j, counter);
-            if(counter == i) {
-                ans = 2 * i;
-                break;
-            }
-        }
+    int n;
+    cin>>n;
+    for(int i = 0; i < n; i++) cin>>population[i];
+    for(int i = 0; i < n-1; i++) {
+        int st, en;
+        cin>>st>>en;
+        --st, --en;
+        adj[st].pb(en);
+        adj[en].pb(st);
     }
-    cout<<ans<<endl;
+    // for(int i = 0; i < n; i++) {
+    //     cout<<i<<"->";
+    //     print(adj[i]);
+    // }
+    pos = -1, maxlen = -1;
+    fartehst(0, -1, 0);
+    start_node = pos;
+    debug2(pos, maxlen);
+    pos = -1, maxlen = -1;
+    fartehst(start_node, -1, 0);
+    end_node = pos;
+    preprocess(n);
+    auto distance = [&] (int a, int b) {
+        return depth[a] + depth[b] - 2 * depth[lca(a, b)];
+    };
+    debug(distance(0, 2));
+    int tma = 1e9, tind = -1;
+    for(int i = 0; i < n; i++) {
+        int ma = max(distance(i, start_node), distance(i, end_node));
+        if((ma+1)/2 < tma) tma = (ma+1) / 2, tind = i;
+    }
+    debug2(tma, tind);
+    calccost(tind, -1, 0);
+    cout<<costcalc<<endl;
 }
 
 int main()
@@ -119,7 +216,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    cin >> t;
+    // cin >> t;
     while (t--)
     {
         solve();
@@ -132,5 +229,3 @@ int main()
     #endif
     return 0;
 }
-
-// a?af?bas??dasf???

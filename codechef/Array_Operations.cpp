@@ -83,32 +83,44 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-bool check(string &s, int a, int b) {
-    if(s[a] == '?' || s[b] == '?' || s[a] == s[b]) return true;
-    return false;
-}
+
 
 void solve()
 {
-    string s;
-    cin>>s;
-    int n = s.size();
-    int d = n / 2;
-    int ans = 0;
-    for(int i = 1; i <= d; i++) {
-        int counter = 0;
-        for(int j = 0; j < n-i; j++) {
-            if(check(s, j, j + i)) {
-                counter++;
+    ll n, k;
+    cin>>n>>k;
+    vl arr(n);
+    read(arr);
+    sort(all(arr));
+    auto binary = [&](ll mid) -> bool {
+        ll lessmid = 0, kdivi = 0, greater = 0;
+        for(int i = 0; i < n; i++) {
+            if(arr[i] >= mid) {
+                greater++;
+                ll temp = arr[i];
+                while(temp%k == 0 && temp / k >= mid) kdivi++, temp /= k;
             } else {
-                counter = 0;
-            }
-            debug3(i, j, counter);
-            if(counter == i) {
-                ans = 2 * i;
-                break;
+                if(arr[i] % k == 0) {
+                    ll temp = arr[i];
+                    while(temp%k == 0) kdivi++, temp /= k;
+                } else {
+                    if(arr[i] * k >= mid) lessmid++;
+                }
             }
         }
+        debug4(lessmid, kdivi, greater, mid);
+        if(greater >= mid) return true;
+        ll required = mid - greater;
+        ll mi = min(lessmid, kdivi);
+        if(mi >= required) return true;
+        return false;
+    };
+    ll l = 0, r = n;
+    ll ans = 0;
+    while(l <= r) {
+        ll mid = (l + r) / 2;
+        if(binary(mid)) ans = mid, l = mid + 1;
+        else r = mid-1;
     }
     cout<<ans<<endl;
 }
@@ -132,5 +144,3 @@ int main()
     #endif
     return 0;
 }
-
-// a?af?bas??dasf???

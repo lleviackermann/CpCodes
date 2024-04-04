@@ -83,34 +83,20 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-bool check(string &s, int a, int b) {
-    if(s[a] == '?' || s[b] == '?' || s[a] == s[b]) return true;
-    return false;
+const int nmax = 53;
+vvl matrix(nmax);
+string check = "";
+int m, n;
+ll recur(string &str, set<int> &rows, set<int> &cols) {
+    if(str == check) {
+        return 0;
+    }
+    for(int i = 0; i < n; )
 }
 
 void solve()
 {
-    string s;
-    cin>>s;
-    int n = s.size();
-    int d = n / 2;
-    int ans = 0;
-    for(int i = 1; i <= d; i++) {
-        int counter = 0;
-        for(int j = 0; j < n-i; j++) {
-            if(check(s, j, j + i)) {
-                counter++;
-            } else {
-                counter = 0;
-            }
-            debug3(i, j, counter);
-            if(counter == i) {
-                ans = 2 * i;
-                break;
-            }
-        }
-    }
-    cout<<ans<<endl;
+    
 }
 
 int main()
@@ -132,5 +118,3 @@ int main()
     #endif
     return 0;
 }
-
-// a?af?bas??dasf???

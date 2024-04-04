@@ -83,34 +83,52 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-bool check(string &s, int a, int b) {
-    if(s[a] == '?' || s[b] == '?' || s[a] == s[b]) return true;
-    return false;
+long long binpow(long long a, long long b) {
+    long long res = 1;
+    while (b > 0) {
+        if (b & 1)
+            res = res * a;
+        a = a * a;
+        b >>= 1;
+    }
+    return res;
 }
 
 void solve()
 {
-    string s;
-    cin>>s;
-    int n = s.size();
-    int d = n / 2;
-    int ans = 0;
-    for(int i = 1; i <= d; i++) {
-        int counter = 0;
-        for(int j = 0; j < n-i; j++) {
-            if(check(s, j, j + i)) {
-                counter++;
-            } else {
-                counter = 0;
-            }
-            debug3(i, j, counter);
-            if(counter == i) {
-                ans = 2 * i;
+    ll n;
+    cin>>n;
+
+    // auto bruteForce = [&](ll num) -> ll {
+    //     ll ans = 0;
+    //     for(ll i = 1; i <= num; i++) ans += __builtin_popcount(i);
+    //     return ans;
+    // };
+
+    auto countBits = [&](ll num) -> ll {
+        ll leftBit = 0;
+        for(ll i = 56; i >= 0; i--) {
+            if(num & (1ll << i)) {
+                leftBit = i;
                 break;
             }
         }
-    }
-    cout<<ans<<endl;
+        ll ans = leftBit * binpow(2, leftBit-1);
+        debug(ans);
+        ll count = 1;
+        for(ll i = leftBit - 1; i >= 0; i--) {
+            if(num & (1ll << i)) {
+                ans += i * binpow(2, i - 1);
+                ans += count * binpow(2, i);
+                count++;
+            }
+        }
+        debug2(ans, count);
+        ans += count;
+        return ans;
+    };
+
+    cout<<countBits(n)<<endl;
 }
 
 int main()
@@ -119,7 +137,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    cin >> t;
+    // cin >> t;
     while (t--)
     {
         solve();
@@ -132,5 +150,3 @@ int main()
     #endif
     return 0;
 }
-
-// a?af?bas??dasf???

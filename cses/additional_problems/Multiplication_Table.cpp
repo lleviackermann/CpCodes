@@ -83,34 +83,44 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-bool check(string &s, int a, int b) {
-    if(s[a] == '?' || s[b] == '?' || s[a] == s[b]) return true;
-    return false;
-}
+// 1 2 3 4 5
+// 2 4 6 8 10
+// 3 6 9 12 15
+// 4 8 12 16 20
+// 5 10 15 20 25
 
 void solve()
 {
-    string s;
-    cin>>s;
-    int n = s.size();
-    int d = n / 2;
-    int ans = 0;
-    for(int i = 1; i <= d; i++) {
-        int counter = 0;
-        for(int j = 0; j < n-i; j++) {
-            if(check(s, j, j + i)) {
-                counter++;
-            } else {
-                counter = 0;
+    ll n;
+    cin>>n;
+    ll middle = (n*n) / 2 + 1;
+    auto binary = [&](ll mid) -> int {
+        ll equal = 0;
+        ll less = 0;
+        for(ll i = 1; i <= n; i++) {
+            less += (min(i*n, mid) / i);
+            if(mid % i == 0 && i * n >= mid) {
+                equal++;
+                less--;
             }
-            debug3(i, j, counter);
-            if(counter == i) {
-                ans = 2 * i;
-                break;
-            }
+            if(less >= middle) return 0;
         }
+        // debug3(mid, less, equal);
+        if(less < middle && middle <= less + equal) return 1;
+        if(less + equal < middle) return -1;
+        return 0;
+    };
+    ll l = 1, r = n*n;
+    while(l <= r) {
+        ll mid = (l + r) / 2;
+        ll ret = binary(mid);
+        if(ret == 1) {
+            cout<<mid<<endl;
+            return;
+        }
+        if(ret == -1) l = mid + 1;
+        else r = mid - 1;
     }
-    cout<<ans<<endl;
 }
 
 int main()
@@ -119,7 +129,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    cin >> t;
+    // cin >> t;
     while (t--)
     {
         solve();
@@ -132,5 +142,3 @@ int main()
     #endif
     return 0;
 }
-
-// a?af?bas??dasf???
