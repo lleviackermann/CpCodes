@@ -7,7 +7,7 @@ using namespace __gnu_pbds;
 template <typename T> 
 using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
 
-// #define endl "\n"
+#define endl "\n"
 #define fo(i, n) for (i = 0; i < n; i++)
 #define Fo(i, k, n) for (i = k; k < n; k++)
 #define pb push_back
@@ -83,13 +83,92 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
+long long binpow(long long a, long long b, long long m) {
+    a %= m;
+    long long res = 1;
+    while (b > 0) {
+        if (b & 1)
+            res = res * a % m;
+        a = a * a % m;
+        b >>= 1;
+    }
+    return res;
+}
 
+const int nmax = 2e5+10;
+ll factorial[nmax], invfact[nmax];
+
+void preprocess() {
+    factorial[0] = 1;
+    for(ll i = 1; i < nmax; i++) factorial[i] = factorial[i-1] * i % mod;
+    invfact[nmax-1] = binpow(factorial[nmax-1], mod-2, mod);
+    for(ll i = nmax-2; i >= 0; i--) invfact[i] = invfact[i+1] * (i + 1) % mod;
+}
+
+ll nCr(ll n, ll r) {
+    ll ans = factorial[n] * invfact[r] % mod;
+    ans = ans * invfact[n-r] % mod;
+    return ans;
+}
+
+ll recur(ll start, ll end, vl &prefix, vl &suffix) {
+    ll sz = end - start + 1;
+    if(prefix.size() && suffix.size() && prefix.back() == suffix.back()) {
+        ll mid = prefix.back();
+        prefix.pop_back();
+        suffix.pop_back();
+        ll temp = nCr(sz-1, mid-1);
+        ll ans = temp;
+        if(mid > 1) ans *= recur(1, mid-1, prefix, suffix);
+        ans %= mod;
+        if(mid < sz) ans *= recur(mid+1, sz, prefix, suffix);
+        debug4(start, end, mid, ans);
+        return ans % mod;
+    }
+    if(prefix.size()) {
+        if(prefix.back() <= end && prefix.back() >= start) {
+            ll mid = prefix.back();
+            prefix.pop_back();
+            ll temp = nCr(sz-1, mid-start);
+            ll ans = temp;
+            if(mid > start) ans *= recur(start, mid-1, prefix, suffix);
+            ans %= mod;
+            if(mid < end) ans *= recur(mid+1, end, prefix, suffix);
+            debug4(start, end, mid, ans);
+            return ans % mod;
+        }
+    }
+    if(suffix.size()) {
+        if(suffix.back() >= start && suffix.back() <= end) {
+            ll mid = suffix.back();
+            suffix.pop_back();
+            // debug4(sz, mid, start, end);
+            ll temp = nCr(sz-1, mid-start);
+            ll ans = temp;
+            if(mid > start) ans *= recur(start, mid-1, prefix, suffix);
+            ans %= mod;
+            if(mid < end) ans *= recur(mid+1, end, prefix, suffix);
+            debug4(start, end, mid, ans);
+            return ans % mod;
+        }
+    }
+    debug2(start, end);
+    return factorial[sz];
+}
 void solve()
 {
-    int richa = 10, ruchi = 20;
-    cout << "Please enter two numbers: " << endl;
-    cin>> richa >> ruchi;
-    cout<<richa * ruchi <<endl;
+    ll n, m1, m2;
+    cin>>n>>m1>>m2;
+    vl prefix(m1), suffix(m2);
+    read(prefix);
+    read(suffix);
+
+    if(prefix.back() != suffix[0] || prefix[0] != 1 || suffix.back() != n) {    
+        cout<<"0\n";
+        return;
+    }
+    reverse(all(suffix));
+    cout<<recur(1, n, prefix, suffix)<<endl;
 }
 
 int main()
@@ -98,7 +177,8 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    // cin >> t;
+    cin >> t;
+    preprocess();
     while (t--)
     {
         solve();

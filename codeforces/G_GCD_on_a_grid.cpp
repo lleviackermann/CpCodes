@@ -7,7 +7,7 @@ using namespace __gnu_pbds;
 template <typename T> 
 using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
 
-// #define endl "\n"
+#define endl "\n"
 #define fo(i, n) for (i = 0; i < n; i++)
 #define Fo(i, k, n) for (i = k; k < n; k++)
 #define pb push_back
@@ -83,13 +83,50 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-
 void solve()
 {
-    int richa = 10, ruchi = 20;
-    cout << "Please enter two numbers: " << endl;
-    cin>> richa >> ruchi;
-    cout<<richa * ruchi <<endl;
+    ll n, m;
+    cin>>n>>m;
+
+    vvi matrix(n, vi(m));
+    for(auto &i : matrix) read(i);
+
+    auto funcsolve = [&]() -> int {
+        map<int, int> common;
+        vi common_div;
+        auto get_common = [&](int fir, int sec) -> void {
+            int common = __gcd(fir, sec);
+            for(int i = 1; i * i <= common; i++) {
+                if(common % i) continue;
+                common_div.pb(i);
+                if(i * i != common) common_div.pb(common/i);
+            }
+        };
+        get_common(matrix[0][0], matrix[n-1][m-1]);
+        sort(all(common_div));
+        reverse(all(common_div));
+        vvi isdivisible(n, vi(m, 0));
+        vvi dp(n, vi(m, 0));
+        for(auto num : common_div) {
+            for(int i = 0; i < n; i++) for(int j = 0; j < m; j++) isdivisible[i][j] = (matrix[i][j] % num == 0);
+            dp[0][0] = 1;
+            for(int i = 0; i < n; i++) {
+                for(int j = 0; j < m; j++) {
+                    // dp[i][j] = 0;
+                    if(i || j) dp[i][j] = 0;
+                    if((!i & !j) || isdivisible[i][j] == 0) continue;
+                    if(j && dp[i][j-1] == 1) dp[i][j] = 1;
+                    if(i && dp[i-1][j] == 1) dp[i][j] = 1;
+                }
+            }
+            if(dp[n-1][m-1]) {
+                return num;
+            }
+        }
+        return -1;
+    };
+        cout<<funcsolve()<<endl;
+
 }
 
 int main()
@@ -98,7 +135,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    // cin >> t;
+    cin >> t;
     while (t--)
     {
         solve();

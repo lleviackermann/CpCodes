@@ -7,7 +7,7 @@ using namespace __gnu_pbds;
 template <typename T> 
 using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
 
-// #define endl "\n"
+#define endl "\n"
 #define fo(i, n) for (i = 0; i < n; i++)
 #define Fo(i, k, n) for (i = k; k < n; k++)
 #define pb push_back
@@ -83,13 +83,46 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
+ll n, m;
+vl short_trail(102), long_trail(102);
+ll dp[102][2001][3];
+ll recur(int flag, ll ind, int prev) {
+    
+    if(ind == 2*n) {
+        debug2(flag, ind);
+        return 1;
+    }
+    if(dp[prev][ind][flag] != -1) return dp[prev][ind][flag];
+    ll ans = 0;
+    if(!flag) {
+        if(short_trail[prev] != 0) ans += short_trail[prev] * recur(1, ind+1, prev);
+        ans = ans % mod;
+        if(long_trail[prev] != 0) ans += long_trail[prev] * recur(2, ind+1, prev);
+        ans = ans % mod;
+
+    } else {
+        for(int i = 0; i < m; i++) {
+            if(flag == 2 && short_trail[i] != 0) ans += short_trail[i] * recur(0, ind+1, i);
+            ans = ans % mod;
+            if(flag == 1) {
+                if(short_trail[i] != 0) ans += short_trail[i] * recur(0, ind+1, i);
+                ans = ans % mod;
+                if(long_trail[i] != 0) ans += long_trail[i] * recur(0, ind+1, i);
+                ans = ans % mod;
+            }
+        }
+    }
+    debug3(flag, ind, ans);
+    return dp[prev][ind][flag] = ans % mod;
+}
 
 void solve()
 {
-    int richa = 10, ruchi = 20;
-    cout << "Please enter two numbers: " << endl;
-    cin>> richa >> ruchi;
-    cout<<richa * ruchi <<endl;
+    cin>>m>>n;
+    for(int i = 0; i < m; i++) cin>>short_trail[i];
+    for(int i = 0; i < m; i++) cin>>long_trail[i];
+    memset(dp, -1, sizeof dp);
+    cout<<recur(0, 0, 0)<<endl;
 }
 
 int main()

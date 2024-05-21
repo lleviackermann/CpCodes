@@ -7,7 +7,7 @@ using namespace __gnu_pbds;
 template <typename T> 
 using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
 
-// #define endl "\n"
+#define endl "\n"
 #define fo(i, n) for (i = 0; i < n; i++)
 #define Fo(i, k, n) for (i = k; k < n; k++)
 #define pb push_back
@@ -83,13 +83,37 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
+int n, t;
+const int nmax = 2e5+10;
+vvi graph(nmax);
+bool subtree[nmax];
+
+bool dfs1(int u, int v) {
+    subtree[u] = false;
+
+    for (auto nei : graph[u]) {
+        if (nei == v) continue;
+        if (!dfs1(nei, u)) subtree[u] = true;
+    }
+
+    return subtree[u];
+}
+
 
 void solve()
 {
-    int richa = 10, ruchi = 20;
-    cout << "Please enter two numbers: " << endl;
-    cin>> richa >> ruchi;
-    cout<<richa * ruchi <<endl;
+    cin >> n >> t;
+    for(int i = 0; i < n-1; i++) {
+        int st, en;
+        cin >> st >> en;
+        st--, en--;
+        graph[st].pb(en);
+        graph[en].pb(st);
+    }
+    vi queries(t);
+    read(queries);
+    if(dfs1(--queries[0], -1)) cout << "Ron" << endl;
+    else cout << "Hermione" << endl;
 }
 
 int main()

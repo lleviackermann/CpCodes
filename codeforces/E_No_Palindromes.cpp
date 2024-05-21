@@ -7,7 +7,7 @@ using namespace __gnu_pbds;
 template <typename T> 
 using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
 
-// #define endl "\n"
+#define endl "\n"
 #define fo(i, n) for (i = 0; i < n; i++)
 #define Fo(i, k, n) for (i = k; k < n; k++)
 #define pb push_back
@@ -66,7 +66,7 @@ template <typename T, typename V> void print(map<T, V>& arr) { for(auto &it : ar
 template <typename T> void print(unordered_set<T> &arr) { for(auto &it : arr) cout<<it<<" "; line }
 template <typename T> void print(ordered_set<T> &arr) { for(auto &it : arr) cout<<it<<" "; line }
 template <typename T> void print(set<T> &arr) { for(auto &it : arr) cout<<it<<" "; line }
-template <typename T, typename... Args> void print(T t, Args... args) { cout << t << " "; print(args...); }
+template <typename T, typename... Args> void print(T t, Args... args) { print(t); print(args...); }
 template <typename T> void print(T t) { cout<<t<<"\n"; }
 #define debug(x) cout<<#x<<" "<<x<<endl;
 #define debug2(x, y) cout<<#x<<" "<<x<<" "<<#y<<" "<<y<<endl;
@@ -83,13 +83,82 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
+long long binpow(long long a, long long b, long long m) {
+    a %= m;
+    long long res = 1;
+    while (b > 0) {
+        if (b & 1)
+            res = res * a % m;
+        a = a * a % m;
+        b >>= 1;
+    }
+    return res;
+}
+
+class DoubleHash {
+public:
+    string s;
+    int n;
+    vl prefixHash1, prefixHash2, basepower1, basepower2;
+    ll p1, p2, modulo1, modulo2;
+    DoubleHash(string &temp) {
+        s = temp;
+        n = temp.length();
+        prefixHash1.resize(n+1, 0);
+        prefixHash2.resize(n+1, 0);
+        basepower1.resize(n+1, 1);
+        basepower2.resize(n+1, 1);
+        p1 = 31, p2 = 43, modulo1 = 1e9+7, modulo2 = 1e9+9;
+        computePrefixHash(p1, modulo1, prefixHash1, basepower1);
+        computePrefixHash(p2, modulo2, prefixHash2, basepower2);
+    }
+
+    void computePrefixHash(ll p, ll modulo, vl &prefix, vl &basepower) {
+        for(int i = 1; i <= n; i++) basepower[i] = basepower[i-1] * p % modulo;
+        for(ll i = 0; i < n; i++) {
+            ll x = s[i] - 'a' + 1;
+            prefix[i+1] = (prefix[i] + basepower[i] * x) % modulo;
+        }
+    }
+
+    pl substrHash(ll l, ll r) {
+        //indexing should be 0 based
+        pl ans;
+        ans.first = (prefixHash1[r+1] - prefixHash1[l] + modulo1) * basepower1[n-l] % modulo1;
+        ans.second = (prefixHash2[r+1] - prefixHash2[l] + modulo2) * basepower2[n-l] % modulo2;
+        return ans;
+    }
+};
+
 
 void solve()
 {
-    int richa = 10, ruchi = 20;
-    cout << "Please enter two numbers: " << endl;
-    cin>> richa >> ruchi;
-    cout<<richa * ruchi <<endl;
+    string s;
+    cin>>s;
+    string revs = s;
+    reverse(all(revs));
+    DoubleHash ori(s), rev(revs);
+    int n = s.size();
+    if(ori.substrHash(0, n-1) != rev.substrHash(0, n-1)) {
+        cout<<"YES\n1\n";
+        cout<<s<<endl;
+        return;
+    }
+    for(int i = 1; i < n-1; i++) {
+        pl firhalf1, firhalf2, sechalf1, sechalf2;
+        firhalf1 = ori.substrHash(0, i);
+        sechalf1 = ori.substrHash(i+1, n-1);
+        firhalf2 = rev.substrHash(0, n-2-i);
+        sechalf2 = rev.substrHash(n - 1 - i, n - 1);
+        if(firhalf1 != sechalf2 && sechalf1 != firhalf2) {
+            cout<<"YES\n2\n";
+            debug(i);
+            // print(firhalf1, sechalf1, firhalf2, sechalf2);
+            cout<<s.substr(0, i+1)<<" "<<s.substr(i+1)<<endl;
+            return;
+        }
+    }
+    cout<<"NO\n";
 }
 
 int main()
@@ -98,7 +167,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    // cin >> t;
+    cin >> t;
     while (t--)
     {
         solve();

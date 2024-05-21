@@ -7,7 +7,7 @@ using namespace __gnu_pbds;
 template <typename T> 
 using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
 
-// #define endl "\n"
+#define endl "\n"
 #define fo(i, n) for (i = 0; i < n; i++)
 #define Fo(i, k, n) for (i = k; k < n; k++)
 #define pb push_back
@@ -86,10 +86,30 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 void solve()
 {
-    int richa = 10, ruchi = 20;
-    cout << "Please enter two numbers: " << endl;
-    cin>> richa >> ruchi;
-    cout<<richa * ruchi <<endl;
+    ll n, k;
+    cin>>n>>k;
+    if(k > n) {
+        cout<<"NO\n";
+        return;
+    }
+    ll div = n / k;
+    debug2(div, n % k);
+    if(n / div == k) {
+        cout<<"YES\n1\n";
+        cout<<div<<endl;
+        return;
+    }
+    ll temp = n - k + 1;
+    debug(temp);
+    if(n < 2*temp) {
+        cout<<"YES\n2\n";
+        cout<<temp<<" "<<1<<endl;
+        const ll check = n / temp + (n%temp);
+        // debug(check);
+        // assert(check == k);
+        return;
+    }
+    cout<<"NO\n";
 }
 
 int main()
@@ -98,7 +118,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    // cin >> t;
+    cin >> t;
     while (t--)
     {
         solve();
