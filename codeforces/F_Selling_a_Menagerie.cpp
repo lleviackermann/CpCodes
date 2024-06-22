@@ -86,43 +86,109 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 void solve()
 {
-    int n, k;
-    cin >> n >> k;
-    vi arr(n);
-    read(arr);
-    if(k == 1) {
-        for(int i = 1; i <= n; i++) {
-            if(i != arr[i-1]) {
-                cout << "NO\n";
-                return;
+    ll n;
+    cin >> n;
+    vvl graph(n);
+    vi incoming(n, 0);
+    vi arr;
+    for(int i = 0; i < n; i++) {
+        int x;
+        cin >> x;
+        arr.push_back(x);
+        --x;
+        incoming[x]++;
+        graph[i].push_back(x);
+    }
+    vl cost(n);
+    read(cost);
+
+    vi visited(n, 0);
+    vi flag(n, 0);
+    vi cycle;
+    int starting_point = -1;
+    auto dfs = [&](auto&& dfs, int u) -> bool {
+        visited[u] = 1;
+        for(auto nei : graph[u]) {
+            if(visited[nei] == 1 && flag[nei] == 0) {
+                starting_point = nei;
+                flag[u] = 1;
+                cycle.push_back(u);
+                return true;
+            }
+            if(!visited[nei] && dfs(dfs, nei)) {
+                flag[u] = 1;
+                // debug(u);
+                cycle.push_back(u);
+                return u != starting_point;
             }
         }
-        cout << "YES\n";
-        return;
-    }
-    int cyc = 1;
-    vi visited(n, 0);
-    vi store(n, 0);
+        visited[u] = 2;
+        return false;
+    };
+    // set<int> incycle;
+    vi inc;
+    vi mistore;
     for(int i = 0; i < n; i++) {
-        if(visited[i]) continue;
-        int temp = i;
-        int cnt = 1;
-        while(!visited[temp]) {
-            visited[temp] = cyc;
-            store[temp] = cnt++;
-            temp = arr[temp] - 1;
+        if(!visited[i]) {
+            dfs(dfs, i);
+            if(cycle.size()) {
+                reverse(all(cycle));
+                int ind = -1;
+                int cnt = 0;
+                for(auto it : cycle) {
+                    // incycle.insert(it);
+                    if(ind == -1) ind = cnt;
+                    else if(cost[it] < cost[cycle[ind]]) ind = cnt;
+                    cnt++;
+                }
+                print(cycle);
+                debug(ind);
+                for(int it = ind+1; it < cycle.size(); it++) inc.push_back(cycle[it]);
+                for(int it = 0; it < ind; it++) inc.push_back(cycle[it]);
+                mistore.push_back(cycle[ind]);
+            }
+            cycle.clear();
+            starting_point = -1;
         }
-        if(visited[temp] != cyc) {
-            cyc++;
-            continue;
-        }
-        if(cnt - store[temp] != k) {
-            cout << "NO\n";
-            return;
-        }
-        cyc++;
     }
-    cout << "YES\n";
+    // print(incycle);
+    print(flag);
+    print(inc);
+    print(mistore);
+    vi beg;
+    cycle.clear();
+    queue<int> store;
+    for(int i = 0; i < n; i++) {
+        if(flag[i] == 0 && incoming[i] == 0) {
+            store.push(i);
+        }
+    }
+    while(store.size()) {
+        int be = store.front();
+        beg.push_back(be);
+        store.pop();
+        for(auto i : graph[be]) {
+            incoming[i]--;
+            if(incoming[i] == 0) store.push(i);
+        }
+    }
+    vi ans;
+    for(auto i : beg) ans.push_back(i+1);
+    for(auto i : inc) ans.push_back(i+1);
+    for(auto i : mistore) ans.push_back(i+1);
+    vi te1 = ans;
+    sort(all(te1));
+    for(int i = 1; i <= n; i++) {
+        if(te1[i-1] != i) {
+            for(auto it : arr) cout << it << "|";
+            cout<<",";
+            for(auto it : cost) cout << it << "|";
+            cout << endl;
+            break;
+        }
+    }
+    for(auto i : ans) cout << i << " ";
+    cout << endl;
 }
 
 int main()
@@ -137,9 +203,9 @@ int main()
         solve();
     }
     clock_t end = clock();
-    double elapsed = double(end - start) / CLOCKS_PER_SEC;
     
     #ifndef ONLINE_JUDGE
+    double elapsed = double(end - start) / CLOCKS_PER_SEC;
     cout << setprecision(10) << elapsed << endl;
     #endif
     return 0;

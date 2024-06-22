@@ -83,46 +83,39 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
+// 100
+// 345203
+// 100000 200000 
+
+// 1 1 1 1 1 1 8 9 10 20 40 80 100 200 400 800 1000 10000
+// 1 2 2 4 
+// 1 2 4 8 16 32 21
+// 72 -> 1001000
+// 1001000
+// 1001111
+// 1010101
 
 void solve()
 {
-    int n, k;
+    ll n, k;
     cin >> n >> k;
-    vi arr(n);
-    read(arr);
-    if(k == 1) {
-        for(int i = 1; i <= n; i++) {
-            if(i != arr[i-1]) {
-                cout << "NO\n";
-                return;
-            }
-        }
-        cout << "YES\n";
-        return;
+    ll below = 1;
+    while(below * 2 <= k) below *= 2;
+    multiset<int> ans;
+    for(int i = 1; i <= n; i *= 2) ans.insert(i);
+    int to_insert = (k + 1);
+    if(below * 2 == to_insert) to_insert++;
+    ans.insert(to_insert);
+    auto itr = ans.find(below);
+    if(itr != ans.end()) ans.erase(itr);
+    if(below != k) ans.insert(k - below);
+    if(below * 2 != to_insert - 1) {
+        ans.insert(below*2 + 1);
     }
-    int cyc = 1;
-    vi visited(n, 0);
-    vi store(n, 0);
-    for(int i = 0; i < n; i++) {
-        if(visited[i]) continue;
-        int temp = i;
-        int cnt = 1;
-        while(!visited[temp]) {
-            visited[temp] = cyc;
-            store[temp] = cnt++;
-            temp = arr[temp] - 1;
-        }
-        if(visited[temp] != cyc) {
-            cyc++;
-            continue;
-        }
-        if(cnt - store[temp] != k) {
-            cout << "NO\n";
-            return;
-        }
-        cyc++;
-    }
-    cout << "YES\n";
+    assert(ans.size() <= 25);
+    cout << ans.size() << endl; 
+    for(auto i : ans) cout << i << " ";
+    cout << endl;
 }
 
 int main()
@@ -137,9 +130,9 @@ int main()
         solve();
     }
     clock_t end = clock();
-    double elapsed = double(end - start) / CLOCKS_PER_SEC;
     
     #ifndef ONLINE_JUDGE
+    double elapsed = double(end - start) / CLOCKS_PER_SEC;
     cout << setprecision(10) << elapsed << endl;
     #endif
     return 0;

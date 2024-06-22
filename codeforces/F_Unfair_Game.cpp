@@ -83,46 +83,29 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
+int dp[201][201][201];
+void precalculate() {
+    memset(dp, 0, sizeof(dp));
+    for(int i = 0; i <= 200; i++) {
+        for(int j = 0; j <= 200; j++) {
+            for(int k = 0; k <= 200; k++) {
+                int prev = 0;
+                if(i) prev = max(prev, dp[i-1][j][k]);
+                if(j) prev = max(prev, dp[i][j-1][k]);
+                if(k) prev = max(prev, dp[i][j][k-1]);
+                dp[i][j][k] = prev;
+                int xr = ((i&1)*1) ^ ((j & 1) * 2) ^ ((k & 1) * 3);
+                if(xr == 0 && (i | j | k)) ++dp[i][j][k];
+            }
+        }
+    }
+}
 
 void solve()
 {
-    int n, k;
-    cin >> n >> k;
-    vi arr(n);
-    read(arr);
-    if(k == 1) {
-        for(int i = 1; i <= n; i++) {
-            if(i != arr[i-1]) {
-                cout << "NO\n";
-                return;
-            }
-        }
-        cout << "YES\n";
-        return;
-    }
-    int cyc = 1;
-    vi visited(n, 0);
-    vi store(n, 0);
-    for(int i = 0; i < n; i++) {
-        if(visited[i]) continue;
-        int temp = i;
-        int cnt = 1;
-        while(!visited[temp]) {
-            visited[temp] = cyc;
-            store[temp] = cnt++;
-            temp = arr[temp] - 1;
-        }
-        if(visited[temp] != cyc) {
-            cyc++;
-            continue;
-        }
-        if(cnt - store[temp] != k) {
-            cout << "NO\n";
-            return;
-        }
-        cyc++;
-    }
-    cout << "YES\n";
+    int a, b, c, d;
+    cin >> a >> b >> c >> d;
+    cout << dp[a][b][c] + d / 2 << endl;
 }
 
 int main()
@@ -131,15 +114,16 @@ int main()
     clock_t start = clock();
 
     int t = 1;
+    precalculate();
     cin >> t;
     while (t--)
     {
         solve();
     }
     clock_t end = clock();
-    double elapsed = double(end - start) / CLOCKS_PER_SEC;
     
     #ifndef ONLINE_JUDGE
+    double elapsed = double(end - start) / CLOCKS_PER_SEC;
     cout << setprecision(10) << elapsed << endl;
     #endif
     return 0;

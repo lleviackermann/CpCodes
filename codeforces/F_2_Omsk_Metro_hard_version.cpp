@@ -83,46 +83,101 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
+struct node {
+    int premi, prema, sufmi, suffma, sum, ma, mi;
 
+    node(int te = 0) {
+        sum = te;
+        premi = sufmi = mi = min(te, 0);
+        prema = suffma = ma = max(te, 0);
+    }
+
+    static node merge_node(node &fir, node &sec) {
+        node ans;
+        ans.sum = fir.sum + sec.sum;
+        ans.premi = min(fir.premi, fir.sum + sec.premi);
+        ans.prema = max(fir.prema, fir.sum + sec.prema);
+        ans.suffma = max(fir.suffma + sec.sum, sec.suffma);
+        ans.sufmi = min(fir.sufmi + sec.sum, sec.sufmi);
+        ans.ma = max({fir.suffma + sec.prema, fir.ma, sec.ma});
+        ans.mi = min({fir.sufmi + sec.premi, fir.mi, sec.mi});
+        return ans;
+    }
+};
+
+
+struct query {
+    int u, v, val;
+
+
+};
+
+const int nodemax = 2e5+5;
+const int lg = 17;
+int parents[lg+1][nodemax];
+node ans[lg+1][nodemax];
+int depth[nodemax];
 void solve()
 {
-    int n, k;
-    cin >> n >> k;
-    vi arr(n);
-    read(arr);
-    if(k == 1) {
-        for(int i = 1; i <= n; i++) {
-            if(i != arr[i-1]) {
-                cout << "NO\n";
-                return;
+    int n;
+    cin >> n;
+    for(int i = 0; i <= lg; i++) parents[i][1] = 1;
+    ans[0][1] = node(1);
+    depth[1] = 0;
+    int cnt = 1;
+    vector<query> queries;
+    while(n--) {
+        char c;
+        cin >> c;
+        if(c == '+') {
+            int ver, flag;
+            cin >> ver >> flag;
+            cnt++;
+            depth[cnt] = depth[ver] + 1;
+            parents[0][cnt] = ver;
+            for(int i = 1; i <= lg; i++) parents[i][cnt] = parents[i-1][parents[i-1][cnt]];
+
+            ans[0][cnt] = node(flag);
+            for(int i = 1; i <= lg; i++) ans[i][cnt] = node::merge_node(ans[i-1][cnt], ans[i-1][parents[i-1][cnt]]);
+        } else {
+            int u, v, val;
+            cin >> u >> v >> val;
+            
+            if(depth[u] < depth[v]) swap(u, v);
+            int diff = depth[u] - depth[v];
+            node a, b;
+            for(int i = lg; i >= 0; i--) {
+                if((diff >> i) & 1) {
+                    a = node::merge_node(a, ans[i][u]);
+                    u = parents[i][u];
+                }
             }
+            assert(depth[u] == depth[v]);
+
+            if(u == v) {
+                a = node::merge_node(a, ans[0][u]);
+            } else {
+                for(int i = lg; i >= 0; i--) {
+                    if(parents[i][u] != parents[i][v]) {
+                        a = node::merge_node(a, ans[i][u]);
+                        b = node::merge_node(b, ans[i][v]);
+                        u = parents[i][u];
+                        v = parents[i][v];
+                    }
+                }
+                assert(parents[0][u] == parents[0][v]);
+                b = node::merge_node(b, ans[1][v]);
+                a = node::merge_node(a, ans[0][u]);
+            }
+
+            swap(a.prema, a.suffma);
+            swap(a.premi, a.sufmi);
+
+            node fi = node::merge_node(b, a);
+            if(fi.mi <= val && fi.ma >= val) cout << "YES\n";
+            else cout << "NO\n";
         }
-        cout << "YES\n";
-        return;
     }
-    int cyc = 1;
-    vi visited(n, 0);
-    vi store(n, 0);
-    for(int i = 0; i < n; i++) {
-        if(visited[i]) continue;
-        int temp = i;
-        int cnt = 1;
-        while(!visited[temp]) {
-            visited[temp] = cyc;
-            store[temp] = cnt++;
-            temp = arr[temp] - 1;
-        }
-        if(visited[temp] != cyc) {
-            cyc++;
-            continue;
-        }
-        if(cnt - store[temp] != k) {
-            cout << "NO\n";
-            return;
-        }
-        cyc++;
-    }
-    cout << "YES\n";
 }
 
 int main()
@@ -137,9 +192,9 @@ int main()
         solve();
     }
     clock_t end = clock();
-    double elapsed = double(end - start) / CLOCKS_PER_SEC;
     
     #ifndef ONLINE_JUDGE
+    double elapsed = double(end - start) / CLOCKS_PER_SEC;
     cout << setprecision(10) << elapsed << endl;
     #endif
     return 0;

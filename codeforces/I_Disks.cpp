@@ -86,43 +86,89 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 void solve()
 {
-    int n, k;
-    cin >> n >> k;
-    vi arr(n);
-    read(arr);
-    if(k == 1) {
-        for(int i = 1; i <= n; i++) {
-            if(i != arr[i-1]) {
-                cout << "NO\n";
-                return;
+    ll n;
+    cin >> n;
+    vpl center(n);
+    vl radii(n);
+    for(int i = 0; i < n; i++) cin >> center[i].ff >> center[i].ss >> radii[i];
+    vvi graph(n);
+    auto istangent = [&](int i, int j) -> bool {
+        auto [x1, y1] = center[i];
+        auto [x2, y2] = center[j];
+        ll center_dist = (x2-x1) * (x2-x1) + (y2-y1) * (y2 - y1);
+        ll radii_dist = (radii[i] + radii[j]) * (radii[i] + radii[j]);
+        return center_dist == radii_dist;
+    };
+    auto add_edge = [&](int i, int j) {
+        graph[i].push_back(j);
+        graph[j].push_back(i);
+    };
+
+    vi colors(n, -1);
+    auto assign_colors = [&](auto&& assign_colors, int u, int color) -> bool {
+        // debug2(u, color);
+        colors[u] = color;
+        bool flag = true;
+        for(auto nei : graph[u]) {
+            if(colors[nei] == -1) flag = flag && assign_colors(assign_colors, nei, color^1);
+            else if(colors[nei] == color) return false;
+        }
+        return flag;
+    };
+    vi visited(n, 0);
+    auto sum = [&](auto&& sum, int u) -> int {
+        // debug(u);
+        int ans = (colors[u] ? 1 : -1);
+        visited[u] = 1;
+        for(auto it : graph[u]) {
+            if(visited[it]) continue;
+            ans += sum(sum, it);
+        }
+        colors[u] = -1;
+        return ans;
+    };
+
+    auto dfs = [&](auto&& dfs, int u, vi& tem) -> void {
+        tem[u] = 1;
+        for(auto it : graph[u]) {
+            if(tem[it]) continue;
+            dfs(dfs, it, tem);
+        }
+    };
+    for(int i = 0; i < n; i++) {
+        for(int j = i + 1; j < n; j++) {
+            if(istangent(i, j)) {
+                add_edge(i, j);
             }
         }
-        cout << "YES\n";
-        return;
     }
-    int cyc = 1;
-    vi visited(n, 0);
-    vi store(n, 0);
+    // for(int i = 0; i < n; i++) {
+    //     cout << i << "->";
+    //     print(graph[i]);
+    // }
     for(int i = 0; i < n; i++) {
         if(visited[i]) continue;
-        int temp = i;
-        int cnt = 1;
-        while(!visited[temp]) {
-            visited[temp] = cyc;
-            store[temp] = cnt++;
-            temp = arr[temp] - 1;
-        }
-        if(visited[temp] != cyc) {
-            cyc++;
-            continue;
-        }
-        if(cnt - store[temp] != k) {
-            cout << "NO\n";
+        vi tem = visited;
+        bool flag = assign_colors(assign_colors, i, 0);
+        if(flag && sum(sum, i) > 0) {
+            debug3(i, sum(sum, i), n);
+            cout << "YES\n";
             return;
         }
-        cyc++;
+        visited.clear();
+        visited.resize(n, 0);
+        flag = assign_colors(assign_colors, i, 1);
+            print(colors);
+        if(flag && sum(sum, i) > 0) {
+            debug3(i, sum(sum, i), -n);
+            cout << "YES\n";
+            return;
+        }
+        dfs(dfs, i, tem);
+        visited = tem;
     }
-    cout << "YES\n";
+    cout << "NO\n";
+
 }
 
 int main()
@@ -131,15 +177,15 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    cin >> t;
+    // cin >> t;
     while (t--)
     {
         solve();
     }
     clock_t end = clock();
-    double elapsed = double(end - start) / CLOCKS_PER_SEC;
     
     #ifndef ONLINE_JUDGE
+    double elapsed = double(end - start) / CLOCKS_PER_SEC;
     cout << setprecision(10) << elapsed << endl;
     #endif
     return 0;

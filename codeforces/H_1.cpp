@@ -84,43 +84,91 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 #endif
 
 
+vi order;
+set<int> graph[1002];
+set<int> rev_graph[1002];
+vi used;
+void dfs1(int u) {
+    used[u] = 1;
+    // print(graph[u]);
+    for(auto nei : graph[u]) {
+        if(!used[nei]) dfs1(nei);
+    }
+    order.push_back(u);
+}
+
+int cnt = 0;
+vi comp(1005, 0);
+void dfs2(int u) {
+    comp[u] = cnt;
+    for(auto i : rev_graph[u]) {
+        if(comp[i] == 0) dfs2(i);
+    }
+}
+
+
 void solve()
 {
-    int n, k;
-    cin >> n >> k;
-    vi arr(n);
-    read(arr);
-    if(k == 1) {
-        for(int i = 1; i <= n; i++) {
-            if(i != arr[i-1]) {
-                cout << "NO\n";
-                return;
-            }
+    int n;
+    cin >> n;
+    vvi arr(n, vi(3));
+    for(int i = 0; i < 3; i++) for(int j = 0; j < n; j++) cin >> arr[j][i];
+    for(int i = 0; i < 2*n+1; i++) graph[i].clear();
+    for(int i = 0; i < 2*n+1; i++) rev_graph[i].clear();
+    comp.clear();
+    used.clear();
+    comp.resize(n*2+10, 0);
+    used.resize(n*2+10, 0);
+    cnt = 0;
+    order.clear();
+    auto calc = [&](int x) {
+        return (x < 0 ? abs(x) + n : x);
+    };
+
+
+    auto add_edge = [&](int x, int y) {
+        // debug2(x, y);
+        // debug4(calc(-x), calc(-y), calc(x), calc(y));
+        graph[calc(-x)].insert(calc(y));
+        graph[calc(-y)].insert(calc(x));
+        rev_graph[calc(y)].insert(calc(-x));
+        rev_graph[calc(x)].insert(calc(-y));
+    };
+
+    auto print_graph = [&](set<int> temp[]) {
+        for(int i = 1; i <= 2*n; i++) {
+            cout << i << "->";
+            print(temp[i]);
         }
-        cout << "YES\n";
-        return;
-    }
-    int cyc = 1;
-    vi visited(n, 0);
-    vi store(n, 0);
+    };
+
     for(int i = 0; i < n; i++) {
-        if(visited[i]) continue;
-        int temp = i;
-        int cnt = 1;
-        while(!visited[temp]) {
-            visited[temp] = cyc;
-            store[temp] = cnt++;
-            temp = arr[temp] - 1;
-        }
-        if(visited[temp] != cyc) {
-            cyc++;
-            continue;
-        }
-        if(cnt - store[temp] != k) {
+        auto& vec = arr[i];
+        add_edge(vec[0], vec[1]);
+        add_edge(vec[0], vec[2]);
+        add_edge(vec[1], vec[2]);
+    }
+    // print_graph(graph);
+    // print_graph(rev_graph);
+    for(int i = 1; i <= 2*n; i++) {
+        debug2(i, used[i]);
+        if(!used[i]) dfs1(i);
+        // if(!used[i+n]) dfs1(i+n);
+    }
+    print(order);
+    while(order.size()) {
+        int bac = order.back();
+        order.pop_back();
+        if(comp[bac] != 0) continue;
+        cnt++;
+        dfs2(bac);
+    }
+    for(int i = 1; i <= n; i++) debug2(comp[i], comp[i+n]);
+    for(int i = 1; i <= n; i++) {
+        if(comp[i] == comp[i+n]) {
             cout << "NO\n";
             return;
         }
-        cyc++;
     }
     cout << "YES\n";
 }
@@ -137,9 +185,9 @@ int main()
         solve();
     }
     clock_t end = clock();
-    double elapsed = double(end - start) / CLOCKS_PER_SEC;
     
     #ifndef ONLINE_JUDGE
+    double elapsed = double(end - start) / CLOCKS_PER_SEC;
     cout << setprecision(10) << elapsed << endl;
     #endif
     return 0;

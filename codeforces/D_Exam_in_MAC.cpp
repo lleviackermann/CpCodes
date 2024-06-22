@@ -86,43 +86,28 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 void solve()
 {
-    int n, k;
-    cin >> n >> k;
-    vi arr(n);
-    read(arr);
-    if(k == 1) {
-        for(int i = 1; i <= n; i++) {
-            if(i != arr[i-1]) {
-                cout << "NO\n";
-                return;
-            }
-        }
-        cout << "YES\n";
-        return;
-    }
-    int cyc = 1;
-    vi visited(n, 0);
-    vi store(n, 0);
+    ll n, c;
+    cin >> n >> c;
+    set<ll> se;
     for(int i = 0; i < n; i++) {
-        if(visited[i]) continue;
-        int temp = i;
-        int cnt = 1;
-        while(!visited[temp]) {
-            visited[temp] = cyc;
-            store[temp] = cnt++;
-            temp = arr[temp] - 1;
-        }
-        if(visited[temp] != cyc) {
-            cyc++;
-            continue;
-        }
-        if(cnt - store[temp] != k) {
-            cout << "NO\n";
-            return;
-        }
-        cyc++;
+        int x;
+        cin >> x;
+        se.insert(x);
     }
-    cout << "YES\n";
+    ll total_pairs = (c + 1) * (c + 2) / 2;
+    debug(total_pairs);
+    for(auto i : se) total_pairs -= (c+1-i);
+    debug(total_pairs);
+    int cnt = 0;
+    ll odd = 0, even = 0;
+    for(auto i : se) {
+        if(i&1) odd++;
+        else even++;
+        ll temp = i / 2 + 1;
+        temp -= (i&1 ? odd : even);
+        total_pairs -= temp;
+    }
+    cout << total_pairs << endl;
 }
 
 int main()
@@ -137,9 +122,9 @@ int main()
         solve();
     }
     clock_t end = clock();
-    double elapsed = double(end - start) / CLOCKS_PER_SEC;
     
     #ifndef ONLINE_JUDGE
+    double elapsed = double(end - start) / CLOCKS_PER_SEC;
     cout << setprecision(10) << elapsed << endl;
     #endif
     return 0;

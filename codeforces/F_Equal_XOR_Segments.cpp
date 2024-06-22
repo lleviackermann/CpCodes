@@ -86,43 +86,49 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 void solve()
 {
-    int n, k;
-    cin >> n >> k;
+    int n, q;
+    cin >> n >> q;
     vi arr(n);
     read(arr);
-    if(k == 1) {
-        for(int i = 1; i <= n; i++) {
-            if(i != arr[i-1]) {
+    vi prefix_xor(n);
+    prefix_xor[0] = arr[0];
+    for(int i = 1; i < n; i++) prefix_xor[i] = prefix_xor[i-1] ^ arr[i];
+    print(prefix_xor);
+    map<int, vi> pos;
+    for(int i = 0; i < n; i++) pos[prefix_xor[i]].push_back(i);
+    while(q--) {
+        int l, r;
+        cin >> l >> r;
+        --l, --r;
+        debug2(l, r);
+        int bac = (l ? prefix_xor[l-1] : 0);
+        if(bac == prefix_xor[r]) {
+            cout << "YES\n";
+        } else {
+            const auto& vec = pos[prefix_xor[r]];
+            const auto& vec2 = pos[bac];
+            // for(auto i : vec) cout << i << " ";
+            // cout << endl;
+            if(vec.empty() || vec2.empty()) {
                 cout << "NO\n";
-                return;
+                continue;
+            }
+            int ind = *lower_bound(all(vec), l);
+            if(ind >= r) {
+                cout << "NO\n";
+            } else {
+                auto ind2 = upper_bound(all(vec2), ind);
+                if(ind2 == vec2.end() || *ind2 >= r) {
+                    cout << "NO\n";
+                } else {
+                    cout << "YES\n";
+                }
             }
         }
-        cout << "YES\n";
-        return;
     }
-    int cyc = 1;
-    vi visited(n, 0);
-    vi store(n, 0);
-    for(int i = 0; i < n; i++) {
-        if(visited[i]) continue;
-        int temp = i;
-        int cnt = 1;
-        while(!visited[temp]) {
-            visited[temp] = cyc;
-            store[temp] = cnt++;
-            temp = arr[temp] - 1;
-        }
-        if(visited[temp] != cyc) {
-            cyc++;
-            continue;
-        }
-        if(cnt - store[temp] != k) {
-            cout << "NO\n";
-            return;
-        }
-        cyc++;
-    }
-    cout << "YES\n";
+    line
+
+// 7 . . . 7
 }
 
 int main()
@@ -137,9 +143,9 @@ int main()
         solve();
     }
     clock_t end = clock();
-    double elapsed = double(end - start) / CLOCKS_PER_SEC;
     
     #ifndef ONLINE_JUDGE
+    double elapsed = double(end - start) / CLOCKS_PER_SEC;
     cout << setprecision(10) << elapsed << endl;
     #endif
     return 0;

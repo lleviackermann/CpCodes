@@ -83,46 +83,54 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
+struct node {
+    int mi, ma, con, cop;
+
+    node() {}
+
+    static node update(node temp, int flag) {
+        debug4(temp.mi, temp.ma, temp.con, temp.cop);
+        node ans;
+        ans.mi = temp.mi, ans.ma = temp.ma, ans.con = temp.con, ans.cop = temp.cop;
+
+        if(flag == -1) {
+            ans.con--;
+            ans.cop -= (ans.cop ? 1 : 0);
+        } else {
+            ans.cop++;
+            ans.con += (ans.con < 0 ? 1 : 0);
+        }
+        ans.mi = min(ans.mi, ans.con);
+        ans.ma = max(ans.ma, ans.cop);
+        debug4(ans.mi, ans.ma, ans.con, ans.cop);
+        return ans;
+    }
+};
 
 void solve()
 {
-    int n, k;
-    cin >> n >> k;
-    vi arr(n);
-    read(arr);
-    if(k == 1) {
-        for(int i = 1; i <= n; i++) {
-            if(i != arr[i-1]) {
-                cout << "NO\n";
-                return;
-            }
+    int n;
+    cin >> n;
+    vector<node> store(n+3);
+    store[1].mi = 1, store[1].ma = 1, store[1].con = 0, store[1].cop = 1;
+    int cnt = 1;
+    while(n--) {
+        char c;
+        cin >> c;
+        if(c == '+') {
+            int ver, flag;
+            cin >> ver >> flag;
+            debug(cnt);
+            store[++cnt] = node::update(store[ver], flag);
+            // const node temp = store[cnt];
+            // debug4(temp.mi, temp.ma, temp.con, temp.cop);
+        } else {
+            int u, v, val;
+            cin >> u >> v >> val;
+            if(val == 0 || (val <= store[v].ma && val >= store[v].mi)) cout << "YES\n";
+            else cout << "NO\n";
         }
-        cout << "YES\n";
-        return;
     }
-    int cyc = 1;
-    vi visited(n, 0);
-    vi store(n, 0);
-    for(int i = 0; i < n; i++) {
-        if(visited[i]) continue;
-        int temp = i;
-        int cnt = 1;
-        while(!visited[temp]) {
-            visited[temp] = cyc;
-            store[temp] = cnt++;
-            temp = arr[temp] - 1;
-        }
-        if(visited[temp] != cyc) {
-            cyc++;
-            continue;
-        }
-        if(cnt - store[temp] != k) {
-            cout << "NO\n";
-            return;
-        }
-        cyc++;
-    }
-    cout << "YES\n";
 }
 
 int main()
@@ -137,9 +145,9 @@ int main()
         solve();
     }
     clock_t end = clock();
-    double elapsed = double(end - start) / CLOCKS_PER_SEC;
     
     #ifndef ONLINE_JUDGE
+    double elapsed = double(end - start) / CLOCKS_PER_SEC;
     cout << setprecision(10) << elapsed << endl;
     #endif
     return 0;

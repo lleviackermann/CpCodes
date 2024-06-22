@@ -42,7 +42,7 @@ typedef set<pair<ll, ll>> spl;
 typedef ordered_set<ll> osl;
 typedef ordered_set<pair<ll, ll>> ospl;
 
-const ll mod = 1e9 + 7;
+const ll mod = 998244353;
 
 bool comp2(pair<ll, ll> &arr, pair<ll, ll> &b)
 {
@@ -83,46 +83,39 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
+int sum[5001];
 
 void solve()
 {
-    int n, k;
-    cin >> n >> k;
-    vi arr(n);
+    ll n;
+    cin >> n;
+    vl arr(n);
     read(arr);
-    if(k == 1) {
-        for(int i = 1; i <= n; i++) {
-            if(i != arr[i-1]) {
-                cout << "NO\n";
-                return;
-            }
+    sort(all(arr));
+    ll total = accumulate(all(arr), 0);
+    debug(total);
+    sum[0] = 1;
+    ll ans = 0;
+    auto mod_sum = [](int x) {
+        return (x >= mod ? x - mod : x);
+    };
+    for(auto num : arr) {
+        // vl temp = sum;
+        ll te = 0;
+        for(ll i = 0; i <= num; i++) {
+            ans += num * sum[i];
+            ans %= mod;
+        };
+        for(ll i = num+1; i <= total; i++) {
+            ans = ans + (num + (i - num + 1ll) / 2) * sum[i] % mod;
+            ans %= mod;
         }
-        cout << "YES\n";
-        return;
+        for(int i = total-num; i >= 0; i--) {
+            sum[i+num] += sum[i];
+            sum[i+num] -= (sum[i+num] >= mod ? mod : 0);
+        }
     }
-    int cyc = 1;
-    vi visited(n, 0);
-    vi store(n, 0);
-    for(int i = 0; i < n; i++) {
-        if(visited[i]) continue;
-        int temp = i;
-        int cnt = 1;
-        while(!visited[temp]) {
-            visited[temp] = cyc;
-            store[temp] = cnt++;
-            temp = arr[temp] - 1;
-        }
-        if(visited[temp] != cyc) {
-            cyc++;
-            continue;
-        }
-        if(cnt - store[temp] != k) {
-            cout << "NO\n";
-            return;
-        }
-        cyc++;
-    }
-    cout << "YES\n";
+    cout << ans << endl;    
 }
 
 int main()
@@ -131,15 +124,15 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    cin >> t;
+    // cin >> t;    
     while (t--)
     {
         solve();
     }
     clock_t end = clock();
-    double elapsed = double(end - start) / CLOCKS_PER_SEC;
     
     #ifndef ONLINE_JUDGE
+    double elapsed = double(end - start) / CLOCKS_PER_SEC;
     cout << setprecision(10) << elapsed << endl;
     #endif
     return 0;
