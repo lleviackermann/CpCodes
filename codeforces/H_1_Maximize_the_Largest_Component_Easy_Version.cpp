@@ -95,7 +95,9 @@ void solve()
     int num = 0, cnt = 0;
     int dx[] = {-1, 1, 0, 0};
     int dy[] = {0, 0, 1, -1};
-    map<int, int> st;
+    // map<int, int> st;
+    vector<int> st;
+    st.push_back(0);
     auto dfs = [&](auto&& dfs, int i, int j) -> void {
         cnt++;
         store[i][j] = num;
@@ -113,11 +115,11 @@ void solve()
             num++, cnt = 0;
             // debug4(i, j, num, cnt);
             dfs(dfs, i, j);
-            st[num] = cnt;
+            st.push_back(cnt);
         }
     }
     int ans = 0;
-    for(auto [it, freq] : st) ans = max(ans, freq);
+    for(auto freq : st) ans = max(ans, freq);
     // for(int i = 0; i < n; i++) {
     //     for(int j = 0; j < m; j++) {
     //         cout << store[i][j] << " ";

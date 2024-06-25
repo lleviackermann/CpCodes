@@ -83,11 +83,142 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
+struct info {
+    int rmi, rma, cmi, cma;
+
+    info() {
+        rmi = cmi = 1e9;
+        cma = rma = -1e9;
+    }
+
+    void update(int x, int y) {
+        rmi = min(rmi, x);
+        rma = max(rma, x);
+        cmi = min(cmi, y);
+        cma = max(cma, y);
+    }
+
+    void print_() {
+        debug4(rmi, rma, cmi, cma);
+    }
+};
 
 void solve()
 {
-    
-}
+    int n, m;
+    cin >> n >> m;
+    vector<string> matrix(n);
+    read(matrix);
+    vector<vector<int>> store(n, vi(m, -1));
+    vector<vector<int>> sum(n, vi(m, 0));
+    int num = 0, cnt = 0;
+    int dx[] = {-1, 1, 0, 0};
+    int dy[] = {0, 0, 1, -1};
+    vector<int> st;
+    vector<info> informa(1);
+    st.push_back(0);
+    auto dfs = [&](auto&& dfs, int i, int j) -> void {
+        cnt++;
+        store[i][j] = num;
+        informa[num].update(i, j);
+        for(int k = 0; k < 4; k++) {
+            int ni = i + dx[k];
+            int nj = j + dy[k];
+            if(ni < 0 || ni >= n || nj < 0 || nj >= m || matrix[ni][nj] == '.' || store[ni][nj] != -1) continue;
+            dfs(dfs, ni, nj);
+        }
+    };
+
+    for(int i = 0; i < n; i++) {
+        for(int j = 0; j < m; j++) {
+            if(matrix[i][j] == '.' || store[i][j] != -1) continue;
+            num++, cnt = 0;
+            info ter;
+            informa.push_back(ter);
+            dfs(dfs, i, j);
+            st.push_back(cnt);
+        }
+    }
+    assert(informa.size() == st.size());
+    for(int j = 1; j <= num; j++) {
+        info temp = informa[j];
+        // temp.print_();
+        int cpr = (temp.cmi ? temp.cmi - 1 : temp.cmi), cpm =(temp.cma < m-2 ? temp.cma + 2 : -1);
+        debug2(cpr, cpm);
+        for(int i = max(0, temp.rmi-1); i <= min(n-1, temp.rma+1); i++) {
+            sum[i][cpr] += st[j];
+            if(cpm != -1) sum[i][cpm] -= st[j];
+        }
+    }
+    for(int i = 0; i < n; i++) {
+        for(int j = 0; j < m; j++) {
+            if(j) sum[i][j] += sum[i][j-1];
+            // cout << sum[i][j] << " ";
+        }
+        for(int j = 0; j < m; j++) {
+            if(matrix[i][j] == '.') sum[i][j]++;
+        }
+    }
+    vi row(n, 0), col(m, 0);
+    int ans = 0;
+    for(auto freq : st) ans = max(ans, freq);
+    for(int i = 0; i < n; i++) {
+        cnt = 0;
+        set<int> count;
+        for(int j = 0; j < m; j++) {
+            if(store[i][j] == -1) cnt++;
+            else if(count.count(store[i][j]) == 0) {
+                count.insert(store[i][j]);
+                cnt += st[store[i][j]];
+            }
+            if(i) {
+                if(store[i-1][j] != -1 && count.count(store[i-1][j]) == 0) {
+                    count.insert(store[i-1][j]);
+                    cnt += st[store[i-1][j]];
+                }
+            }
+            if(i != n-1) {
+                if(store[i+1][j] != -1 && count.count(store[i+1][j]) == 0) {
+                    count.insert(store[i+1][j]);
+                    cnt += st[store[i+1][j]];
+                }
+            }
+        }
+        row[i] = cnt;
+        ans = max(ans, cnt);
+    }
+    for(int j = 0; j < m; j++) {
+        cnt = 0;
+        set<int> count;
+        for(int i = 0; i < n; i++) {
+            if(store[i][j] == -1) cnt++;
+            else if(count.count(store[i][j]) == 0) {
+                count.insert(store[i][j]);
+                cnt += st[store[i][j]];
+            }
+            if(j) {
+                if(store[i][j-1] != -1 && count.count(store[i][j-1]) == 0) {
+                    count.insert(store[i][j-1]);
+                    cnt += st[store[i][j-1]];
+                }
+            }
+            if(j != m-1) {
+                if(store[i][j+1] != -1 && count.count(store[i][j+1]) == 0) {
+                    count.insert(store[i][j+1]);
+                    cnt += st[store[i][j+1]];
+                }
+            }
+        }
+        col[j] = cnt;
+        ans = max(ans, cnt);
+    }
+    for(int i = 0; i < n; i++) {
+        for(int j = 0; j < m; j++) {
+            ans = max(ans, row[i] + col[j] - sum[i][j]);
+        }
+    }
+    cout << ans << endl;
+}   
 
 int main()
 { 
