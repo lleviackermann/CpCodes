@@ -5,7 +5,7 @@ using namespace std;
 using namespace __gnu_pbds;
 
 template <typename T> 
-using ordered_set = tree<T, null_type, less_equal<T>, rb_tree_tag, tree_order_statistics_node_update>;
+using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
 
 #define endl "\n"
 #define fo(i, n) for (i = 0; i < n; i++)
@@ -42,7 +42,7 @@ typedef set<pair<ll, ll>> spl;
 typedef ordered_set<ll> osl;
 typedef ordered_set<pair<ll, ll>> ospl;
 
-const ll mod = 1e9 + 7;
+const ll mod = 1e6 + 7;
 
 bool comp2(pair<ll, ll> &arr, pair<ll, ll> &b)
 {
@@ -83,104 +83,39 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-class segtree {
-    vector<ll> tree, coordinates;
-public:
-    segtree(vector<ll>& val)
-        : coordinates(val)
-    {}
+ll dp[19][11][11][16][2][2];  
 
-    void compress() {
-        sort(coordinates.begin(), coordinates.end());
-        coordinates.erase(unique(coordinates.begin(), coordinates.end()), coordinates.end());
-        tree.resize(4 * coordinates.size() + 1, 0);
+ll recur(string& str, int ind, int ma, int mi, int xor_sum, int tight, int flag) {
+    if(ind == str.size()) {
+        debug3(ma, mi, xor_sum);
+        return (ma + mi) / 2 < xor_sum;
     }
-
-    ll query(int ind, int st, int en, int l, int r) {
-        if(en < l || st > r) return 0;
-        if(st >= l && en <= r) return tree[ind];
-        int mid = (st + en) / 2;
-        ll first = query(2*ind+1, st, mid, l, r);
-        ll sec = query(2*ind+2, mid+1, en, l, r);
-        return first + sec;
-    }
-
-
-    void update(int ind, int st, int en, int toup, int val) {
-        if(en < toup || st > toup) return;
-        if(st == en) {
-            assert(toup == st);
-            tree[ind] += val;
-            return;
+    if(dp[ind][ma][mi][xor_sum][tight][flag] != -1) return dp[ind][ma][mi][xor_sum][tight][flag];
+    ll ans = 0;
+    int ub = (tight ? (str[ind] - '0') : 9);
+    for(int i = 0; i <= ub; i++) {
+        if(i == 0 && flag == 0) {
+            ans += recur(str, ind+1, ma, mi, xor_sum, 0, flag);
+        } else {
+            ans += recur(str, ind+1, (ma == 10 ? i : max(ma, i)), (mi == 10 ? i : min(mi, i)), xor_sum ^ i, ((tight && i == ub) ? 1 : 0), (i == 0 && flag == 0) ? 0 : 1);
         }
-        int mid = (st + en) / 2;
-        update(2*ind+1, st, mid, toup, val);
-        update(2*ind+2, mid+1, en, toup, val);
-        tree[ind] = tree[2*ind+1] + tree[2*ind+2];
     }
-
-    void update(int value, int incr) {
-        int indx = lower_bound(coordinates.begin(), coordinates.end(), value) - coordinates.begin();
-        update(0, 0, coordinates.size() - 1, indx, incr);
-    }
-
-    ll query(int value_l, int value_r) {
-        int l = lower_bound(coordinates.begin(), coordinates.end(), value_l) - coordinates.begin();
-        int r = lower_bound(coordinates.begin(), coordinates.end(), value_r) - coordinates.begin();
-        return query(0, 0, coordinates.size() - 1, l, r);
-    }
-
-    
-};
-
+    return dp[ind][ma][mi][xor_sum][tight][flag] = ans % mod;
+}
 
 void solve()
 {
-    ll n, q;
-    cin >> n >> q;
-    const int N = 1e5+1;
-    vl heros[N], ans(q, 0), strengths;
-    ll total = 0;
-    vector<vector<pl>> events(N);
-    for(int i = 0; i < n; i++) {
-        ll st, en, stre;
-        cin >> st >> en >> stre;
-        total += (en - st + 1);
-        events[st].emplace_back(1, stre);
-        if(en + 1 < N) events[en+1].emplace_back(-1, stre);
-        strengths.push_back(stre);
-    }
-    vl arr;
-    for(int i = 0; i < q; i++) {
-        ll pos, stre;
-        cin >> pos >> stre;
-        arr.push_back(stre);
-        strengths.push_back(stre);
-        heros[pos].push_back(i);
-    }
-
-    segtree tre(strengths);
-    tre.compress();
-    for(int i = 1; i < N; i++) {
-        for(auto& [value, stre] : events[i]) {
-            tre.update(stre, value);
-        }   
-        int ma_stre = 0;
-        for(auto num : heros[i]) {
-            debug3(i, num, ma_stre);
-            int temp = arr[num];
-            if(temp > ma_stre) {
-                ans[num] = tre.query(ma_stre+1, temp);
-                ma_stre = temp;
-            }
-            debug(ans[num]);
-        }
-    }
-    for(int i = 0; i < q; i++) {
-        ans[i] += (i ? ans[i-1] : 0);
-        cout << total - ans[i] << " ";
-    }
-    line
+    ll n, m;
+    cin >> n >> m;
+    memset(dp, -1, sizeof dp);
+    string l = to_string(n-1);
+    string r = to_string(m);
+    ll right = recur(r, 0, 10, 10, 0, 1, 0);
+    memset(dp, -1, sizeof dp);
+    ll left = recur(l, 0, 10, 10, 0, 1, 0);
+    cout << (right - left + mod) % mod << endl;
+    // cout << recur(r, 0, 10, 10, 0, 1, 0) << endl;
+    // cout << recur(r, 0, 10, 10, 0, 1, 0) - recur(l, 0, 10, 10, 0, 1, 0) << endl;
 }
 
 int main()
@@ -195,9 +130,9 @@ int main()
         solve();
     }
     clock_t end = clock();
-    double elapsed = double(end - start) / CLOCKS_PER_SEC;
     
     #ifndef ONLINE_JUDGE
+    double elapsed = double(end - start) / CLOCKS_PER_SEC;
     cout << setprecision(10) << elapsed << endl;
     #endif
     return 0;

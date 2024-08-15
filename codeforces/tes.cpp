@@ -83,18 +83,60 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
+const int nmax = 2e5; 
+ll segtree[4*nmax+10];
+
+void build(int ind, int st, int en, vl& cnt) {
+    if(st == en) {
+        segtree[ind] = cnt[st];
+        return;
+    }
+    int mid = (st + en) / 2;
+    build(2*ind+1, st, mid, cnt);
+    build(2*ind+2, mid+1, en, cnt);
+    segtree[ind] = segtree[2*ind+1] + segtree[2*ind+2];
+}
+
+ll query(int ind, int st, int en, int l, int r) {
+    if(en < l || st > r) return 0;
+    if(st >= l && en <= r) return segtree[ind];
+    int mid = (st + en) / 2;
+    ll first = query(2*ind+1, st, mid, l, r);
+    ll sec = query(2*ind+2, mid+1, en, l, r);
+    return first + sec;
+}
+
+
+void update(int ind, int st, int en, int toup, int val) {
+    if(en < toup || st > toup) return;
+    if(st == en) {
+        assert(toup == st);
+        segtree[ind] = val;
+        return;
+    }
+    int mid = (st + en) / 2;
+    update(2*ind+1, st, mid, toup, val);
+    update(2*ind+2, mid+1, en, toup, val);
+    segtree[ind] = segtree[2*ind+1] + segtree[2*ind+2];
+}
+
 
 void solve()
 {
-    int n = 5e5;
-    cout << 1 << endl;
-    cout << n << endl;
-    vi arr;
-    for(int i = 1; i <= n; i++) arr.push_back(i);
-    unsigned seed = 0;
-    shuffle(all(arr), default_random_engine(seed));
-    for(auto i : arr) cout << i << " ";
-    cout << endl;
+    ll n, q;
+    cin >> n >> q;
+    vl arr(n);
+    read(arr);
+    build(0, 0, n-1, arr);
+    while(q--) {
+        int flag, x, y;
+        cin >> flag >> x >> y;
+        if(flag == 1) {
+            update(0, 0, n-1, --x, y);
+        } else {
+            cout << query(0, 0, n-1, --x, --y) << endl;
+        }
+    }
 }
 
 int main()

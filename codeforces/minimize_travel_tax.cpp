@@ -5,7 +5,7 @@ using namespace std;
 using namespace __gnu_pbds;
 
 template <typename T> 
-using ordered_set = tree<T, null_type, less_equal<T>, rb_tree_tag, tree_order_statistics_node_update>;
+using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
 
 #define endl "\n"
 #define fo(i, n) for (i = 0; i < n; i++)
@@ -22,7 +22,7 @@ using ordered_set = tree<T, null_type, less_equal<T>, rb_tree_tag, tree_order_st
 #define PI 3.1415926535897932384626
 #define suprit ios_base::sync_with_stdio(0); cout.tie(0); cin.tie(0);
 #define line cout << endl;
-
+#define tree fadjf
 typedef pair<int, int> pi;
 typedef pair<ll, ll> pl;
 typedef vector<int> vi;
@@ -83,104 +83,106 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-class segtree {
-    vector<ll> tree, coordinates;
-public:
-    segtree(vector<ll>& val)
-        : coordinates(val)
-    {}
+const int nmax = 1e5;
+const int l = 21;
+int in[nmax+1], out[nmax+1], parents[nmax+1][l];
+vvi tree(nmax+1);
+int timer = -1;
+ll val[nmax+1];
+vl tax;
 
-    void compress() {
-        sort(coordinates.begin(), coordinates.end());
-        coordinates.erase(unique(coordinates.begin(), coordinates.end()), coordinates.end());
-        tree.resize(4 * coordinates.size() + 1, 0);
+void dfs(int u, int v) {
+    in[u] = ++timer;
+    parents[u][0] = v;
+    for(auto nei : tree[u]) {
+        if(nei == v) continue;
+        dfs(nei, u);
     }
+    out[u] = ++timer;
+}
 
-    ll query(int ind, int st, int en, int l, int r) {
-        if(en < l || st > r) return 0;
-        if(st >= l && en <= r) return tree[ind];
-        int mid = (st + en) / 2;
-        ll first = query(2*ind+1, st, mid, l, r);
-        ll sec = query(2*ind+2, mid+1, en, l, r);
-        return first + sec;
+bool isancestor(int u, int v) {
+    return (in[u] < in[v] && out[u] > out[v]);
+}
+
+int lca(int a, int b) {
+    if(isancestor(a, b)) return a;
+    if(isancestor(b, a)) return b;
+    for(int i = l-1; i >= 0; i--) {
+        if(parents[a][i] == -1) continue;
+        if(!isancestor(parents[a][i], b)) a = parents[a][i];
     }
+    assert(a != -1);
+    return parents[a][0];
+}
 
-
-    void update(int ind, int st, int en, int toup, int val) {
-        if(en < toup || st > toup) return;
-        if(st == en) {
-            assert(toup == st);
-            tree[ind] += val;
-            return;
+void preprocess(int n) {
+    timer = -1;
+    dfs(0, -1);
+    for(int i = 1; i < l; i++) {
+        for(int j = 0; j < n; j++) {
+            val[j] = 0;
+            parents[j][i] = -1;
+            if(parents[j][i-1] != -1) parents[j][i] = parents[parents[j][i-1]][i-1];
         }
-        int mid = (st + en) / 2;
-        update(2*ind+1, st, mid, toup, val);
-        update(2*ind+2, mid+1, en, toup, val);
-        tree[ind] = tree[2*ind+1] + tree[2*ind+2];
     }
+}
 
-    void update(int value, int incr) {
-        int indx = lower_bound(coordinates.begin(), coordinates.end(), value) - coordinates.begin();
-        update(0, 0, coordinates.size() - 1, indx, incr);
+void dfs2(int u, int v) {
+    for(auto nei : tree[u]) {
+        if(nei == v) continue;
+        dfs2(nei, u);
+        val[u] += val[nei];
     }
+}
 
-    ll query(int value_l, int value_r) {
-        int l = lower_bound(coordinates.begin(), coordinates.end(), value_l) - coordinates.begin();
-        int r = lower_bound(coordinates.begin(), coordinates.end(), value_r) - coordinates.begin();
-        return query(0, 0, coordinates.size() - 1, l, r);
+ll ans[nmax+1][2];
+void dfs3(int u, int v) {
+    ans[u][0] = val[u] * (tax[u] / 2);
+    ans[u][1] = val[u] * tax[u];
+    ll half = 0, full = 0;
+    for(auto nei : tree[u]) {
+        if(nei == v) continue;
+        dfs3(nei, u);
+        half += ans[nei][1];
+        full += min(ans[nei][0], ans[nei][1]);
     }
-
-    
-};
+    ans[u][0] += half;
+    ans[u][1] += full;
+}
 
 
 void solve()
 {
-    ll n, q;
-    cin >> n >> q;
-    const int N = 1e5+1;
-    vl heros[N], ans(q, 0), strengths;
-    ll total = 0;
-    vector<vector<pl>> events(N);
-    for(int i = 0; i < n; i++) {
-        ll st, en, stre;
-        cin >> st >> en >> stre;
-        total += (en - st + 1);
-        events[st].emplace_back(1, stre);
-        if(en + 1 < N) events[en+1].emplace_back(-1, stre);
-        strengths.push_back(stre);
+    int n,m;
+    cin >> n >> m;
+    tax.clear();
+    tax.resize(n);
+    read(tax);
+    for(int i = 0; i < n; i++) tree[i].clear();
+    for(int i = 0; i < n-1; i++) {
+        int st, en;
+        cin >> st >> en;
+        --st, --en;
+        tree[st].push_back(en);
+        tree[en].push_back(st);
     }
-    vl arr;
-    for(int i = 0; i < q; i++) {
-        ll pos, stre;
-        cin >> pos >> stre;
-        arr.push_back(stre);
-        strengths.push_back(stre);
-        heros[pos].push_back(i);
+    preprocess(n);
+    while(m--) {
+        int st, en;
+        cin >> st >> en;
+        --st, --en;
+        int lc = lca(st, en);
+        val[st] += 1;
+        val[en] += 1;
+        val[lc] -= 1;
+        if(parents[lc][0] != -1) val[parents[lc][0]] -= 1;
     }
-
-    segtree tre(strengths);
-    tre.compress();
-    for(int i = 1; i < N; i++) {
-        for(auto& [value, stre] : events[i]) {
-            tre.update(stre, value);
-        }   
-        int ma_stre = 0;
-        for(auto num : heros[i]) {
-            debug3(i, num, ma_stre);
-            int temp = arr[num];
-            if(temp > ma_stre) {
-                ans[num] = tre.query(ma_stre+1, temp);
-                ma_stre = temp;
-            }
-            debug(ans[num]);
-        }
-    }
-    for(int i = 0; i < q; i++) {
-        ans[i] += (i ? ans[i-1] : 0);
-        cout << total - ans[i] << " ";
-    }
-    line
+    dfs2(0, -1);
+    // for(int i = 0; i < n; i++) cout << val[i] << " ";
+    // cout << endl;
+    dfs3(0, -1);
+    cout << min(ans[0][0], ans[0][1]) << endl;
 }
 
 int main()
@@ -189,15 +191,15 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    // cin >> t;
+    cin >> t;
     while (t--)
     {
         solve();
     }
     clock_t end = clock();
-    double elapsed = double(end - start) / CLOCKS_PER_SEC;
     
     #ifndef ONLINE_JUDGE
+    double elapsed = double(end - start) / CLOCKS_PER_SEC;
     cout << setprecision(10) << elapsed << endl;
     #endif
     return 0;
