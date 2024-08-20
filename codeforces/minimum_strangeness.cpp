@@ -83,23 +83,34 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
+ll dp[1001][1001];
+ll k;
+ll recur(ll ind, vl& prefix, int curr) {
+    debug2(ind, curr);
+    if(ind == prefix.size()-1) {
+        if(curr == k) return 0;
+        return 2e16;
+    }
+    if(curr >= k) return 2e16; 
+    if(dp[ind][curr] != -1) return dp[ind][curr];
+    ll ans = 1e18;
+    for(ll i = ind+1; i <= prefix.size(); i++) {
+        ans = min(ans, min((ll)1e18, (prefix[i] - prefix[ind]) * (prefix[i] - prefix[ind]) + 
+        recur(i, prefix, curr+1)));
+    }
+    return dp[ind][curr] = ans;
+}
 
 void solve()
 {
-    int n = 1e5;
-    // int ri = n - 1;
-    // string s = "[";
-    // int st = 0;
-    // while(st < n) {
-    //     s += "[" + to_string(st) + "," + to_string(ri) + "],";
-    //     st++;
-    // }
-    // s.pop_back();
-    // s += "]";
-    // cout << s << endl;
-    string s = "";
-    while(n--) s += "0";
-    cout << s << endl;
+    ll n;
+    cin >> n >> k;
+    vl arr(n);
+    read(arr);
+    vl prefix(n+1, 0);
+    for(int i = 1; i <= n; i++) prefix[i] = prefix[i-1] + arr[i-1];
+    memset(dp, -1, sizeof dp);
+    cout << recur(0, prefix, 0) << endl;
 }
 
 int main()
@@ -117,7 +128,7 @@ int main()
     
     #ifndef ONLINE_JUDGE
     double elapsed = double(end - start) / CLOCKS_PER_SEC;
-    // cout << setprecision(10) << elapsed << endl;
+    cout << setprecision(10) << elapsed << endl;
     #endif
     return 0;
 }

@@ -86,20 +86,24 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 void solve()
 {
-    int n = 1e5;
-    // int ri = n - 1;
-    // string s = "[";
-    // int st = 0;
-    // while(st < n) {
-    //     s += "[" + to_string(st) + "," + to_string(ri) + "],";
-    //     st++;
-    // }
-    // s.pop_back();
-    // s += "]";
-    // cout << s << endl;
-    string s = "";
-    while(n--) s += "0";
-    cout << s << endl;
+    ll n;
+    cin >> n;
+    vl arr(n);
+    read(arr);
+    ll x = 0;
+    map<ll, ll> countt;
+    countt[0] = 1;
+    int cnt = 0;
+    ll ans = 0;
+    for(auto i : arr) {
+        cnt++;
+        x ^= i;
+        ans += countt[x];
+        ans %= mod;
+        debug2(i, ans);
+        countt[x]++;
+    }
+    cout << ans << endl;
 }
 
 int main()
@@ -108,7 +112,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    // cin >> t;
+    cin >> t;
     while (t--)
     {
         solve();
@@ -117,7 +121,7 @@ int main()
     
     #ifndef ONLINE_JUDGE
     double elapsed = double(end - start) / CLOCKS_PER_SEC;
-    // cout << setprecision(10) << elapsed << endl;
+    cout << setprecision(10) << elapsed << endl;
     #endif
     return 0;
 }
