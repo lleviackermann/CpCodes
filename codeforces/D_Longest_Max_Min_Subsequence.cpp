@@ -83,29 +83,6 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-int dp[51][51][51][51];
-
-int recur(vi& arr, int low, int high, int l, int r) {
-    if(l > r) return 0;
-    if(l == r) {
-        return (arr[l] >= low) && (arr[l] <= high);
-    }
-    if(dp[low][high][l][r] != -1) return dp[low][high][l][r];
-    int ans = 0;
-    ans = max({ans, recur(arr, low, high, l+1, r), recur(arr, low, high, l, r-1)});
-    if(arr[l] >= low && arr[l] <= high) ans = max(ans, 1 + recur(arr, arr[l], high, l+1, r));
-    if(arr[r] >= low && arr[r] <= high) ans = max(ans, 1 + recur(arr, low, arr[r], l, r-1));
-    swap(arr[l], arr[r]);
-    if(arr[l] >= low && arr[l] <= high) ans = max(ans, 1 + recur(arr, arr[l], high, l+1, r-1));
-    if(arr[r] >= low && arr[r] <= high) ans = max(ans, 1 + recur(arr, low, arr[r], l+1, r-1));
-    if(arr[l] >= low && arr[l] <= high && arr[r] >= low && arr[r] <= high && arr[l] <= arr[r]) {
-        ans = max(ans, 2 + recur(arr, arr[l], arr[r], l+1, r-1));
-    }
-    swap(arr[l], arr[r]);
-    debug4(low, high, l, r);
-    debug(ans);
-    return dp[low][high][l][r] = ans;
-}
 
 void solve()
 {
@@ -113,15 +90,43 @@ void solve()
     cin >> n;
     vi arr(n);
     read(arr);
-    vi temp = arr;
-    sort(all(temp));
-    temp.erase(unique(all(temp)), temp.end());
-    map<int, int> te;
-    for(int i = 0; i < temp.size(); i++) te[temp[i]] = i;
-    for(auto &i : arr) i = te[i];
-    // print(arr);
-    memset(dp, -1, sizeof dp);
-    cout << recur(arr, 0, 50, 0, n-1) << endl;
+    for(auto &i : arr) --i;
+    vi is_last(n), last_ind(n, -1), cnt(n, 0);
+    for(int i = n-1; i >= 0; i--) {
+        if(!cnt[arr[i]]++) {
+            is_last[i] = 1;
+            last_ind[arr[i]] = i;
+        }
+    }
+    vi ans;
+    multiset<int> se;
+    int flag = 0;
+    int l = 0, r = -1;
+    print(is_last);
+    print(last_ind);
+    while(r + 1 < n) {
+        debug(r);
+        while(r + 1 < n && (r == - 1 || is_last[r] == 0)) {
+            ++r;
+            // debug2(r, arr[r]);
+            if(is_last[last_ind[arr[r]]]) se.insert(arr[r]);
+        }
+        if(se.size()) {
+            ans.emplace_back(flag ? *se.begin() : *se.rbegin());
+            flag ^= 1;
+            is_last[last_ind[ans.back()]] = 0;
+            // print(ans);
+            // print(is_last);
+            while(arr[l] != ans.back()) {
+                auto it = se.find(arr[l++]);
+                if(it != se.end()) se.erase(it);
+            }
+            se.erase(arr[l++]);
+        }
+    }
+    cout << ans.size() << endl;
+    for(auto i : ans) cout << i + 1 << " ";
+    cout << endl;
 }
 
 int main()
@@ -130,7 +135,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    // cin >> t;
+    cin >> t;
     while (t--)
     {
         solve();

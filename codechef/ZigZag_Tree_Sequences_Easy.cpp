@@ -83,45 +83,71 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-int dp[51][51][51][51];
+const int nodemax = 1e5 + 5;
+vector<vector<int>> adj(nodemax);
 
-int recur(vi& arr, int low, int high, int l, int r) {
-    if(l > r) return 0;
-    if(l == r) {
-        return (arr[l] >= low) && (arr[l] <= high);
+ll ans = 0;
+ll ones[nodemax + 5], twos[nodemax+5];
+vi arr(nodemax+5);
+void dfs3(int u, int v) {
+    assert(arr[u] <= 2);
+    ones[u] = twos[u] = 0;
+    vl teo, tew;
+    for(auto nei : adj[u]) {
+        if(nei == v) continue;
+        dfs3(nei, u);
+        teo.push_back(ones[nei]);
+        tew.push_back(twos[nei]);
     }
-    if(dp[low][high][l][r] != -1) return dp[low][high][l][r];
-    int ans = 0;
-    ans = max({ans, recur(arr, low, high, l+1, r), recur(arr, low, high, l, r-1)});
-    if(arr[l] >= low && arr[l] <= high) ans = max(ans, 1 + recur(arr, arr[l], high, l+1, r));
-    if(arr[r] >= low && arr[r] <= high) ans = max(ans, 1 + recur(arr, low, arr[r], l, r-1));
-    swap(arr[l], arr[r]);
-    if(arr[l] >= low && arr[l] <= high) ans = max(ans, 1 + recur(arr, arr[l], high, l+1, r-1));
-    if(arr[r] >= low && arr[r] <= high) ans = max(ans, 1 + recur(arr, low, arr[r], l+1, r-1));
-    if(arr[l] >= low && arr[l] <= high && arr[r] >= low && arr[r] <= high && arr[l] <= arr[r]) {
-        ans = max(ans, 2 + recur(arr, arr[l], arr[r], l+1, r-1));
+    if(v != -1 &&  adj[u].size() == 1) {
+        ones[u] = (arr[u] == 1);
+        twos[u] = (arr[u] == 2);
+        return;
     }
-    swap(arr[l], arr[r]);
-    debug4(low, high, l, r);
+    debug2(u, v);
+    vl suf_one(teo.size()), suf_two(tew.size());
+    suf_one.back() = teo.back();
+    suf_two.back() = tew.back();
+    for(int i = teo.size() - 2; i >= 0; i--) {
+        suf_one[i] = (suf_one[i+1] + teo[i]) % mod;
+        suf_two[i] = (suf_two[i+1] + tew[i]) % mod;
+    }
+    print(suf_two);
+    print(suf_one);
+    ans = (ans + (arr[u] == 1 ? suf_two[0] : suf_one[0])) % mod;
+    assert(ans >= 0);
+    ones[u] = (arr[u] == 1 ? suf_one[0] + suf_two[0] + 1 : suf_one[0]) % mod;
+    twos[u] = (arr[u] == 2 ? suf_one[0] + suf_two[0] + 1 : suf_two[0]) % mod;
+    for(int i = 0; i < (int)teo.size() - 1; i++) {
+        ans = (ans + teo[i] * suf_two[i+1] % mod) % mod;
+        ans = (ans + tew[i] * suf_one[i+1] % mod) % mod;
+        if(arr[u] == 1) {
+            ans = (ans + tew[i] * suf_two[i+1] % mod) % mod;
+        }
+        if(arr[u] == 2) {
+            ans = (ans + teo[i] * suf_one[i+1] % mod) % mod;
+        }
+    }
+    assert(ans >= 0);
+    debug2(ones[u], twos[u]);
     debug(ans);
-    return dp[low][high][l][r] = ans;
 }
 
 void solve()
 {
     int n;
     cin >> n;
-    vi arr(n);
-    read(arr);
-    vi temp = arr;
-    sort(all(temp));
-    temp.erase(unique(all(temp)), temp.end());
-    map<int, int> te;
-    for(int i = 0; i < temp.size(); i++) te[temp[i]] = i;
-    for(auto &i : arr) i = te[i];
-    // print(arr);
-    memset(dp, -1, sizeof dp);
-    cout << recur(arr, 0, 50, 0, n-1) << endl;
+    for(int i = 0; i <= n; i++) adj[i].clear();
+    for(int i = 1; i <= n; i++) cin >> arr[i];
+    ans = 0;
+    for(int i = 2; i <= n; i++) {
+        int x;
+        cin >> x;
+        adj[i].push_back(x);
+        adj[x].push_back(i);
+    }
+    dfs3(1, -1);
+    cout << ans << endl;
 }
 
 int main()
@@ -130,7 +156,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    // cin >> t;
+    cin >> t;
     while (t--)
     {
         solve();

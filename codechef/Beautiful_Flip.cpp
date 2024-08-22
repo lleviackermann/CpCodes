@@ -83,45 +83,66 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-int dp[51][51][51][51];
+const int nmax = 3e5;
+pi seg[2*nmax];
 
-int recur(vi& arr, int low, int high, int l, int r) {
-    if(l > r) return 0;
-    if(l == r) {
-        return (arr[l] >= low) && (arr[l] <= high);
+void build(vi& pre) {
+    int n = pre.size();
+    for(int i = 0; i < n; i++) seg[i+n] = {pre[i], pre[i]};
+    for(int i = n-1; i > 0; i--) {
+        seg[i].ff = min(seg[i<<1].ff, seg[i<<1|1].ff);
+        seg[i].ss = max(seg[i<<1].ss, seg[i<<1|1].ss);
     }
-    if(dp[low][high][l][r] != -1) return dp[low][high][l][r];
-    int ans = 0;
-    ans = max({ans, recur(arr, low, high, l+1, r), recur(arr, low, high, l, r-1)});
-    if(arr[l] >= low && arr[l] <= high) ans = max(ans, 1 + recur(arr, arr[l], high, l+1, r));
-    if(arr[r] >= low && arr[r] <= high) ans = max(ans, 1 + recur(arr, low, arr[r], l, r-1));
-    swap(arr[l], arr[r]);
-    if(arr[l] >= low && arr[l] <= high) ans = max(ans, 1 + recur(arr, arr[l], high, l+1, r-1));
-    if(arr[r] >= low && arr[r] <= high) ans = max(ans, 1 + recur(arr, low, arr[r], l+1, r-1));
-    if(arr[l] >= low && arr[l] <= high && arr[r] >= low && arr[r] <= high && arr[l] <= arr[r]) {
-        ans = max(ans, 2 + recur(arr, arr[l], arr[r], l+1, r-1));
+}
+
+pi query(int l, int r, int n) {
+    if(r == 0) return {0,0};
+    pi ans = {1e9, -1e9};
+    for(l += n, r += n; l < r; l >>= 1, r >>= 1) {
+        if(l & 1) {
+            ans.ff = min(ans.ff, seg[l].ff);
+            ans.ss = max(ans.ss, seg[l].ss);
+            l++;
+        } 
+        if(r & 1) {
+            --r;
+            ans.ff = min(ans.ff, seg[r].ff);
+            ans.ss = max(ans.ss, seg[r].ss);
+        }
     }
-    swap(arr[l], arr[r]);
-    debug4(low, high, l, r);
-    debug(ans);
-    return dp[low][high][l][r] = ans;
+    return ans;
 }
 
 void solve()
 {
-    int n;
-    cin >> n;
-    vi arr(n);
-    read(arr);
-    vi temp = arr;
-    sort(all(temp));
-    temp.erase(unique(all(temp)), temp.end());
-    map<int, int> te;
-    for(int i = 0; i < temp.size(); i++) te[temp[i]] = i;
-    for(auto &i : arr) i = te[i];
-    // print(arr);
-    memset(dp, -1, sizeof dp);
-    cout << recur(arr, 0, 50, 0, n-1) << endl;
+    int n, k;
+    cin >> n >> k;
+    string s;
+    cin >> s;
+    vi prefix(n+1, 0);
+    // prefix[0] = (s[0] == '1' ? -1 : 1);
+    int one = 0;
+    // one += (s[0] == '1');
+    for(int i = 0; i < n; i++) {
+        prefix[i+1] = prefix[i] + (s[i] == '0' ? 1 : -1);
+        one += (s[i] == '1');
+    }
+    int ans = min(one, n - one);
+    debug2(one, n- one);
+    print(prefix);
+    build(prefix);
+    // for(int i = 1; i < 2 * n; i++) debug2(seg[i].ff, seg[i].ss);
+    for(int i = 0; i < n; i++) {
+        int r = i+1;
+        int l = max(0, i + 1 - k);
+        pi temp = query(l, r, n+1);
+        debug4(l, r, temp.ff, temp.ss);
+        int no = one + prefix[r] - temp.second;
+        int noo = one + prefix[r] - temp.first;
+        ans = max(ans, min(no, n-no));
+        ans = max(ans, min(noo, n - noo));
+    }
+    cout << ans << endl;
 }
 
 int main()
@@ -130,7 +151,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    // cin >> t;
+    cin >> t;
     while (t--)
     {
         solve();

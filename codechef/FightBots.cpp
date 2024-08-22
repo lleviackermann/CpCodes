@@ -83,45 +83,28 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-int dp[51][51][51][51];
-
-int recur(vi& arr, int low, int high, int l, int r) {
-    if(l > r) return 0;
-    if(l == r) {
-        return (arr[l] >= low) && (arr[l] <= high);
-    }
-    if(dp[low][high][l][r] != -1) return dp[low][high][l][r];
-    int ans = 0;
-    ans = max({ans, recur(arr, low, high, l+1, r), recur(arr, low, high, l, r-1)});
-    if(arr[l] >= low && arr[l] <= high) ans = max(ans, 1 + recur(arr, arr[l], high, l+1, r));
-    if(arr[r] >= low && arr[r] <= high) ans = max(ans, 1 + recur(arr, low, arr[r], l, r-1));
-    swap(arr[l], arr[r]);
-    if(arr[l] >= low && arr[l] <= high) ans = max(ans, 1 + recur(arr, arr[l], high, l+1, r-1));
-    if(arr[r] >= low && arr[r] <= high) ans = max(ans, 1 + recur(arr, low, arr[r], l+1, r-1));
-    if(arr[l] >= low && arr[l] <= high && arr[r] >= low && arr[r] <= high && arr[l] <= arr[r]) {
-        ans = max(ans, 2 + recur(arr, arr[l], arr[r], l+1, r-1));
-    }
-    swap(arr[l], arr[r]);
-    debug4(low, high, l, r);
-    debug(ans);
-    return dp[low][high][l][r] = ans;
-}
 
 void solve()
 {
-    int n;
-    cin >> n;
-    vi arr(n);
-    read(arr);
-    vi temp = arr;
-    sort(all(temp));
-    temp.erase(unique(all(temp)), temp.end());
-    map<int, int> te;
-    for(int i = 0; i < temp.size(); i++) te[temp[i]] = i;
-    for(auto &i : arr) i = te[i];
-    // print(arr);
-    memset(dp, -1, sizeof dp);
-    cout << recur(arr, 0, 50, 0, n-1) << endl;
+    int n, a, b;
+    cin >> n >> a >> b;
+    int x = 0, y = 0;
+    string s;
+    cin >> s;
+    for(int i = 0; i < n; i++) {
+        char c = s[i];
+        if(c == 'L') x -= 1;
+        if(c == 'R') x += 1;
+        if(c == 'U') y += 1;
+        if(c == 'D') y -= 1;
+        if(abs(x - a) + abs(y - b) == i + 1) {
+            if(x == a && y == b && i == 0) continue;
+            debug4(i, x, y, c);
+            cout << "Yes\n";
+            return;
+        }
+    }
+    cout << "No\n";
 }
 
 int main()
@@ -130,7 +113,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    // cin >> t;
+    cin >> t;
     while (t--)
     {
         solve();

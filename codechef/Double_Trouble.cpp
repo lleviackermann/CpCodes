@@ -83,45 +83,56 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-int dp[51][51][51][51];
-
-int recur(vi& arr, int low, int high, int l, int r) {
-    if(l > r) return 0;
-    if(l == r) {
-        return (arr[l] >= low) && (arr[l] <= high);
+long long binpow(long long a, long long b, long long m) {
+    a %= m;
+    long long res = 1;
+    while (b > 0) {
+        if (b & 1)
+            res = res * a % m;
+        a = a * a % m;
+        b >>= 1;
     }
-    if(dp[low][high][l][r] != -1) return dp[low][high][l][r];
-    int ans = 0;
-    ans = max({ans, recur(arr, low, high, l+1, r), recur(arr, low, high, l, r-1)});
-    if(arr[l] >= low && arr[l] <= high) ans = max(ans, 1 + recur(arr, arr[l], high, l+1, r));
-    if(arr[r] >= low && arr[r] <= high) ans = max(ans, 1 + recur(arr, low, arr[r], l, r-1));
-    swap(arr[l], arr[r]);
-    if(arr[l] >= low && arr[l] <= high) ans = max(ans, 1 + recur(arr, arr[l], high, l+1, r-1));
-    if(arr[r] >= low && arr[r] <= high) ans = max(ans, 1 + recur(arr, low, arr[r], l+1, r-1));
-    if(arr[l] >= low && arr[l] <= high && arr[r] >= low && arr[r] <= high && arr[l] <= arr[r]) {
-        ans = max(ans, 2 + recur(arr, arr[l], arr[r], l+1, r-1));
-    }
-    swap(arr[l], arr[r]);
-    debug4(low, high, l, r);
-    debug(ans);
-    return dp[low][high][l][r] = ans;
+    return res;
 }
 
 void solve()
 {
-    int n;
-    cin >> n;
-    vi arr(n);
+    ll n, k;
+    cin >> n >> k;
+    vl arr(n);
     read(arr);
-    vi temp = arr;
-    sort(all(temp));
-    temp.erase(unique(all(temp)), temp.end());
-    map<int, int> te;
-    for(int i = 0; i < temp.size(); i++) te[temp[i]] = i;
-    for(auto &i : arr) i = te[i];
-    // print(arr);
-    memset(dp, -1, sizeof dp);
-    cout << recur(arr, 0, 50, 0, n-1) << endl;
+    priority_queue<ll, vl, greater<ll>> store;
+    ll ans = 0;
+    ll ma = *max_element(all(arr));
+    for(auto i : arr) store.push(i);
+    while(k>0) {
+        ll x = store.top();
+        if(x == ma) break;
+        store.pop();
+        --k;
+        store.push(x*2);
+    }
+    arr.clear();
+    while(store.size()) {
+        arr.push_back(store.top());
+        store.pop();
+    }
+    if(k == 0) {
+        ll ans = accumulate(all(arr), 0ll);
+        cout << ans % mod << endl;
+        return;
+    }
+    ll total = 0, remain = 0;
+    for(int i = 0; i < n; i++) {
+        total += arr[i];
+        total %= mod;
+        if(i < (k % n)) {
+            remain = (remain + arr[i]) % mod;
+        }
+    }
+    ans = binpow(2, k / n, mod) * (total - remain + mod) % mod;
+    ans = (ans + binpow(2, k / n + 1, mod) * remain) % mod;
+    cout << ans << endl;
 }
 
 int main()
@@ -130,7 +141,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    // cin >> t;
+    cin >> t;
     while (t--)
     {
         solve();
