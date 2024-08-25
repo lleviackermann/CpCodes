@@ -83,33 +83,24 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
+// 6 199 1324 1e9 
+// 1 121 199 1324 
+//  0 1 2 3 4
+
+long long binpow(long long a, long long b, long long m) {
+    a %= m;
+    long long res = 1;
+    while (b > 0) {
+        if (b & 1)
+            res = res * a % m;
+        a = a * a % m;
+        b >>= 1;
+    }
+    return res;
+}
 
 void solve()
 {
-    int n = 11;
-    for(int i = 3; i <= n; i++) {
-        vector<int> ans;
-        int mi = 1e9;
-        int arr[i];
-        for(int j = 1; j <= i; j++) arr[j-1] = j;
-        int flag = 0;
-        while(next_permutation(arr, arr+i)) {
-            int ma = 0;
-            flag = 1;
-            for(int j = 1; j <= i; j++) {
-                if(j == arr[j-1]) flag = 0;
-                ma = max(ma, j ^ arr[j-1]);
-            }
-            if(flag && mi > ma) {
-                mi = ma;
-                ans.clear();
-                for(int j = 0; j < i; j++) ans.push_back(arr[j]);
-            }
-            // for(int j = 1; j <= i; j++) cout << arr[j-1] << " ";
-            // cout << endl;
-        }   
-        print(ans);
-    }
     
 }
 
@@ -119,7 +110,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    // cin >> t;
+    cin >> t;
     while (t--)
     {
         solve();

@@ -86,31 +86,52 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 void solve()
 {
-    int n = 11;
-    for(int i = 3; i <= n; i++) {
-        vector<int> ans;
-        int mi = 1e9;
-        int arr[i];
-        for(int j = 1; j <= i; j++) arr[j-1] = j;
-        int flag = 0;
-        while(next_permutation(arr, arr+i)) {
-            int ma = 0;
-            flag = 1;
-            for(int j = 1; j <= i; j++) {
-                if(j == arr[j-1]) flag = 0;
-                ma = max(ma, j ^ arr[j-1]);
-            }
-            if(flag && mi > ma) {
-                mi = ma;
-                ans.clear();
-                for(int j = 0; j < i; j++) ans.push_back(arr[j]);
-            }
-            // for(int j = 1; j <= i; j++) cout << arr[j-1] << " ";
-            // cout << endl;
-        }   
-        print(ans);
+    ll n, m;
+    cin >> n >> m;
+    map<ll, ll> store;
+    for(int i = 0; i < n; i++) {
+        int sz;
+        cin >> sz;
+        set<int> st;
+        for(int j = 0; j <= sz+5; j++) st.insert(j);
+        for(int j = 0; j < sz; j++) {
+            int x;
+            cin >> x;
+            if(st.count(x)) st.erase(x);
+        }
+        ll fir = *st.begin();
+        st.erase(fir);
+        ll sec = *st.begin();
+        store[fir] = max(store[fir], sec);
     }
-    
+    print(store);
+    int ms = store.size();
+    vl suff(ms, -1);
+    int curr = ms - 1;
+    // suff[ms-1] = (*store.rbegin()).second;
+    for(auto it = store.rbegin(); it != store.rend(); it++) {
+        if(curr == ms-1) suff[curr] = it->second;
+        else suff[curr] = max(suff[curr+1], it->second);
+        curr--;
+    }
+    print(suff);
+    ll ans = 0;
+    ll prev = -1;
+    curr = 0;
+    for(auto it = store.begin(); it != store.end(); it++, curr++) {
+        ans = ans + (min(m, it->first) - prev) * suff[curr];
+        debug3(it->first, it->second, ans);
+        if(it->first >= m) {
+            prev = m;
+            break;
+        }
+        prev = it->first;
+    }
+    if(prev < m) {
+        ll sum = m * (m + 1) / 2 - prev * (prev + 1) / 2;
+        ans += sum;
+    }
+    cout << ans << endl;
 }
 
 int main()
@@ -119,7 +140,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    // cin >> t;
+    cin >> t;
     while (t--)
     {
         solve();
