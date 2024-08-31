@@ -165,7 +165,13 @@ void solve()
     ll gc = __gcd(a, b);
     debug(gc);
     for(auto &i : arr) i = i % gc;
+    sort(all(arr));
     print(arr);
+    ll ans = arr.back() - arr[0];
+    for(int i = 0; i < n-1; i++) {
+        ans = min(ans, arr[i] + gc - arr[i+1]);
+    }
+    cout << ans << endl;
 }
 
 int main()
