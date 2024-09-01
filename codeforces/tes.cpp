@@ -1,123 +1,155 @@
-#include <bits/stdc++.h>
-#include <ext/pb_ds/assoc_container.hpp>
-#include <ext/pb_ds/tree_policy.hpp>
-using namespace std;
-using namespace __gnu_pbds;
+/*
+  Compete against Yourself.
+  Author - Aryan (@aryanc403)
+*/
+/*
+  Credits -
+  Atcoder library - https://atcoder.github.io/ac-library/production/document_en/ (namespace atcoder)
+  Github source code of library - https://github.com/atcoder/ac-library/tree/master/atcoder
+  https://codeforces.com/contest/4/submission/150120627
+*/
 
-template <typename T> 
-using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
-
-#define endl "\n"
-#define fo(i, n) for (i = 0; i < n; i++)
-#define Fo(i, k, n) for (i = k; k < n; k++)
-#define pb push_back
-#define ll long long
-#define mp make_pair
-#define ff first
-#define ss second
-#define all(x) x.begin(), x.end()
-#define clr(x) memset(x, 0, sizeof(x))
-#define sortall(x) sort(all(x))
-#define tr(it, arr) for (auto it = arr.begin(); it != arr.end(); it++)
-#define PI 3.1415926535897932384626
-#define suprit ios_base::sync_with_stdio(0); cout.tie(0); cin.tie(0);
-#define line cout << endl;
-
-typedef pair<int, int> pi;
-typedef pair<ll, ll> pl;
-typedef vector<int> vi;
-typedef vector<ll> vl;
-typedef vector<pi> vpi;
-typedef vector<pl> vpl;
-typedef vector<vi> vvi;
-typedef vector<vl> vvl;
-typedef map<ll, ll> ml;
-typedef map<string, ll> msl;
-typedef map<ll, string> mls;
-typedef unordered_map<ll, ll> uml;
-typedef unordered_map<string, ll> umsl;
-typedef unordered_map<ll, string> umls;
-typedef set<ll> sl;
-typedef set<pair<ll, ll>> spl;
-typedef ordered_set<ll> osl;
-typedef ordered_set<pair<ll, ll>> ospl;
-
-const ll mod = 1e9 + 7;
-
-bool comp2(pair<ll, ll> &arr, pair<ll, ll> &b)
-{
-    if (arr.first == b.first)
-        return arr.second < b.second;
-    return arr.first < b.first;
-};
-
-template <typename T> void read(T i, T n, vector<T> &arr) { for(T j = i; j < n; j++) cin >> arr[j]; }
-template <typename T> void read(vector<T> &arr) { for(auto &j : arr) cin>>j; }
-
-#ifndef ONLINE_JUDGE
-
-template <typename T, typename V> void print(set<pair<T, V>> &arr) { for(auto &it : arr) cout<<it.first<<" "<<it.second<<endl; line}
-template <typename T, typename V> void print(pair<T, V>& pa) { cout<<pa.first<<" "<<pa.second<<endl; }
-template <typename T> void print(T i, T last, vector<T> &arr) { for(T j = i; j < last; j++) cout<<arr[j]<<" "; line} 
-template <typename T> void print(T i, vector<T> &arr) { for(T j = i; j < arr.size(); j++) cout<<arr[j]<<" "; line} 
-template <typename T> void print(vector<T> &arr) { for(auto &i : arr) cout<<i<<" "; line}
-template <typename T, typename V> void print(unordered_map<T, V>& arr) { for(auto &it : arr) cout<<it.first<<" "<<it.second<<endl; line}
-template <typename T, typename V> void print(map<T, V>& arr) { for(auto &it : arr) cout<<it.first<<" "<<it.second<<endl;}
-template <typename T> void print(unordered_set<T> &arr) { for(auto &it : arr) cout<<it<<" "; line }
-template <typename T> void print(ordered_set<T> &arr) { for(auto &it : arr) cout<<it<<" "; line }
-template <typename T> void print(set<T> &arr) { for(auto &it : arr) cout<<it<<" "; line }
-template <typename T, typename... Args> void print(T t, Args... args) { cout << t << " "; print(args...); }
-template <typename T> void print(T t) { cout<<t<<"\n"; }
-#define debug(x) cout<<#x<<" "<<x<<endl;
-#define debug2(x, y) cout<<#x<<" "<<x<<" "<<#y<<" "<<y<<endl;
-#define debug3(x, y, z) cout<<#x<<" "<<x<<" "<<#y<<" "<<y<<" "<<#z<<" "<<z<<endl;
-#define debug4(x, y, z, a) cout<<#x<<" "<<x<<" "<<#y<<" "<<y<<" "<<#z<<" "<<z<<" "<<#a<<" "<<a<<endl;
-
+#ifdef ARYANC403
+    #include <header.h>
 #else
-
-#define print(x) 
-#define debug(x)
-#define debug2(x, y)
-#define debug3(x, y, z)
-#define debug4(x, y, z, a)
-
+    #pragma GCC optimize ("Ofast")
+    // #pragma GCC target ("sse,sse2,sse3,ssse3,sse4,popcnt,abm,mmx")
+    #pragma GCC target ("sse,sse2,mmx")
+    #pragma GCC optimize ("-ffloat-store")
+    #include <bits/stdc++.h>
+    #include <ext/pb_ds/assoc_container.hpp>
+    #include <ext/pb_ds/tree_policy.hpp>
+    #define dbg(args...) 42;
+    #define endl "\n"
 #endif
 
+// y_combinator from @neal template https://codeforces.com/contest/1553/submission/123849801
+// http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2016/p0200r0.html
+template<class Fun> class y_combinator_result {
+    Fun fun_;
+public:
+    template<class T> explicit y_combinator_result(T &&fun): fun_(std::forward<T>(fun)) {}
+    template<class ...Args> decltype(auto) operator()(Args &&...args) { return fun_(std::ref(*this), std::forward<Args>(args)...); }
+};
+template<class Fun> decltype(auto) y_combinator(Fun &&fun) { return y_combinator_result<std::decay_t<Fun>>(std::forward<Fun>(fun)); }
 
-void solve()
+using namespace std;
+#define fo(i,n)   for(i=0;i<(n);++i)
+#define repA(i,j,n)   for(i=(j);i<=(n);++i)
+#define repD(i,j,n)   for(i=(j);i>=(n);--i)
+#define all(x) begin(x), end(x)
+#define sz(x) ((lli)(x).size())
+#define eb emplace_back
+#define X first
+#define Y second
+
+using lli = long long int;
+using mytype = long double;
+using ii = pair<lli,lli>;
+using vii = vector<ii>;
+using vi = vector<lli>;
+
+template <class T>
+using ordered_set =  __gnu_pbds::tree<T,__gnu_pbds::null_type,less<T>,__gnu_pbds::rb_tree_tag,__gnu_pbds::tree_order_statistics_node_update>;
+// X.find_by_order(k) return kth element. 0 indexed.
+// X.order_of_key(k) returns count of elements strictly less than k.
+
+// namespace Re = std::ranges;
+// namespace Ve = std::ranges::views;
+
+const auto start_time = std::chrono::high_resolution_clock::now();
+void aryanc403()
 {
-    int n = 1e5;
-    // int ri = n - 1;
-    // string s = "[";
-    // int st = 0;
-    // while(st < n) {
-    //     s += "[" + to_string(st) + "," + to_string(ri) + "],";
-    //     st++;
-    // }
-    // s.pop_back();
-    // s += "]";
-    // cout << s << endl;
-    string s = "";
-    while(n--) s += "0";
-    cout << s << endl;
+auto end_time = std::chrono::high_resolution_clock::now();
+std::chrono::duration<double> diff = end_time-start_time;
+    cerr<<"Time Taken : "<<diff.count()<<"\n";
 }
 
-int main()
-{ 
-    suprit;
-    clock_t start = clock();
+const lli INF = 0xFFFFFFFFFFFFFFFLL;
+const lli SEED=chrono::steady_clock::now().time_since_epoch().count();
+mt19937_64 rng(SEED);
+inline lli rnd(lli l=0,lli r=INF)
+{return uniform_int_distribution<lli>(l,r)(rng);}
 
-    int t = 1;
-    // cin >> t;
-    while (t--)
-    {
-        solve();
+class CMP
+{public:
+bool operator()(ii a , ii b) //For min priority_queue .
+{    return ! ( a.X < b.X || ( a.X==b.X && a.Y <= b.Y ));   }};
+
+void add( map<lli,lli> &m, lli x,lli cnt=1)
+{
+    auto jt=m.find(x);
+    if(jt==m.end())         m.insert({x,cnt});
+    else                    jt->Y+=cnt;
+}
+
+void del( map<lli,lli> &m, lli x,lli cnt=1)
+{
+    auto jt=m.find(x);
+    if(jt->Y<=cnt)            m.erase(jt);
+    else                      jt->Y-=cnt;
+}
+
+bool cmp(const ii &a,const ii &b)
+{
+    return a.X<b.X||(a.X==b.X&&a.Y<b.Y);
+}
+
+int main(void) {
+    ios_base::sync_with_stdio(false);cin.tie(NULL);
+    // freopen("txt.in", "r", stdin);
+    // freopen("txt.out", "w", stdout);
+// cout<<std::fixed<<std::setprecision(35);
+// Ve::iota(1, 6) | Ve::transform([](int x) { return x * 2; }) | Ve::reverse | Ve::take(3)
+lli T=1;
+cin>>T;
+while(T--)
+{
+    lli n,q;
+    cin>>n>>q;
+    vi a(n);
+    for(auto &x:a)
+        cin>>x;
+    vi f(2*n+1),dp(n+1,-1);
+    for(const auto &x:a)
+        f[x]++;
+
+    for(lli j=1;j<=2*n;j++)
+        f[j]+=f[j-1];
+    const lli sm = (n+2)/2;
+    auto chk=[&](const lli mid,const lli f2)->bool{
+        lli cnt = 0;
+        for(lli j=0;j<=n;j+=f2){
+            const lli l=j,r=j+mid;
+            cnt+=f[r];
+            if(l)
+                cnt-=f[l-1];
+        }
+        dbg(mid,f2,cnt);
+        return cnt>=sm;
+    };
+
+    auto solve=[&](const lli mod)->lli{
+        auto &cur=dp[mod];
+        if(cur!=-1)
+            return cur;
+        lli l=-1,r=mod;
+        while(r-l>1){
+            const lli mid=(l+r)/2;
+            if(chk(mid,mod))
+                r=mid;
+            else
+                l=mid;
+        }
+        return cur=r;
+    };
+
+    while(q--){
+        lli x;
+        cin>>x;
+        cout<<solve(x)<<" \n"[q==0];
     }
-    clock_t end = clock();
-    
-    #ifndef ONLINE_JUDGE
-    double elapsed = double(end - start) / CLOCKS_PER_SEC;
-    // cout << setprecision(10) << elapsed << endl;
-    #endif
+
+}   aryanc403();
     return 0;
 }

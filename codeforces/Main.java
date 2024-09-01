@@ -1,14 +1,14 @@
-class Hello{
-	public Hello(){
-		System.out.println("Hello");
-	}
-}
 
 public class Main{
+	static {
+		System.out.println("Static block");
+		new Main();
+	}
 
-	
+	Main() {
+		System.out.println("Constructor");
+	}
 	public static void main(String[] args) {
-		Hello hello = new Hello();
-		System.out.println("Hello World!");
+		System.out.println("Main method");
 	}
 }
