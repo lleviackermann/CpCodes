@@ -83,16 +83,36 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
+// f(1) = 1
+// f(n) = (x + y = n)
+// 1 - f(n) = phi(n)
+// 2 - g(phi(n)) = phi(n)
+// 3 - f(phi(n)) = 
 
 void solve()
 {
-    int n;
-    cin >> n;
-    vpi coor(n);
-    for(auto &i : coor) cin >> i.first >> i.second;
+    ll n, k;
+    cin >> n >> k;
     ll ans = 0;
+    ll tem = n;
+    ll count = 0;
+    auto phiCalc = [](ll num) {
+        if(num == 1) return 1ll;
+        ll result = num;
+        for(ll i = 2; i * i <= num; i++) {
+            if(num % i) continue;
+            while(num % i == 0) num /= i;
+            result -= result / i;
+        }
+        if(num > 1) result -= result / num;
+        return result;
+    };
 
-    cout << ans << endl;
+    while(count < k && tem > 1) {
+        tem = phiCalc(tem);
+        count += 2;
+    }
+    cout << tem % mod << endl;
 }
 
 int main()
@@ -101,11 +121,11 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    cin >> t;
+    // cin >> t;
     while (t--)
     {
         solve();
-    } 
+    }
     clock_t end = clock();
     
     #ifndef ONLINE_JUDGE

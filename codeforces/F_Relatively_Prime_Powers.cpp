@@ -86,13 +86,7 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 void solve()
 {
-    int n;
-    cin >> n;
-    vpi coor(n);
-    for(auto &i : coor) cin >> i.first >> i.second;
-    ll ans = 0;
-
-    cout << ans << endl;
+    
 }
 
 int main()
@@ -105,7 +99,7 @@ int main()
     while (t--)
     {
         solve();
-    } 
+    }
     clock_t end = clock();
     
     #ifndef ONLINE_JUDGE
