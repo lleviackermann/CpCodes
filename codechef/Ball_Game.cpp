@@ -83,87 +83,27 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-const int nmax = 4e5+1;
-int seg[2*nmax];
-int n;
-vi ans;
-
-void build() {
-    for(int i = 0; i < 2*n; i++) seg[i] = 0;
-}
-
-void update(int l, int val) {
-    for(seg[l += n] += val; l > 1; l >>= 1) seg[l>>1] = max(seg[l], seg[l^1]);
-}
-
-void build_again() {
-    for(int i = 0; i < n; i++) seg[i+n] = i;
-    for(int i = n-1; i > 0; i--) {
-        int lef = seg[i<<1], rig = seg[i<<1|1];
-        seg[i] = (ans[lef] < ans[rig] ? lef : rig);
-    }
-}
-
-int query(int l, int r) {
-    int temp = -1;
-    for(l += n, r += n; l < r; l >>= 1, r >>= 1) {
-        if(l & 1) {
-            temp = (temp == -1 ? seg[l] : (ans[temp] > ans[seg[l]] ? seg[l] : temp));
-            l++;
-        }
-        if(r & 1) {
-            --r;
-            temp = (temp == -1 ? seg[r] : (ans[temp] > ans[seg[r]] ? seg[r] : temp));
-        }
-    }
-    assert(temp >= 0);
-    return temp;
-}
-
 
 void solve()
 {
-    int len, k, q;
-    cin >> len >> k >> q;
-    vi arr(len);
-    read(arr);
-    n = 2 * len + 2;
-    build();
-    ans.clear();
-    ans.resize(len, -1);
-    for(int i = 0; i < len; i++) {
-        if(i >= k) update(arr[i-k] - (i - k) + len, -1);
-        update(arr[i] - i + len, 1);
-        if(i >= k-1) ans[i] = (k - seg[1]);
+    ll n;
+    cin >> n;
+    vpl arr(n);
+    for(auto &i : arr) cin >> i.first;
+    for(auto &i : arr) cin >> i.second;
+    sort(all(arr));
+    reverse(all(arr));
+    ll ans = 0;
+    double mi = 3e9;
+    for(auto [dist, speed] : arr) {
+       double tim = (double) dist / (double) speed;
+    //    cout << tim << " ";
+        debug(mi);
+        if(tim < mi) ans++, mi = tim;
+        debug2(tim, mi);
     }
-    vl cals(len+1, 0);
-    n = len;
-    vl nexSmaller(len, n);
-    stack<int> st;
-    for(int i = 0; i < len; i++) {
-        while(st.size() && ans[st.top()] > ans[i]) {
-            cals[st.top()] = (ll)(i - st.top()) * ans[st.top()];
-            nexSmaller[st.top()] = i;
-            st.pop();
-        }
-        st.push(i);
-    }
-    while(st.size()) {
-        cals[st.top()] = (ll)(n - st.top()) * ans[st.top()];
-        st.pop();
-    }
-    for(int i = n-1; i >= 0; i--) cals[i] += cals[nexSmaller[i]];
-    build_again();
-    while(q--) {
-        int l, r;
-        cin >> l >> r;
-        --l, --r;
-        debug2(l, r);
-        ll mi = query(l+k-1, r+1);
-        debug4(mi, ans[mi], nexSmaller[mi], cals[nexSmaller[mi]]);
-        ll curr_ans = cals[l+k-1] - (cals[nexSmaller[mi]] + ans[mi] * (nexSmaller[mi] - r - 1));
-        cout << curr_ans << endl;
-    }
+    line
+    cout << ans << endl;
 }
 
 int main()
