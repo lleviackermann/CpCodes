@@ -83,54 +83,85 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
+const int nmax = 5e5+1;
+int segtree[4*nmax];
+int n;
+
+void build(int index, int start, int end, vi& arr) {
+    if(start == end) {
+        segtree[index] = arr[start];
+        return;
+    }
+    int mid = (start + end) / 2;
+    build(index + 1, start, mid, arr);
+    build(index + 2 * (mid - start + 1), mid + 1, end, arr);
+    segtree[index] = __gcd(segtree[index+1], segtree[index + 2 * ((start + end) / 2 - start + 1)]);
+} 
+
+void update(int index, int start, int end, int target, int val) {
+    if(start == end) {
+        segtree[index] = val;
+        return;
+    }
+    int mid = (start + end) / 2;
+    if(target <= mid) update(index+1, start, mid, target, val);
+    else update(index + 2 * (mid - start + 1), mid+1, end, target, val);
+    segtree[index] = __gcd(segtree[index+1], segtree[index + 2 * (mid - start + 1)]);
+
+}
+
+ll x;
+int tem_ans = 0;
+void query(int index, int start, int end, int l, int r) {
+    if(l > end || r < start || tem_ans > 1) return;
+    if(start >= l && end <= r && segtree[index] % x == 0) return;
+    if(start >= l && end <= r && segtree[index] % x && tem_ans) {
+        tem_ans += 1;
+        return;
+    }
+    if(start == end) {
+        tem_ans += 1;
+        return;
+    }
+    ll mid = (start + end) / 2;
+    int left = index + 1, right = index + 2 * (mid - start + 1);
+    if(segtree[left] % x) {
+        query(left, start, mid, l, r);
+    }
+    debug3(index, start, end);
+    debug3(start, mid, segtree[left]);
+    debug3(mid+1, end, segtree[right]);
+    // if(sum && (segtree[right] % x)) return 10;
+    if(segtree[right] % x) {
+        query(right, mid+1, end, l, r);
+    }
+    // debug3(start, end, sum);
+    return;
+}
+
 
 void solve()
 {
-    int n;
-    cin>>n;
-    vi arr(n), brr(n);
-    ordered_set<int> s;
-    for(int i = n-1; i >= 0; i--) {
-        int x;
-        cin>>x;
-        s.insert(x);
-        int y = s.order_of_key(x);
-        arr[i] = x - y;
-    }
-    s.clear();
-    for(int i = n-1; i >= 0; i--) {
-        int x;
-        cin>>x;
-        s.insert(x);
-        brr[i] = x - s.order_of_key(x);
-    }
-    int carry = 0;
-    for(int i = 0; i < n; i++) {
-        arr[i] = arr[i] + brr[i] + carry;
-        carry = arr[i] >= (i+1);
-        arr[i] %= (i+1);
-    }
-    reverse(all(arr));
-    // reverse(all(brr));
-    print(arr);
-    // print(brr);
-    for(int i = 0; i < n; i++) {
-        int l = 0, r = n-1;
-        while(l <= r) {
-            int mid = (l + r) / 2;
-            int temp = s.order_of_key(mid);
-            debug4(mid, temp, i, arr[i]);
-            if(temp == arr[i]) {
-                int te = *(s.lower_bound(mid));
-                cout<<te<<" ";
-                s.erase(te);
-                break;
-            }
-            if(temp < arr[i]) l = mid + 1;
-            else r = mid - 1;
+    cin >> n;
+    vi arr(n);
+    read(arr);
+    build(0, 0, n-1, arr);
+
+    int q;
+    cin >> q;
+    while(q--) {
+        int flag, l, r;
+        cin >> flag >> l >> r;
+        if(flag == 1) {
+            cin >> x;
+            tem_ans = 0;
+            query(0, 0, n-1, l-1, r-1);
+            // debug3(l, r, ans);
+            cout << (tem_ans > 1 ? "NO" : "YES") << endl;
+        } else {
+            update(0, 0, n-1, l-1, r);
         }
     }
-    cout<<endl;
 }
 
 int main()
@@ -145,9 +176,9 @@ int main()
         solve();
     }
     clock_t end = clock();
-    double elapsed = double(end - start) / CLOCKS_PER_SEC;
     
     #ifndef ONLINE_JUDGE
+    double elapsed = double(end - start) / CLOCKS_PER_SEC;
     cout << setprecision(10) << elapsed << endl;
     #endif
     return 0;

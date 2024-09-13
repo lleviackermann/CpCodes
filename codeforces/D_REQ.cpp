@@ -84,53 +84,95 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 #endif
 
 
-void solve()
-{
-    int n;
-    cin>>n;
-    vi arr(n), brr(n);
-    ordered_set<int> s;
-    for(int i = n-1; i >= 0; i--) {
-        int x;
-        cin>>x;
-        s.insert(x);
-        int y = s.order_of_key(x);
-        arr[i] = x - y;
+const int nmax = 2e5+5;
+ll seg[2*nmax];
+ll gc[2*nmax];
+int n;
+const int valmax = 1000001;
+int phi[valmax];
+int inverse[valmax];
+
+    
+
+long long binpow(long long a, long long b, long long m) {
+    a %= m;
+    if(a == 0) return 1;
+    long long res = 1;
+    while (b > 0) {
+        if (b & 1)
+            res = res * a % m;
+        a = a * a % m;
+        b >>= 1;
     }
-    s.clear();
-    for(int i = n-1; i >= 0; i--) {
-        int x;
-        cin>>x;
-        s.insert(x);
-        brr[i] = x - s.order_of_key(x);
+    return res;
+}
+
+void preprocess() {
+    for(int i = 0; i <= valmax; i++) inverse[i] = binpow(i, mod-2, mod);
+    for(int i = 1; i <= valmax; i++) phi[i] = i - 1;
+    phi[0] = 1;
+    phi[1] = 1;
+    for(int i = 2; i <= valmax; i++) {
+        for(int j = 2 * i; j <= valmax; j += i) phi[j] -= phi[i];
     }
-    int carry = 0;
-    for(int i = 0; i < n; i++) {
-        arr[i] = arr[i] + brr[i] + carry;
-        carry = arr[i] >= (i+1);
-        arr[i] %= (i+1);
+}
+
+void build() {
+    for(int i = n-1; i > 0; i--) {
+        gc[i] = __gcd(gc[i << 1], gc[i << 1 | 1]);
+        seg[i] = (seg[i << 1] * seg[i << 1 | 1] % mod) * gc[i] % mod;
+        seg[i] = seg[i] * inverse[phi[gc[i]]] % mod;
     }
-    reverse(all(arr));
-    // reverse(all(brr));
-    print(arr);
-    // print(brr);
-    for(int i = 0; i < n; i++) {
-        int l = 0, r = n-1;
-        while(l <= r) {
-            int mid = (l + r) / 2;
-            int temp = s.order_of_key(mid);
-            debug4(mid, temp, i, arr[i]);
-            if(temp == arr[i]) {
-                int te = *(s.lower_bound(mid));
-                cout<<te<<" ";
-                s.erase(te);
-                break;
-            }
-            if(temp < arr[i]) l = mid + 1;
-            else r = mid - 1;
+}
+
+int query(int l, int r) {
+    ll gc_tem = 0, val = 1;
+    ll flag = 0;
+    for(l += n, r += n; l < r; l >>= 1, r >>= 1) {
+        debug2(l, r);
+        if(l & 1) {
+            gc_tem = __gcd(gc[l], gc_tem);
+            val = (val * seg[l] % mod) * gc_tem % mod;
+            val = val * inverse[phi[gc_tem]] % mod;
+            if(flag == 0) val = phi[gc_tem], flag = 1;
+            debug3(l, gc_tem, val);
+            l++;
+        }
+        if(r & 1) {
+            --r;
+            gc_tem = __gcd(gc[r], gc_tem);
+            val = (val * seg[r] % mod) * gc_tem % mod;
+            val = val * inverse[phi[gc_tem]] % mod;
+            if(flag == 0) val = phi[gc_tem], flag = 1;
+            debug3(r, gc_tem, val);
         }
     }
-    cout<<endl;
+    return val;
+}
+
+void solve()
+{
+    cin >> n;
+    preprocess();
+    debug4(phi[8], phi[90], __gcd(8,90), phi[__gcd(8, 90)]);
+    debug(phi[720]);
+    for(int i = n; i < 2 * n; i++) {
+        cin >> gc[i];
+        seg[i] = phi[gc[i]];
+    }
+
+    build();
+    for(int i = 1; i < 2*n; i++) {
+        debug3(i, gc[i], seg[i]);
+    }
+    int q;
+    cin >> q;
+    while(q--) {
+        int l, r;
+        cin >> l >> r;
+        --l;
+        cout << query(l, r) << endl;
+    }
 }
 
 int main()
@@ -145,9 +187,9 @@ int main()
         solve();
     }
     clock_t end = clock();
-    double elapsed = double(end - start) / CLOCKS_PER_SEC;
     
     #ifndef ONLINE_JUDGE
+    double elapsed = double(end - start) / CLOCKS_PER_SEC;
     cout << setprecision(10) << elapsed << endl;
     #endif
     return 0;
