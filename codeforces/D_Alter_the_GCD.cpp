@@ -46,9 +46,9 @@ const ll mod = 1e9 + 7;
 
 bool comp2(pair<ll, ll> &arr, pair<ll, ll> &b)
 {
-	if (arr.first == b.first)
-		return arr.second < b.second;
-	return arr.first < b.first;
+    if (arr.first == b.first)
+        return arr.second < b.second;
+    return arr.first < b.first;
 };
 
 template <typename T> void read(T i, T n, vector<T> &arr) { for(T j = i; j < n; j++) cin >> arr[j]; }
@@ -83,30 +83,64 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
+class SegmentTree {
+private:
+    vi gc;
+    int n;
+
+public:
+    SegmentTree(vi& arr) {
+        n = gc.size();
+        gc.resize(2*n);
+        for(int i = n; i < 2*n; i++) gc[i] = arr[i-n];
+        for(int i = n-1; i > 0; i--) gc[i] = __gcd(gc[i << 1], gc[i << 1 | 1]);
+    }
+
+    int query(int l, int r) {
+        int ans = 0;
+        for(l += n, r += n; l < r; l >>= 1, r >>= 1) {
+            if(l & 1) ans = __gcd(ans, gc[l++]);
+            if(r & 1) ans = __gcd(ans, gc[--r]);
+        }
+        return ans;
+    }
+};
 
 void solve()
 {
-	int n = 1000000, k = 500000;
-	cout << n << " " << k << endl;
-	for(int i = 1; i <= n; i++) cout << i << " \n"[i==n];
+    ll n;
+    cin >> n;
+    vi arr(n), brr(n);
+    read(arr);
+    read(brr);
+    SegmentTree fir(arr), sec(brr);
+    int ans = 0;
+    for(int i = 0; i < n; i++) {
+        int tem = 0;
+        int l = i, r = n-1;
+        while(l <= r) {
+            int mid = (l + r) / 2;
+            
+        }
+    }
 }
 
 int main()
 { 
-	suprit;
-	clock_t start = clock();
+    suprit;
+    clock_t start = clock();
 
-	int t = 1;
-	// cin >> t;
-	while (t--)
-	{
-		solve();
-	}
-	clock_t end = clock();
-	
-	#ifndef ONLINE_JUDGE
-	double elapsed = double(end - start) / CLOCKS_PER_SEC;
-	// cout << setprecision(10) << elapsed << endl;
-	#endif
-	return 0;
+    int t = 1;
+    cin >> t;
+    while (t--)
+    {
+        solve();
+    }
+    clock_t end = clock();
+    
+    #ifndef ONLINE_JUDGE
+    double elapsed = double(end - start) / CLOCKS_PER_SEC;
+    cout << setprecision(10) << elapsed << endl;
+    #endif
+    return 0;
 }

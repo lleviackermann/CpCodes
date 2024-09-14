@@ -46,9 +46,9 @@ const ll mod = 1e9 + 7;
 
 bool comp2(pair<ll, ll> &arr, pair<ll, ll> &b)
 {
-	if (arr.first == b.first)
-		return arr.second < b.second;
-	return arr.first < b.first;
+    if (arr.first == b.first)
+        return arr.second < b.second;
+    return arr.first < b.first;
 };
 
 template <typename T> void read(T i, T n, vector<T> &arr) { for(T j = i; j < n; j++) cin >> arr[j]; }
@@ -86,27 +86,38 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 void solve()
 {
-	int n = 1000000, k = 500000;
-	cout << n << " " << k << endl;
-	for(int i = 1; i <= n; i++) cout << i << " \n"[i==n];
+    int n, m, k;
+    cin >> n >> m >> k;
+    int fir, sec, david;
+    cin >> fir >> sec >> david;
+    if(fir > sec) swap(fir, sec);
+    if(david < fir) {
+        cout << fir - 1 << endl;
+        return;
+    }
+    if(david > sec) {
+        cout << n - sec << endl;
+        return;
+    }
+    cout << (sec - fir) / 2 << endl;
 }
 
 int main()
 { 
-	suprit;
-	clock_t start = clock();
+    suprit;
+    clock_t start = clock();
 
-	int t = 1;
-	// cin >> t;
-	while (t--)
-	{
-		solve();
-	}
-	clock_t end = clock();
-	
-	#ifndef ONLINE_JUDGE
-	double elapsed = double(end - start) / CLOCKS_PER_SEC;
-	// cout << setprecision(10) << elapsed << endl;
-	#endif
-	return 0;
+    int t = 1;
+    cin >> t;
+    while (t--)
+    {
+        solve();
+    }
+    clock_t end = clock();
+    
+    #ifndef ONLINE_JUDGE
+    double elapsed = double(end - start) / CLOCKS_PER_SEC;
+    cout << setprecision(10) << elapsed << endl;
+    #endif
+    return 0;
 }

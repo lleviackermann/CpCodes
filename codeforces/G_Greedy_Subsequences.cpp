@@ -83,12 +83,98 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
+const int nmax = 1000007;
+vvi tre;
+int tin[nmax], tout[nmax];
+int timer = 0;
+void dfs(int u) {
+    tin[u] = ++timer;
+    for(int nei : tre[u]) {
+        dfs(nei);
+    }
+    tout[u] = timer;
+}
+
+class SegmentTree {
+private:
+    vl ma;
+    ll lazy[3*nmax+1];
+    int n;
+
+    void applylazy(int index, int start, int end) {
+        if(!lazy[index]) return;
+        ma[index] += lazy[index];
+        int mid = (start + end) >> 1;
+        if(start != end) {
+            lazy[index + 1] += lazy[index];
+            lazy[index + 2 * (mid - start + 1)] += lazy[index];
+        }
+        lazy[index] = 0;
+    }
+
+    void update(int index, int start, int end, int l, int r, int flag) {
+        // debug4(start, end, l, r);
+        if(start > end) return;
+        applylazy(index, start, end);
+        if(start > r || end < l) return;
+        if(start >= l && end <= r) {
+            lazy[index] += flag;
+            applylazy(index, start, end);
+            return;
+        }
+        int mid = (start + end) >> 1;
+        update(index+1, start, mid, l, r, flag);
+        update(index +  2 * (mid - start + 1), mid + 1, end, l, r, flag);
+        ma[index] = max(ma[index + 1], ma[index + 2 * (mid - start + 1)]);
+    }
+
+public:
+    SegmentTree() {
+        n = timer + 1;
+        ma.resize(2 * (timer + 1), 0);
+    }
+
+    int get_ans() {
+        return ma[0];
+    }
+
+    void update(int u, int flag) {
+        assert(tin[u] <= tout[u]);
+        update(0, 0, n-1, tin[u], tout[u], flag);
+        // for(int i = 0; i < 2*timer; i++) cout << ma[i] << " \n"[i==2*timer-1]; 
+    }
+};
+
+
 void solve()
 {
     int n, k;
     cin >> n >> k;
     vi arr(n);
     read(arr);
+    tre.resize(n+1);
+    stack<int> st;
+    for(int i = 0; i < n; i++) {
+        while(st.size() && arr[st.top()] < arr[i]) {
+            tre[i].push_back(st.top());
+            st.pop();
+        }
+        st.push(i);
+    }
+    while(st.size()) tre[n].push_back(st.top()), st.pop();
+    dfs(n);
+    // for(int i = 0; i <= n; i++) debug3(i, tin[i], tout[i]);
+    SegmentTree seg;
+    // seg.update(0, 1);
+    for(int i = 0; i < k-1; i++) {
+        seg.update(i, 1);
+    }
+
+    for(int i = k-1; i < n; i++) {
+        seg.update(i, 1);
+        cout << seg.get_ans() << " \n"[i==n-1];
+        seg.update(i-k+1, -1);
+    }
 }
 
 int main()
@@ -97,7 +183,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    cin >> t;
+    // cin >> t;
     while (t--)
     {
         solve();
