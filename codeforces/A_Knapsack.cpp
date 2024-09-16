@@ -86,36 +86,29 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 void solve()
 {
-    int n, m;
-    cin >> n >> m;
-    set<char> se{'n', 'a', 'r', 'e', 'k'};
-    vector<string> words(n);
-    read(words);
-    vector<char> contain{'n', 'a', 'r', 'e', 'k'};
-    vi score(5, -1e9);
-    score[0] = 0;
+    ll n, w;
+    cin >> n >> w;
+    vpl arr(n);
     for(int i = 0; i < n; i++) {
-        assert(i < words.size());
-        vi ano = score;
-        for(int j = 0; j < 5; j++) {
-            int gpt = 0, narek = 0;
-            int te = j;
-            for(int k = 0; k < m; k++) {
-                assert(k < words[i].size());
-                if(words[i][k] == contain[te]) te++, narek++;
-                else if(se.count(words[i][k])) gpt++;
-                te %= 5;
-            }
-            ano[te] = max(ano[te], score[j] + narek - gpt);
+        cin >> arr[i].first;
+        arr[i].second = i+1;
+    }
+    sort(all(arr));
+    while(arr.back().first > w) arr.pop_back();
+    for(auto i : arr) debug2(i.first, i.second);
+    ll ans = 0;
+    ll sum = 0;
+    n = arr.size();
+    for(int i = n-1; i >= 0; i--) {
+        sum += arr[i].first;
+        if(sum >= (w + 1) / 2) {
+            cout << n - i << endl;
+            for(int j = n-1; j >= i; j--) cout << arr[j].second << " ";
+            cout << endl;
+            return;
         }
-        score = ano;
     }
-    print(score);
-    int ans = 0;
-    for(int i = 0; i < 5; i++) {
-        ans = max(ans, score[i] - 2 * i);
-    }
-    cout << ans << endl;
+    cout << -1 << endl;
 }
 
 int main()

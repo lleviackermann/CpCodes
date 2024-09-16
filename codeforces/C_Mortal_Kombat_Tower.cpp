@@ -86,36 +86,21 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 void solve()
 {
-    int n, m;
-    cin >> n >> m;
-    set<char> se{'n', 'a', 'r', 'e', 'k'};
-    vector<string> words(n);
-    read(words);
-    vector<char> contain{'n', 'a', 'r', 'e', 'k'};
-    vi score(5, -1e9);
-    score[0] = 0;
+    int n;
+    cin >> n;
+    vi arr(n);
+    read(arr);
+    vvi dp(n+1, vi(2, 0));
+    dp[0][0] = 1e9;
     for(int i = 0; i < n; i++) {
-        assert(i < words.size());
-        vi ano = score;
-        for(int j = 0; j < 5; j++) {
-            int gpt = 0, narek = 0;
-            int te = j;
-            for(int k = 0; k < m; k++) {
-                assert(k < words[i].size());
-                if(words[i][k] == contain[te]) te++, narek++;
-                else if(se.count(words[i][k])) gpt++;
-                te %= 5;
-            }
-            ano[te] = max(ano[te], score[j] + narek - gpt);
+        dp[i+1][0] = dp[i][1] + arr[i];
+        dp[i+1][1] = dp[i][0];
+        if(i > 0) {
+            dp[i+1][0] = min(dp[i+1][0], dp[i-1][1] + arr[i-1] + arr[i]);
+            dp[i+1][1] = min(dp[i+1][1], dp[i-1][0]);
         }
-        score = ano;
     }
-    print(score);
-    int ans = 0;
-    for(int i = 0; i < 5; i++) {
-        ans = max(ans, score[i] - 2 * i);
-    }
-    cout << ans << endl;
+    cout << min(dp[n][0], dp[n][1]) << endl;
 }
 
 int main()

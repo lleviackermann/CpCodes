@@ -83,39 +83,33 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-
+bool dp[2][501][501];
 void solve()
 {
-    int n, m;
-    cin >> n >> m;
-    set<char> se{'n', 'a', 'r', 'e', 'k'};
-    vector<string> words(n);
-    read(words);
-    vector<char> contain{'n', 'a', 'r', 'e', 'k'};
-    vi score(5, -1e9);
-    score[0] = 0;
-    for(int i = 0; i < n; i++) {
-        assert(i < words.size());
-        vi ano = score;
-        for(int j = 0; j < 5; j++) {
-            int gpt = 0, narek = 0;
-            int te = j;
-            for(int k = 0; k < m; k++) {
-                assert(k < words[i].size());
-                if(words[i][k] == contain[te]) te++, narek++;
-                else if(se.count(words[i][k])) gpt++;
-                te %= 5;
+    int n, k;
+    cin >> n >> k;
+    dp[0][0][0] = 1;
+    for(int i = 1; i <= n; i++) {
+        int x;
+        cin >> x;
+        int flag = i % 2;
+        for(int j = 0; j <= k; j++) {
+            for(int te = 0; te <= j; te++) {
+                dp[flag][j][te] = dp[flag^1][j][te];
+                if(j >= x) {
+                    dp[flag][j][te] |= dp[flag^1][j-x][te];
+                    if(te >= x) dp[flag][j][te] |= dp[flag^1][j-x][te-x];
+                }
             }
-            ano[te] = max(ano[te], score[j] + narek - gpt);
         }
-        score = ano;
     }
-    print(score);
-    int ans = 0;
-    for(int i = 0; i < 5; i++) {
-        ans = max(ans, score[i] - 2 * i);
+    vi ans;
+    for(int i = 0; i <= k; i++) {
+        if(dp[n%2][k][i]) ans.push_back(i);
     }
-    cout << ans << endl;
+    cout << ans.size() << endl;
+    for(auto i : ans) cout << i << " ";
+    cout << endl;
 }
 
 int main()
@@ -124,7 +118,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    cin >> t;
+    // cin >> t;
     while (t--)
     {
         solve();

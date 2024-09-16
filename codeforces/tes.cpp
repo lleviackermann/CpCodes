@@ -4,7 +4,7 @@
 using namespace std;
 using namespace __gnu_pbds;
 
-template <typename T> 
+template <typename T>
 using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
 
 #define endl "\n"
@@ -20,7 +20,10 @@ using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statisti
 #define sortall(x) sort(all(x))
 #define tr(it, arr) for (auto it = arr.begin(); it != arr.end(); it++)
 #define PI 3.1415926535897932384626
-#define suprit ios_base::sync_with_stdio(0); cout.tie(0); cin.tie(0);
+#define suprit                    \
+	ios_base::sync_with_stdio(0); \
+	cout.tie(0);                  \
+	cin.tie(0);
 #define line cout << endl;
 
 typedef pair<int, int> pi;
@@ -51,31 +54,101 @@ bool comp2(pair<ll, ll> &arr, pair<ll, ll> &b)
 	return arr.first < b.first;
 };
 
-template <typename T> void read(T i, T n, vector<T> &arr) { for(T j = i; j < n; j++) cin >> arr[j]; }
-template <typename T> void read(vector<T> &arr) { for(auto &j : arr) cin>>j; }
+template <typename T>
+void read(T i, T n, vector<T> &arr)
+{
+	for (T j = i; j < n; j++)
+		cin >> arr[j];
+}
+template <typename T>
+void read(vector<T> &arr)
+{
+	for (auto &j : arr)
+		cin >> j;
+}
 
 #ifndef ONLINE_JUDGE
 
-template <typename T, typename V> void print(set<pair<T, V>> &arr) { for(auto &it : arr) cout<<it.first<<" "<<it.second<<endl; line}
-template <typename T, typename V> void print(pair<T, V>& pa) { cout<<pa.first<<" "<<pa.second<<endl; }
-template <typename T> void print(T i, T last, vector<T> &arr) { for(T j = i; j < last; j++) cout<<arr[j]<<" "; line} 
-template <typename T> void print(T i, vector<T> &arr) { for(T j = i; j < arr.size(); j++) cout<<arr[j]<<" "; line} 
-template <typename T> void print(vector<T> &arr) { for(auto &i : arr) cout<<i<<" "; line}
-template <typename T, typename V> void print(unordered_map<T, V>& arr) { for(auto &it : arr) cout<<it.first<<" "<<it.second<<endl; line}
-template <typename T, typename V> void print(map<T, V>& arr) { for(auto &it : arr) cout<<it.first<<" "<<it.second<<endl;}
-template <typename T> void print(unordered_set<T> &arr) { for(auto &it : arr) cout<<it<<" "; line }
-template <typename T> void print(ordered_set<T> &arr) { for(auto &it : arr) cout<<it<<" "; line }
-template <typename T> void print(set<T> &arr) { for(auto &it : arr) cout<<it<<" "; line }
-template <typename T, typename... Args> void print(T t, Args... args) { cout << t << " "; print(args...); }
-template <typename T> void print(T t) { cout<<t<<"\n"; }
-#define debug(x) cout<<#x<<" "<<x<<endl;
-#define debug2(x, y) cout<<#x<<" "<<x<<" "<<#y<<" "<<y<<endl;
-#define debug3(x, y, z) cout<<#x<<" "<<x<<" "<<#y<<" "<<y<<" "<<#z<<" "<<z<<endl;
-#define debug4(x, y, z, a) cout<<#x<<" "<<x<<" "<<#y<<" "<<y<<" "<<#z<<" "<<z<<" "<<#a<<" "<<a<<endl;
+template <typename T, typename V>
+void print(set<pair<T, V>> &arr)
+{
+	for (auto &it : arr)
+		cout << it.first << " " << it.second << endl;
+	line
+}
+template <typename T, typename V>
+void print(pair<T, V> &pa) { cout << pa.first << " " << pa.second << endl; }
+template <typename T>
+void print(T i, T last, vector<T> &arr)
+{
+	for (T j = i; j < last; j++)
+		cout << arr[j] << " ";
+	line
+}
+template <typename T>
+void print(T i, vector<T> &arr)
+{
+	for (T j = i; j < arr.size(); j++)
+		cout << arr[j] << " ";
+	line
+}
+template <typename T>
+void print(vector<T> &arr)
+{
+	for (auto &i : arr)
+		cout << i << " ";
+	line
+}
+template <typename T, typename V>
+void print(unordered_map<T, V> &arr)
+{
+	for (auto &it : arr)
+		cout << it.first << " " << it.second << endl;
+	line
+}
+template <typename T, typename V>
+void print(map<T, V> &arr)
+{
+	for (auto &it : arr)
+		cout << it.first << " " << it.second << endl;
+}
+template <typename T>
+void print(unordered_set<T> &arr)
+{
+	for (auto &it : arr)
+		cout << it << " ";
+	line
+}
+template <typename T>
+void print(ordered_set<T> &arr)
+{
+	for (auto &it : arr)
+		cout << it << " ";
+	line
+}
+template <typename T>
+void print(set<T> &arr)
+{
+	for (auto &it : arr)
+		cout << it << " ";
+	line
+}
+template <typename T, typename... Args>
+void print(T t, Args... args)
+{
+	cout << t << " ";
+	print(args...);
+}
+template <typename T>
+void print(T t) { cout << t << "\n"; }
+#define debug(x) cout << #x << " " << x << endl;
+#define debug2(x, y) cout << #x << " " << x << " " << #y << " " << y << endl;
+#define debug3(x, y, z) cout << #x << " " << x << " " << #y << " " << y << " " << #z << " " << z << endl;
+#define debug4(x, y, z, a) cout << #x << " " << x << " " << #y << " " << y << " " << #z << " " << z << " " << #a << " " << a << endl;
 
 #else
 
-#define print(x) 
+#define print(x)
 #define debug(x)
 #define debug2(x, y)
 #define debug3(x, y, z)
@@ -83,30 +156,16 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-
-void solve()
-{
-	int n = 1000000, k = 500000;
-	cout << n << " " << k << endl;
-	for(int i = 1; i <= n; i++) cout << i << " \n"[i==n];
-}
+char *c[] = {"GeksQuiz", "MCQ", "TEST", "QUIZ"};
+char **cp[] = {c+3, c+2, c+1, c};
+char ***cpp = cp;
 
 int main()
-{ 
-	suprit;
-	clock_t start = clock();
-
-	int t = 1;
-	// cin >> t;
-	while (t--)
-	{
-		solve();
-	}
-	clock_t end = clock();
-	
-	#ifndef ONLINE_JUDGE
-	double elapsed = double(end - start) / CLOCKS_PER_SEC;
-	// cout << setprecision(10) << elapsed << endl;
-	#endif
-	return 0;
+{
+    // printf("%s ", **++cpp);
+    // printf("%s ", *--*++cpp+3);
+    // printf("%s ", *cpp[-2]+3);
+    // printf("%s ", cpp[-1][-1]+1);
+	debug(**cpp);
+    return 0;
 }
