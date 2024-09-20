@@ -1,0 +1,118 @@
+Q1)
+WITH cte AS (
+    SELECT 
+        e.emp_name AS employee_name,
+        e.department_id,
+        COALESCE(m.manager_name, 'No Manager') AS manager_name
+    FROM 
+        employees AS e
+    LEFT JOIN 
+        managers AS m ON e.manager_id = m.manager_id
+)
+
+SELECT 
+    c.employee_name, 
+    d.department_name, 
+    c.manager_name
+FROM 
+    cte AS c
+INNER JOIN 
+    departments AS d ON c.department_id = d.dept_id;
+
+
+
+
+Q2)
+SELECT COUNT(*) AS NUM_CUSTOMERS,
+ AVG(AGE) AS AVG_AGE
+FROM CUSTOMERS
+WHERE EMAIL LIKE '%.com';
+
+
+
+
+Q3)
+WITH TotalOrders AS (
+    SELECT 
+        CustomerID, 
+        SUM(Amount) AS TotalAmount
+    FROM Orders
+    GROUP BY CustomerID
+),
+TotalSales AS (
+    SELECT 
+        CustomerID, 
+        SUM(Amount) AS TotalAmount
+    FROM Sales
+    GROUP BY CustomerID
+)
+SELECT 
+    CustomerID, 
+    SUM(TotalAmount) AS TotalSpending
+FROM (
+    SELECT * FROM TotalOrders
+    UNION ALL
+    SELECT * FROM TotalSales
+) AS CombinedSpending
+GROUP BY CustomerID;
+
+
+
+
+Q4)
+SELECT EmpID
+FROM EMPLOYEEINFO
+WHERE EmpID % 2 = 0;
+
+
+
+
+Q5)
+
+SELECT department, AVG(salary) AS average_salary
+FROM Employees e
+JOIN Salaries s ON e.emp_id = s.emp_id
+GROUP BY department
+ORDER BY average_salary DESC
+LIMIT 5;
+
+
+
+
+
+Q6)
+
+SELECT COUNT(Created_Date) 
+FROM Leads
+WHERE SUBSTR(Created_Date, 6, 2) IN ('04', '05', '06');
+
+
+
+
+
+Q7)
+
+SELECT 
+    d.DeptName,
+    e.EmpName,
+    s.Salary
+FROM 
+    Employees e
+JOIN 
+    Salaries s 
+    ON e.EmpID = s.EmpID
+JOIN 
+    Departments d 
+    ON e.DeptID = d.DeptID
+WHERE 
+    s.Salary = (
+        SELECT 
+            MAX(s2.Salary)
+        FROM 
+            Salaries s2
+        JOIN 
+            Employees e2 
+            ON s2.EmpID = e2.EmpID
+        WHERE 
+            e2.DeptID = e.DeptID
+    );
