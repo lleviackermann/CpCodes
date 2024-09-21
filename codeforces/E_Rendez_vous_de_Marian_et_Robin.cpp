@@ -94,6 +94,7 @@ void solve()
         cin >> x;
         horse[x] = 1;
     }
+    ll temp = 1e17;
     vector<vector<pl>> tre(n+1);
     for(int i = 0; i < m; i++) {
         int st, en, wei;
@@ -101,7 +102,40 @@ void solve()
         tre[st].push_back({en, wei});
         tre[en].push_back({st, wei});
     }
-    
+    auto dijikstra = [&](int src) {
+        vector<ll> dist(2*n + 1, temp);
+        priority_queue<pl, vpl, greater<pl>> store;
+        dist[src] = 0;
+        store.push({0ll, src});
+        while(store.size()) {
+            auto [d, v] = store.top();
+            store.pop();
+            if(d != dist[v]) continue;
+            if(v <= n && horse[v] && dist[v + n] > dist[v]) dist[v+n] = dist[v], v += n; 
+            for(auto [nei, wei] : tre[v > n ? v - n : v]) {
+                if(v > n) nei += n;
+                if(v > n && dist[v] + wei / 2 < dist[nei]) {
+                    dist[nei] = dist[v] + wei / 2;
+                    store.push({dist[nei], nei});
+                }
+                if(v <= n && dist[v] + wei < dist[nei]) {
+                    dist[nei] = dist[v] + wei;
+                    store.push({dist[nei], nei});
+                }
+            }
+        }
+        print(dist);
+        vector<ll> fin(n+1, temp);
+        for(int i = 1; i <= n; i++) fin[i] = min(dist[i], dist[i+n]);
+        return fin;
+    };
+    vl fir = dijikstra(1);
+    vl sec = dijikstra(n);
+    print(fir);
+    print(sec);
+    ll ans = temp;
+    for(int i = 1; i <= n; i++) ans = min(ans, max(fir[i], sec[i]));
+    cout << (ans == temp ? -1 : ans) << endl;
 }
 
 int main()

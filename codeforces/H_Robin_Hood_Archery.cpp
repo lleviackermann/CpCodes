@@ -88,23 +88,30 @@ void solve()
 {
     ll n, q;
     cin >> n >> q;
-    vl arr(n+2, 0);
+    vl arr(n+1, 0);
     for(int i = 1; i <= n; i++) cin >> arr[i];
-    map<int, int> ste;
-    for(int i = 1; i <= n; i++) {
-        int &val = ste[arr[i]];
-        if(val) arr[i] = -arr[i];
-        val ^= 1;
+    random_device rd;
+    mt19937_64 gen(rd());
+    map<unsigned ll, unsigned ll> ste;
+    set<unsigned ll> se{0};
+    for(auto &num : arr) {
+        unsigned ll random_num;
+        if(ste.count(num)) random_num = ste[num];
+        else {
+            do {
+                random_num = gen();
+            } while(se.count(random_num));
+            ste[num] = random_num;
+            se.insert(random_num);
+        }
+        num = random_num;
     }
     // print(arr);
-    for(int i = 1; i <= n; i++) arr[i] += arr[i-1];
+    for(int i = 1; i <= n; i++) arr[i] ^= arr[i-1];
     while(q--) {
         int l, r;
         cin >> l >> r;
-        if(r - l + 1) cout << "NO\n";
-        else {
-            
-        }
+        cout << (arr[r] ^ arr[l-1] ? "NO\n" : "YES\n");
     }
 }
 
