@@ -48,14 +48,22 @@ void solve() {
     cin >> n;
     string ans;
     bool direction = true;
+
+    map <string, int> store;
     while (ans.size() != n) {
-        bool response;
+        int response;
         if (direction) {
             // check 0 
             ans.push_back('0');
-            cout << "? " + ans << "\n";
-            cout.flush();
-            cin >> response;
+            if (store[ans] == 0) {
+                cout << "? " + ans << "\n";
+                cout.flush();
+                cin >> response;
+                store[ans] = response + 1;
+            } else {
+                response = store[ans] - 1;
+            }
+
             if (response) {
                 continue;
             }
@@ -63,9 +71,14 @@ void solve() {
 
             // check 1
             ans.push_back('1');
-            cout << "? " + ans << "\n";
-            cout.flush();
-            cin >> response;
+            if (store[ans] == 0) {
+                cout << "? " + ans << "\n";
+                cout.flush();
+                cin >> response;
+                store[ans] = response + 1;
+            } else {
+                response = store[ans] - 1;
+            }
             if (response) {
                 continue;
             }
@@ -75,9 +88,14 @@ void solve() {
         } else {
             // check 0 
             ans.insert(ans.begin(), '0');
-            cout << "? " + ans << "\n";
-            cout.flush();
-            cin >> response;
+            if (store[ans] == 0) {
+                cout << "? " + ans << "\n";
+                cout.flush();
+                cin >> response;
+                store[ans] = response + 1;
+            } else {
+                response = store[ans] - 1;
+            }
             if (response) {
                 continue;
             }
@@ -85,9 +103,14 @@ void solve() {
 
             // check 1
             ans.insert(ans.begin(), '1');
-            cout << "? " + ans << "\n";
-            cout.flush();
-            cin >> response;
+            if (store[ans] == 0) {
+                cout << "? " + ans << "\n";
+                cout.flush();
+                cin >> response;
+                store[ans] = response + 1;
+            } else {
+                response = store[ans] - 1;
+            }
             if (response) {
                 continue;
             }
@@ -95,12 +118,10 @@ void solve() {
         }
     }
 
-    cout << "! " << ans << endl;
+    cout << "! " << ans << "\n";
 }
 
 int main(){
-    ios_base::sync_with_stdio(0), cin.tie(0), cout.tie(0);
-    srand(chrono::high_resolution_clock::now().time_since_epoch().count());
     int t = 1;
     cin >> t;
     while (t--) {

@@ -162,71 +162,9 @@ void solve()
     cin >> n;
     vl arr(n);
     read(arr);
-    // while (arr[0] > arr.back())
-    //     arr[0]--, arr[n - 1]++;
-    vl temp;
-    for (int i = 1; i < n - 1; i++)
-    {
-        if (arr[i] > arr.back())
-            temp.push_back(i);
-        else
-        {
-            if (temp.empty())
-                continue;
-            else
-            {
-                while (temp.size() && arr[i] < max(arr.back(), arr[0]))
-                {
-                    int ind = temp.back();
-                    ll val = arr[ind];
-                    ll spend = val - arr[0], need = arr.back() - arr[i];
-                    debug4(i, ind, spend, need);
-                    debug(val);
-                    if (spend >= need)
-                        arr[ind] -= need, arr[i] += need;
-                    else
-                        arr[ind] -= spend, arr[i] += spend;
-                    if (arr[ind] == arr[0])
-                        temp.pop_back();
-                }
-                if (arr[i] > arr[0])
-                    temp.push_back(i);
-            }
-        }
-    }
-    temp.clear();
-    for (int i = 1; i < n - 1; i++)
-        if (arr[i] > arr.back())
-            temp.push_back(arr[i]);
-    if (temp.size() == 0)
-    {
-        cout << arr.back() - arr[0] << endl;
-        return;
-    }
-    sort(all(temp));
-    print(arr);
-    print(temp);
-    auto binary_func = [&](ll mid)
-    {
-        ll tem = 0;
-        for (auto i : temp)
-            tem += max(0ll, i - mid);
-        if (arr.back() + tem <= mid)
-            return 1;
-        return 0;
+    auto binary_func = [&](ll mid) {
+            
     };
-    ll low = arr.back(), high = temp.back();
-    ll ans = 1e16;
-    while (low <= high)
-    {
-        ll mid = (low + high) / 2;
-        if (binary_func(mid))
-            ans = mid, high = mid - 1;
-        else
-            low = mid + 1;
-    }
-    debug(ans);
-    cout << ans - *min_element(all(arr)) << endl;
 }
 
 int main()

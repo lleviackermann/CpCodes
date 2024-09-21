@@ -86,10 +86,6 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 const int nmax = 301;
 int dp[nmax][nmax][nmax];
 
-int recur(int ind, int row, int col, vector<array<int, 2>>& tem) {
-
-}
-
 void solve()
 {
     int l, n, m;
@@ -98,6 +94,26 @@ void solve()
     read(arr);
     vvi mat(n, vi(m));
     for(int i = 0; i < n; i++) read(mat[i]);
+    for(int i = 0; i <= n; i++) for(int j = 0; j <= m; j++) for(int k = 0; k < l; k++) dp[i][j][k] = 0;
+    for(int i = n; i > 0; i--) {
+        for(int j = m; j > 0; j--) {
+            for(int k = 0; k < l; k++) {
+                if(i == n && j == m && arr[k] == mat[i-1][j-1]) {
+                    dp[i][j][k] = 1;
+                    continue;
+                }
+                dp[i][j][k] = dp[min(n, i+1)][j][k] | dp[i][min(m, j+1)][k] | dp[min(n, i+1)][min(j+1, m)][k];
+                if(arr[k] == mat[i-1][j-1]) {
+                    if(i + 1 > n || j + 1 > m || k + 1 >= l) dp[i][j][k] = 1;
+                    else if(dp[i+1][j+1][k+1] == 0) dp[i][j][k] = 1;
+                    // dp[i][j][k] |= dp[min(n, i+1)][min(m, j+1)][min(l, k+1)];
+                }
+            }
+            
+        }
+    }
+    if(dp[1][1][0]) cout << "T\n";
+    else cout << "N\n";
 
 }
 
