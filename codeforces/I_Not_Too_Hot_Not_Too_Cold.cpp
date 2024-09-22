@@ -86,79 +86,29 @@ const int nmax = 200001;
 int segtree[2*nmax];
 int n;
 vi arr(nmax);
-// void build(int index, int start, int end, )
-void build() {
-    for(int i = n-1; i > 0; i--) {
-        if(arr[segtree[i << 1] >= arr[segtree[i << 1 | 1]]]) segtree[i] = segtree[i << 1];
-        else segtree[i] = segtree[i << 1 | 1];
-        // debug3(i, (i << 1), (i << 1 | 1));
-        // debug3(i, segtree[i], arr[segtree[i]]);
-        // debug2(segtree[i << 1], segtree[i << 1 | 1]);
-    }
+
+void update(int l, int val) {
+    for(segtree[l += n] = val; l > 1; l >>= 1) segtree[l >> 1] = max(segtree[l], segtree[l^1]);
 }
 
-void update(int ind) {
-    ind += n;
-    for(; ind > 1; ind >>= 1) {
-        if(arr[segtree[ind] > arr[segtree[ind ^ 1]]]) segtree[ind >> 1] = segtree[ind];
-        else if(arr[segtree[ind] < arr[segtree[ind ^ 1]]]) segtree[ind >> 1] = segtree[ind ^ 1];
-        else segtree[ind >> 1] = min(segtree[ind], segtree[ind ^ 1]);
-    }
-}
-
-int query(int l, int r, int t) {
-    int temp = 2*n+1;
-    debug2(l, r);
+int query(int l, int r) {
+    int ans = -1;
     for(l += n, r += n; l < r; l >>= 1, r >>= 1) {
-        if(l & 1) {
-            if(arr[segtree[l]] > t) {
-                // temp = min(temp, l);
-                temp = l;
-                break;
-            }
-            l++;
-        }
-        if(r & 1) {
-            --r;
-            if(arr[segtree[r]] > t) temp = min(temp, r);
-        }
+        if(l & 1) ans = max(ans, segtree[l++]);
+        if(r & 1) ans = max(ans, segtree[--r]);
     }
-    if(temp == 2*n+1) return n;
-    debug(temp);
-    while(temp < n) {
-        assert(arr[segtree[temp]] > t);
-        int fir = arr[segtree[temp << 1]], sec = arr[segtree[temp << 1 | 1]];
-        if(fir > t) {
-            temp = (temp << 1);
-        } else {
-            temp = (temp << 1 | 1);
-        }
-    }
-    return temp - n;
-    // return ans;
+    return ans;
 }
-
-
 
 void solve()
 {
     cin >> n;
     int prev = 0;
-    vi curr(n);
-    for(int i = n; i < 2 * n; i++) {
-        int x;
-        cin >> x;
-        arr[i-n] = abs(prev - x);
-        segtree[i] = i - n;
-        curr[i-n] = x;
-        prev = x;
+    for(int i = 0; i < n; i++) {
+        cin >> arr[i];
+        if(i) update(i, abs(arr[i] - arr[i-1]));
+        else update(0, 0);
     }
-    arr[0] = 0;
-    build();
-    // for(int i = 0; i < n; i++) cout << arr[i] << " ";
-    // line
-    // for(int i = 1; i < 2*n; i++) cout << segtree[i] << " ";
-    // line
     int q;
     cin >> q;
     while(q--) {
@@ -166,17 +116,19 @@ void solve()
         cin >> sign >> u >> v;
         if(sign == 1) {
             u--;
-            if(u != 0) arr[u] = abs(v - curr[u-1]);
-            if(u != n-1) arr[u+1] = abs(v - curr[u+1]);
-            curr[u] = v;
-            update(u);
-            if(u < n-1) update(u+1);
-            // for(int i = 0; i < n; i++) cout << arr[i] << " ";
-            // line
-            // for(int i = 1; i < 2*n; i++) cout << segtree[i] << " ";
-            // line
+            arr[u] = v;
+            if(u) update(u, abs(arr[u] - arr[u-1]));
+            if(u < n-1) update(u+1, abs(arr[u] - arr[u+1]));
         } else {
-            cout << query(u, n, v) << endl;
+            u--;
+            int l = u + 1, r = n-1, ans = u;
+            while(l <= r) {
+                int mid = (l + r) / 2;
+                int ma = query(u+1, mid+1);
+                if(ma <= v) ans = mid, l = mid + 1;
+                else r = mid - 1;
+            }
+            cout << ans + 1 << endl;
         }
     }
 }

@@ -82,104 +82,108 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 #define debug4(x, y, z, a)
 
 #endif
-const int nmax = 200001;
-int segtree[2*nmax];
-int n;
-vi arr(nmax);
-// void build(int index, int start, int end, )
-void build() {
-    for(int i = n-1; i > 0; i--) {
-        if(arr[segtree[i << 1] >= arr[segtree[i << 1 | 1]]]) segtree[i] = segtree[i << 1];
-        else segtree[i] = segtree[i << 1 | 1];
-        // debug3(i, (i << 1), (i << 1 | 1));
-        // debug3(i, segtree[i], arr[segtree[i]]);
-        // debug2(segtree[i << 1], segtree[i << 1 | 1]);
-    }
-}
 
-void update(int ind) {
-    ind += n;
-    for(; ind > 1; ind >>= 1) {
-        if(arr[segtree[ind] > arr[segtree[ind ^ 1]]]) segtree[ind >> 1] = segtree[ind];
-        else if(arr[segtree[ind] < arr[segtree[ind ^ 1]]]) segtree[ind >> 1] = segtree[ind ^ 1];
-        else segtree[ind >> 1] = min(segtree[ind], segtree[ind ^ 1]);
-    }
-}
+class customCompare {
+public:
+    bool operator()(array<ll, 2>& below, array<ll, 2>& above)
+    {
+        debug3(below[0], below[1], below[2]);
+        debug3(above[0], above[1], above[2]);
 
-int query(int l, int r, int t) {
-    int temp = 2*n+1;
-    debug2(l, r);
-    for(l += n, r += n; l < r; l >>= 1, r >>= 1) {
-        if(l & 1) {
-            if(arr[segtree[l]] > t) {
-                // temp = min(temp, l);
-                temp = l;
-                break;
-            }
-            l++;
+        if (below[0] < above[0]) {
+            return true;
         }
-        if(r & 1) {
-            --r;
-            if(arr[segtree[r]] > t) temp = min(temp, r);
+        
+        return false;
+    }
+};
+
+bool isPrime(int n) {
+    if (n <= 1) {
+        return false;
+    }
+
+    if (n <= 3) {
+        return true;
+    }
+
+    if (n % 2 == 0 || n % 3 == 0) {
+        return false;
+    }
+
+    for (int i = 5; i * i <= n; i += 6) {
+
+        if (n % i == 0 || n % (i + 2) == 0) {
+            return false;
         }
     }
-    if(temp == 2*n+1) return n;
-    debug(temp);
-    while(temp < n) {
-        assert(arr[segtree[temp]] > t);
-        int fir = arr[segtree[temp << 1]], sec = arr[segtree[temp << 1 | 1]];
-        if(fir > t) {
-            temp = (temp << 1);
-        } else {
-            temp = (temp << 1 | 1);
-        }
-    }
-    return temp - n;
-    // return ans;
+
+    return true;
 }
 
-
-
+const int nmax = 1e5+10;
+vector<vector<array<ll, 3>>> tre(nmax);
 void solve()
 {
-    cin >> n;
-    int prev = 0;
-    vi curr(n);
-    for(int i = n; i < 2 * n; i++) {
-        int x;
-        cin >> x;
-        arr[i-n] = abs(prev - x);
-        segtree[i] = i - n;
-        curr[i-n] = x;
-        prev = x;
+    ll n, m, s, e;
+    cin >> n >> m >> s >> e;
+    for(int i = 0; i < m; i++) {
+        int st, en, cap, co;
+        cin >> st >> en >> cap >> co;
+        tre[st].push_back({en, cap, co});
     }
-    arr[0] = 0;
-    build();
-    // for(int i = 0; i < n; i++) cout << arr[i] << " ";
-    // line
-    // for(int i = 1; i < 2*n; i++) cout << segtree[i] << " ";
-    // line
-    int q;
-    cin >> q;
-    while(q--) {
-        int sign, u, v;
-        cin >> sign >> u >> v;
-        if(sign == 1) {
-            u--;
-            if(u != 0) arr[u] = abs(v - curr[u-1]);
-            if(u != n-1) arr[u+1] = abs(v - curr[u+1]);
-            curr[u] = v;
-            update(u);
-            if(u < n-1) update(u+1);
-            // for(int i = 0; i < n; i++) cout << arr[i] << " ";
-            // line
-            // for(int i = 1; i < 2*n; i++) cout << segtree[i] << " ";
-            // line
-        } else {
-            cout << query(u, n, v) << endl;
+    priority_queue<array<ll, 2>, vector<array<ll, 2>>, customCompare> store;
+    auto find_prime = [&](ll x) {
+        for(ll i = x; i >= 2; i--) {
+            if(isPrime(i)) return i;
+        }
+        return 1ll;
+    };
+    store.push({(ll)1e9, s});
+    vl ste(n+1, 0);
+    ste[s] = 1e9;
+    while(store.size()) {
+        auto [ma, ind] = store.top();
+        // debug3(ma,sum, ind);
+        store.pop();
+        if(ma != ste[ind]) continue;
+        if(ind == e) {
+            break;
+        }
+        for(auto [en, cap, co] : tre[ind]) {
+            if(min(ma, cap) > ste[en]) {
+                // debug4(ind, en, cap, co);
+                ste[en] = min(ma, cap);
+                // debug3(ma, cap, ste[en]);
+                store.push({ste[en], en});
+            }
         }
     }
-}
+    if(ste[e] == 0) {
+        cout << "0 0\n";
+        return;
+    }
+    ste[e] = find_prime(ste[e]);
+    priority_queue<pair<ll, ll>, vpl, greater<pl>> sum_store;
+    vl sum(n+1, 1e17);
+    sum[s] = 0;
+    sum_store.push({0ll, s});
+    while(sum_store.size()) {
+        auto [su, ind] = sum_store.top();
+        sum_store.pop();
+        if(su != sum[ind]) continue;
+        if(ind == e) {
+            cout << ste[e] << " " << ste[e] * su << endl;
+            return;
+        }
+        for(auto [en, cap, cos] : tre[ind]) {
+            if(cap < ste[e] || sum[ind] + cos >= sum[en]) continue;
+            sum[en] = sum[ind] + cos;
+            sum_store.push({sum[en], en});
+        }
+    }
+    cout << "0 0\n";
+}   
 
 int main()
 { 
