@@ -83,28 +83,50 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
+// 114 * 2.5 
+// a1 a2 a3 a4 a5 a6
+// a1^2^4 a2^2^0 a3^2^1
 
+int tt = 0;
 void solve()
 {
     ll n;
+    ++tt;
     cin >> n;
     vl arr(n);
     read(arr);
+    int i = 0;
+    while(i < n && arr[i] == 1) i++;
+    ll prev = 0;
     ll ans = 0;
-    ll prev = arr[0];
-    for(int i = 1; i < n; i++) {
-        ll x = arr[i];
-        if(arr[i] == 1) {
-            if(prev > 1) {
-                cout << "-1\n";
-                return;
-            }
-            continue; 
+    auto fin = [&](ll cur) {
+        ll an = 0;
+        ll tem = 1;
+        while(tem < cur) tem *= 2, an++;
+        return an;
+    };
+    auto pow2 = [&](ll x) {
+        ll an = 1, cur = 0;
+        while(cur < x) an *= 2, cur++;
+        return an;
+    };
+    if(i == 0) i++;
+    string tobe = "";
+    for(; i < n; i++) {
+        if(prev == 0 && arr[i] > arr[i-1]) continue;
+        if(arr[i-1] > 1 && arr[i] == 1) {
+            cout << "-1\n";
+            return;
         }
-        ll cnt = 0;
-        while(x < prev) x *= x, cnt++;
-        prev = x;
-        ans += cnt;
+        double bac = (double) prev +  log2(log2(arr[i-1]));
+        ll current = ceil(bac - log2(log2(arr[i])));
+        if(current < 0) current = 0;
+        // assert(current <= 1e17);
+        ll x = fin(current);
+        debug4(i, prev, current, x);
+        // debug(pow2(x));
+        ans += current;
+        prev = current;
     }
     cout << ans << endl;
 }

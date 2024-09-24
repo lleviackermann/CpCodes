@@ -42,7 +42,7 @@ typedef set<pair<ll, ll>> spl;
 typedef ordered_set<ll> osl;
 typedef ordered_set<pair<ll, ll>> ospl;
 
-// const ll mod = 1e9 + 7;
+const ll mod = 1e9 + 7;
 
 bool comp2(pair<ll, ll> &arr, pair<ll, ll> &b)
 {
@@ -83,49 +83,46 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
+// 2 1 3 4 5
+// 3 5 4 1 2
+
+// 1 2 3 4 5 6
+// 3 6 4 5 2 1
+
+// 6 4 1 2
 
 void solve()
 {
-    ll n, l , r;
-    cin >> n >> l >> r;
-    string s;
-    cin >> s;
-    ll p1 = 37, p2 = 99991;
-    ll mod1 = 1e9 + 7, mod2 = 1e9 + 9;
-    vl prefix1(n+1, 0), prefix2(n+1, 0), power1(n+1, 1), power2(n+1, 1);
-    for(int i = 1; i <= n; i++) {
-        power1[i] = power1[i-1] * p1 % mod1;
-        power2[i] = power2[i-1] * p2 % mod2;
-        prefix1[i] = (prefix1[i-1] + (s[i-1] - 'a' + 1) * power1[i] % mod1) % mod1;
-        prefix2[i] = (prefix2[i-1] + (s[i-1] - 'a' + 1) * power2[i] % mod2) % mod2;
-    }
-
-    auto substr_hash = [&](int l, int r) {
-        pl ans;
-        ans.first = ((prefix1[r+1] - prefix1[l] + mod1) % mod1) * power1[n-l] % mod1;
-        ans.second = ((prefix2[r+1] - prefix2[l] + mod2) % mod2) * power2[n-l] % mod2;
-        debug4(l, r, ans.first, ans.second);
-        return ans;
-    };
-    auto binary_funct = [&](ll mid) {
-        if(mid == 0) return true;
-        ll cnt = 1;
-        pl temp = substr_hash(0, mid-1);
-        int i = mid;
-        while(i < n) {
-            if(i + mid - 1 < n && substr_hash(i, i + mid - 1) == temp) cnt++, i += mid;
-            else i++;
-        }
-        debug2(mid, cnt);
-        return cnt >= l;
-    };
-    int low = 0, high = n;
+    int n;
+    cin >> n;
+    vi arr(n);
+    read(arr);
+    for(auto &i : arr) --i;
+    print(arr);
     int ans = 0;
-    while(low <= high) {
-        int mid = (low + high) / 2;
-        if(binary_funct(mid)) ans = mid, low = mid + 1;
-        else high = mid - 1;
+    vector<int> visited(n, 0);
+    int flag = 0;
+    for(int i = 0; i < n; i++) {
+        if(visited[i]) continue;
+        vi temp;
+        int x = i;
+        while(!visited[x]) temp.push_back(x), visited[x] = 1, x = arr[x];
+        debug(i);
+        print(temp);
+        ans += (int)temp.size() - 1;
+        if(!flag) {
+            sort(all(temp));
+            for(int j = 1; j < temp.size(); j++) {
+                if(temp[j] == temp[j-1] + 1) {
+                    flag = 1;
+                    ans--;
+                    break;
+                }
+            }
+        }
+        debug(ans);
     }
+    if(!flag) ans += 1;
     cout << ans << endl;
 }
 
@@ -142,5 +139,9 @@ int main()
     }
     clock_t end = clock();
     
+    #ifndef ONLINE_JUDGE
+    double elapsed = double(end - start) / CLOCKS_PER_SEC;
+    cout << setprecision(10) << elapsed << endl;
+    #endif
     return 0;
 }

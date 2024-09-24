@@ -42,7 +42,7 @@ typedef set<pair<ll, ll>> spl;
 typedef ordered_set<ll> osl;
 typedef ordered_set<pair<ll, ll>> ospl;
 
-// const ll mod = 1e9 + 7;
+const ll mod = 1e9 + 7;
 
 bool comp2(pair<ll, ll> &arr, pair<ll, ll> &b)
 {
@@ -82,51 +82,43 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 #define debug4(x, y, z, a)
 
 #endif
+const int nmax = 50001, kmax = 501;
+int num[kmax][nmax];
+vvi tre(nmax);
+int n, k;
+int ans = 0;
 
+void dfs(int u, int v) {
+    for(int i = 0; i <= k; i++) num[u][i] = 0;
+    num[u][0] = 1;
+    for(auto nei : tre[u]) {
+        if(nei == v) continue;
+        dfs(nei, u);
+        for(int i = 0; i < k; i++) num[u][i+1] += num[nei][i];
+        // for(int i = 0; i <= k-1; i++) ans -= num[nei][i+1] * num[nei][k-i-1];
+    }
+    for(int i = 0; i <= k; i++) {
+        ans += num[u][i] * num[u][k-i];
+    }
+}
 
 void solve()
 {
-    ll n, l , r;
-    cin >> n >> l >> r;
-    string s;
-    cin >> s;
-    ll p1 = 37, p2 = 99991;
-    ll mod1 = 1e9 + 7, mod2 = 1e9 + 9;
-    vl prefix1(n+1, 0), prefix2(n+1, 0), power1(n+1, 1), power2(n+1, 1);
+    cin >> n >> k;
+    for(int i = 0; i < n-1; i++) {
+        int st, en;
+        cin >> st >> en;
+        tre[st].push_back(en);
+        tre[en].push_back(st);
+    }
+    dfs(1, -1);
     for(int i = 1; i <= n; i++) {
-        power1[i] = power1[i-1] * p1 % mod1;
-        power2[i] = power2[i-1] * p2 % mod2;
-        prefix1[i] = (prefix1[i-1] + (s[i-1] - 'a' + 1) * power1[i] % mod1) % mod1;
-        prefix2[i] = (prefix2[i-1] + (s[i-1] - 'a' + 1) * power2[i] % mod2) % mod2;
+        for(int j = 0; j <= k; j++) cout << num[i][j] << " ";
+        line
     }
-
-    auto substr_hash = [&](int l, int r) {
-        pl ans;
-        ans.first = ((prefix1[r+1] - prefix1[l] + mod1) % mod1) * power1[n-l] % mod1;
-        ans.second = ((prefix2[r+1] - prefix2[l] + mod2) % mod2) * power2[n-l] % mod2;
-        debug4(l, r, ans.first, ans.second);
-        return ans;
-    };
-    auto binary_funct = [&](ll mid) {
-        if(mid == 0) return true;
-        ll cnt = 1;
-        pl temp = substr_hash(0, mid-1);
-        int i = mid;
-        while(i < n) {
-            if(i + mid - 1 < n && substr_hash(i, i + mid - 1) == temp) cnt++, i += mid;
-            else i++;
-        }
-        debug2(mid, cnt);
-        return cnt >= l;
-    };
-    int low = 0, high = n;
-    int ans = 0;
-    while(low <= high) {
-        int mid = (low + high) / 2;
-        if(binary_funct(mid)) ans = mid, low = mid + 1;
-        else high = mid - 1;
-    }
-    cout << ans << endl;
+    // assert(ans % 2 == 0);
+    debug(ans);
+    cout << ans / 2 << endl;
 }
 
 int main()
@@ -135,12 +127,16 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    cin >> t;
+    // cin >> t;
     while (t--)
     {
         solve();
     }
     clock_t end = clock();
     
+    #ifndef ONLINE_JUDGE
+    double elapsed = double(end - start) / CLOCKS_PER_SEC;
+    cout << setprecision(10) << elapsed << endl;
+    #endif
     return 0;
 }

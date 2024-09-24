@@ -82,103 +82,20 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 #define debug4(x, y, z, a)
 
 #endif
-const int nmax = 200001;
-int segtree[2*nmax];
-int n;
-vi arr(nmax);
-// void build(int index, int start, int end, )
-void build() {
-    for(int i = n-1; i > 0; i--) {
-        if(arr[segtree[i << 1] >= arr[segtree[i << 1 | 1]]]) segtree[i] = segtree[i << 1];
-        else segtree[i] = segtree[i << 1 | 1];
-        // debug3(i, (i << 1), (i << 1 | 1));
-        // debug3(i, segtree[i], arr[segtree[i]]);
-        // debug2(segtree[i << 1], segtree[i << 1 | 1]);
-    }
-}
-
-void update(int ind) {
-    ind += n;
-    for(; ind > 1; ind >>= 1) {
-        if(arr[segtree[ind] > arr[segtree[ind ^ 1]]]) segtree[ind >> 1] = segtree[ind];
-        else if(arr[segtree[ind] < arr[segtree[ind ^ 1]]]) segtree[ind >> 1] = segtree[ind ^ 1];
-        else segtree[ind >> 1] = min(segtree[ind], segtree[ind ^ 1]);
-    }
-}
-
-int query(int l, int r, int t) {
-    int temp = 2*n+1;
-    debug2(l, r);
-    for(l += n, r += n; l < r; l >>= 1, r >>= 1) {
-        if(l & 1) {
-            if(arr[segtree[l]] > t) {
-                // temp = min(temp, l);
-                temp = l;
-                break;
-            }
-            l++;
-        }
-        if(r & 1) {
-            --r;
-            if(arr[segtree[r]] > t) temp = min(temp, r);
-        }
-    }
-    if(temp == 2*n+1) return n;
-    debug(temp);
-    while(temp < n) {
-        assert(arr[segtree[temp]] > t);
-        int fir = arr[segtree[temp << 1]], sec = arr[segtree[temp << 1 | 1]];
-        if(fir > t) {
-            temp = (temp << 1);
-        } else {
-            temp = (temp << 1 | 1);
-        }
-    }
-    return temp - n;
-    // return ans;
-}
-
 
 
 void solve()
 {
-    cin >> n;
-    int prev = 0;
-    vi curr(n);
-    for(int i = n; i < 2 * n; i++) {
-        int x;
-        cin >> x;
-        arr[i-n] = abs(prev - x);
-        segtree[i] = i - n;
-        curr[i-n] = x;
-        prev = x;
+    cout << 1 << endl;
+    const int nmax = 100000, l = 157, r = 157;
+    cout << nmax << " " << l << " " << r << endl;
+    string ans = "";
+    for(int i = 0; i < nmax; i++) {
+        int x = rand() % 26 + 97;
+        ans += (char)x;
     }
-    arr[0] = 0;
-    build();
-    // for(int i = 0; i < n; i++) cout << arr[i] << " ";
-    // line
-    // for(int i = 1; i < 2*n; i++) cout << segtree[i] << " ";
-    // line
-    int q;
-    cin >> q;
-    while(q--) {
-        int sign, u, v;
-        cin >> sign >> u >> v;
-        if(sign == 1) {
-            u--;
-            if(u != 0) arr[u] = abs(v - curr[u-1]);
-            if(u != n-1) arr[u+1] = abs(v - curr[u+1]);
-            curr[u] = v;
-            update(u);
-            if(u < n-1) update(u+1);
-            // for(int i = 0; i < n; i++) cout << arr[i] << " ";
-            // line
-            // for(int i = 1; i < 2*n; i++) cout << segtree[i] << " ";
-            // line
-        } else {
-            cout << query(u, n, v) << endl;
-        }
-    }
+    assert(ans.size()==nmax);
+    cout << ans << endl;
 }
 
 int main()
@@ -196,7 +113,7 @@ int main()
     
     #ifndef ONLINE_JUDGE
     double elapsed = double(end - start) / CLOCKS_PER_SEC;
-    cout << setprecision(10) << elapsed << endl;
+    // cout << setprecision(10) << elapsed << endl;
     #endif
     return 0;
 }
