@@ -82,75 +82,48 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 #define debug4(x, y, z, a)
 
 #endif
-// int dx[] = {0, 1, 0, -1};
-// int dy[] = {1, 0, -1, 0};
 
-// array<ll, 3> calc(int dire, vector<int>& arr) {
-//     ll x = 0, y = 0;
-//     for(int i = 0; i < arr.size(); i++) {
-//         x += dx[dire] * arr[i], y += dy[dire] * arr[i];
-//         dire = (dire + arr[i]) % 4;
-//     }
-//     return {x, y, dire};
-// }
+// i, j, k, l
+// i + j == k + l
+// j + k == l + i
+// 1 2 3 4 5
 
-// int solve(int k, vector<int>& arr)
-// {
-//     vector<array<long long, 3>> precalc(4);
-//     for(int i = 0; i < 4; i++) {
-//         precalc[i] = calc(i, arr);
-//     }
-//     long long x = 0, y = 0, dire = 0;
-//     for(int i = 0; i < k; i++) {
-//         x += precalc[dire][0], y += precalc[dire][1], dire = precalc[dire][2];
-//     }
-//     return abs(x) + abs(y);
-// }
-
-// cost(t) = k^n + t^2
-// k == 5, m = 2
-
-// long long solve(ll m, ll k) {
-//     ll sq = m*m;
-//     if(k >= sq) return 1ll + sq;
-//     ll limit = sq;
-//     ll days = 0;
-//     ll k_price = 1;
-//     ll tot_cost = 1;
-//     while(tot_cost < limit) k_price *= k, tot_cost += k_price, days++;
-//     ll ans = limit;
-    
-//     while(days > 0) {
-//         ll in_each = m / days;
-//         ll remain = m % days;
-//         ll val = in_each * in_each * (days-1) + (in_each + remain) * (in_each + remain);
-//         debug3(in_each, remain, val);
-//         debug2(tot_cost, k_price);
-//         ll temp = tot_cost + val;
-//         ans = min(ans, temp);
-//         tot_cost -= k_price;
-//         k_price /= k;
-//         days--;
-//     }
-//     return ans;
-// }
-
-int solve(int bound_x, int bound_y) {
-    vector<int> flag(1e6+1, 0);
-    for(int i = 1; i <= 1000; i++) flag[i*i] = 1;
+void solve()
+{
+    int n;
+    cin >> n;
+    vi arr(n);
+    read(arr);
     ll ans = 0;
-    for(ll i = 1; i <= max(bound_x, bound_y); i++) {
-        for(ll j = i; j <= max(bound_x, bound_y); j+=i) {
-            if(i * j > 1e6) break;
-            if(flag[i*j]) {
-                if(i <= bound_x && j <= bound_y) ans++;
-                if(i <= bound_y && j <= bound_x) ans++;
-                if(i == j && min(bound_x, bound_y) >= i) ans--;
-                // debug2(i, j);
-            }
+    map<int, vpi> ma;
+    for(int i = 0; i < n; i++) {
+        for(int j = i+1; j < n; j++) {
+            if((arr[i]^arr[j]) == 0) continue;
+            // debug2(arr[i], arr[j]);
+            ma[arr[i]^arr[j]].push_back({i, j});
         }
     }
-    return ans;
+    // print(ma);
+    debug(ma.size());
+    for(auto &[_, sec] : ma) {
+        cout << _ << "->";
+        for(auto [fi,se] : sec) cout << fi << " " << se << endl;
+        if(_ == 0) continue;
+        if(sec.size() == 1) continue;
+        int x = sec.size();
+        ans += x * (x-1) * 4;
+        unordered_map<ll, ll> temp;
+        map<pair<int, int>, int> another;
+        for(auto &[fi, se] : sec) {
+            temp[fi]++, temp[se]++;
+            another[{min(fi, se), max(fi, se)}]++;
+        }
+        for(auto &[_, se] : another) {
+            ans -= se * (se - 1) * 2;
+        }
+    }
+
+    cout << ans << endl;
 }
 
 int main()
@@ -159,12 +132,10 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    // cin >> t;
+    cin >> t;
     while (t--)
     {
-        // int k = 1;
-        // vector<int> arr{1, 2};
-        cout << solve(2, 2) << endl;
+        solve();
     }
     clock_t end = clock();
     

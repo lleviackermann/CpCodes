@@ -82,75 +82,62 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 #define debug4(x, y, z, a)
 
 #endif
-// int dx[] = {0, 1, 0, -1};
-// int dy[] = {1, 0, -1, 0};
 
-// array<ll, 3> calc(int dire, vector<int>& arr) {
-//     ll x = 0, y = 0;
-//     for(int i = 0; i < arr.size(); i++) {
-//         x += dx[dire] * arr[i], y += dy[dire] * arr[i];
-//         dire = (dire + arr[i]) % 4;
-//     }
-//     return {x, y, dire};
-// }
+vl power_2(64, 1);
 
-// int solve(int k, vector<int>& arr)
-// {
-//     vector<array<long long, 3>> precalc(4);
-//     for(int i = 0; i < 4; i++) {
-//         precalc[i] = calc(i, arr);
-//     }
-//     long long x = 0, y = 0, dire = 0;
-//     for(int i = 0; i < k; i++) {
-//         x += precalc[dire][0], y += precalc[dire][1], dire = precalc[dire][2];
-//     }
-//     return abs(x) + abs(y);
-// }
-
-// cost(t) = k^n + t^2
-// k == 5, m = 2
-
-// long long solve(ll m, ll k) {
-//     ll sq = m*m;
-//     if(k >= sq) return 1ll + sq;
-//     ll limit = sq;
-//     ll days = 0;
-//     ll k_price = 1;
-//     ll tot_cost = 1;
-//     while(tot_cost < limit) k_price *= k, tot_cost += k_price, days++;
-//     ll ans = limit;
-    
-//     while(days > 0) {
-//         ll in_each = m / days;
-//         ll remain = m % days;
-//         ll val = in_each * in_each * (days-1) + (in_each + remain) * (in_each + remain);
-//         debug3(in_each, remain, val);
-//         debug2(tot_cost, k_price);
-//         ll temp = tot_cost + val;
-//         ans = min(ans, temp);
-//         tot_cost -= k_price;
-//         k_price /= k;
-//         days--;
-//     }
-//     return ans;
-// }
-
-int solve(int bound_x, int bound_y) {
-    vector<int> flag(1e6+1, 0);
-    for(int i = 1; i <= 1000; i++) flag[i*i] = 1;
-    ll ans = 0;
-    for(ll i = 1; i <= max(bound_x, bound_y); i++) {
-        for(ll j = i; j <= max(bound_x, bound_y); j+=i) {
-            if(i * j > 1e6) break;
-            if(flag[i*j]) {
-                if(i <= bound_x && j <= bound_y) ans++;
-                if(i <= bound_y && j <= bound_x) ans++;
-                if(i == j && min(bound_x, bound_y) >= i) ans--;
-                // debug2(i, j);
-            }
+void solve()
+{
+    // for(int i = 1; i <= 6; i++) {
+    //     vl arr;
+    //     for(int j = 1; j <= i; j++) arr.push_back(j);
+    //     auto check = [&]() {
+    //         for(int j = 0; j < i-1; j++) {
+    //             if(arr[j+1] < arr[j] - 1) return false;
+    //         }
+    //         return true;
+    //     };
+    //     do{
+    //         if(check()) print(arr);
+    //     } while(next_permutation(all(arr)));
+    // }
+    ll n, k;
+    cin >> n >> k;
+    if(n <= 62) {
+        if((1ll << (n-1)) < k) {
+            cout << "-1\n";
+            return;
         }
     }
-    return ans;
+    vl ans;
+    ll tem = k;
+    int st = 1;
+    // 1 1 2 4 8 16
+    for(int i = n-1; i >= 0;) {
+        debug3(i, tem, power_2[i]);
+        if(i >= 62 || power_2[i] > tem) ans.push_back(st++), i--;
+        else if(power_2[i] == tem) {
+            ans.push_back(st);
+            st++;
+            for(int x = n; x >= st; x--) ans.push_back(x);
+            break;
+        }
+        else {
+            ll x = power_2[i];
+            int ano = 1;
+            i--;
+            while(i >= 0 && x < tem) x += power_2[i--], ano++;
+            for(int j = st + ano - 1; j >= st; j--) ans.push_back(j);
+            debug3(x, ano, i);
+            st += ano;
+            tem = tem - (x - power_2[i+1]);
+            // i--;
+            print(ans);
+        } 
+        // debug2()
+    }
+    // if(ans.size() == n-1) ans.push_back(st);
+    for(auto i : ans) cout << i << " ";
+    line
 }
 
 int main()
@@ -159,12 +146,14 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    // cin >> t;
+    ll x = 1;
+    for(ll i = 1; i <= 63; i++) power_2[i] = x, x *= 2;
+    debug(power_2[61]);
+    // for(ll i = 1; i <= 60; i++) power_2[i] = power_2[i-1] * 2;
+    cin >> t;
     while (t--)
     {
-        // int k = 1;
-        // vector<int> arr{1, 2};
-        cout << solve(2, 2) << endl;
+        solve();
     }
     clock_t end = clock();
     

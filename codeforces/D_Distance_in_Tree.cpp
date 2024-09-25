@@ -83,22 +83,22 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 const int nmax = 50001, kmax = 501;
-int num[kmax][nmax];
+ll num[kmax][nmax];
 vvi tre(nmax);
 int n, k;
-int ans = 0;
+ll ans = 0;
 
 void dfs(int u, int v) {
-    for(int i = 0; i <= k; i++) num[u][i] = 0;
-    num[u][0] = 1;
+    for(int i = 0; i <= k; i++) num[i][u] = 0;
+    num[0][u] = 1;
     for(auto nei : tre[u]) {
         if(nei == v) continue;
         dfs(nei, u);
-        for(int i = 0; i < k; i++) num[u][i+1] += num[nei][i];
-        // for(int i = 0; i <= k-1; i++) ans -= num[nei][i+1] * num[nei][k-i-1];
+        for(int i = 0; i < k; i++) num[i+1][u] += num[i][nei];
+        for(int i = 0; i <= k-2; i++) ans -= num[i][nei] * num[k-i-2][nei];
     }
     for(int i = 0; i <= k; i++) {
-        ans += num[u][i] * num[u][k-i];
+        ans += num[i][u] * num[k-i][u]; 
     }
 }
 
@@ -112,12 +112,12 @@ void solve()
         tre[en].push_back(st);
     }
     dfs(1, -1);
-    for(int i = 1; i <= n; i++) {
-        for(int j = 0; j <= k; j++) cout << num[i][j] << " ";
-        line
-    }
+    // for(int i = 1; i <= n; i++) {
+    //     for(int j = 0; j <= k; j++) cout << num[i][j] << " ";
+    //     line
+    // }
     // assert(ans % 2 == 0);
-    debug(ans);
+    // debug(ans);
     cout << ans / 2 << endl;
 }
 
