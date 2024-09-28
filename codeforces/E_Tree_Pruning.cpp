@@ -84,28 +84,43 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 #endif
 
 
-std::vector<int> optimize_bits(const std::vector<std::vector<int>>& input_matrix) {
-    std::vector<int> result;
-    const int rows = input_matrix.size();
-
-    auto process_row = [](std::vector<int> row) {
-        std::sort(row.rbegin(), row.rend());
-        return row;
+void solve()
+{
+    int n;
+    cin >> n;
+    vvi tre(n);
+    for(int i = 1; i < n; i++) {
+        int st, en;
+        cin >> st >> en;
+        --st, --en;
+        tre[st].push_back(en);
+        tre[en].push_back(st);
+    }
+    vi up_dist(n, 0), tot_dist(n, 0);
+    auto dfs = [&](auto&& dfs, int u, int v, int cnt) -> int {
+        up_dist[cnt]++;
+        int x = 0;
+        for(auto nei : tre[u]) {
+            if(nei == v) continue;
+            x = max(x, dfs(dfs, nei, u, cnt+1) + 1);
+        }
+        // x += 1;
+        tot_dist[cnt+x]++;
+        return x;
     };
-
-    std::vector<std::pair<std::vector<int>, int>> processed_rows;
-    for (int i = 0; i < rows; ++i) {
-        processed_rows.emplace_back(process_row(input_matrix[i]), i);
+    dfs(dfs, 0, -1, 0);
+    print(up_dist);
+    print(tot_dist);
+    // for(int i = )
+    int ans = n;
+    int prev = 0;
+    for(int i = n-1; i >= 0; i--) {
+        debug4(i, prev, tot_dist[i], up_dist[i]);
+        ans = min(ans, n - prev - tot_dist[i]);
+        prev += tot_dist[i] - up_dist[i];
     }
 
-    std::sort(processed_rows.begin(), processed_rows.end(), 
-        [](const auto& a, const auto& b) { return a.first > b.first; });
-
-    std::transform(processed_rows.begin(), processed_rows.end(), 
-        std::back_inserter(result), 
-        [](const auto& pair) { return pair.second; });
-
-    return result;
+    cout << ans << endl;
 }
 
 int main()
@@ -114,13 +129,10 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    // cin >> t;
+    cin >> t;
     while (t--)
     {
-        vvi arr{{1,2,3},{3,0,1},{0,3,2}};
-        vi tem = optimize_bits(arr);
-        for(auto i : tem) cout << i << " ";
-        cout << endl;
+        solve();
     }
     clock_t end = clock();
     

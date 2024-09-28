@@ -83,29 +83,18 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
+// a1 a2 a3 a4 a5 (a6) a7 a8 a9 a10
 
-std::vector<int> optimize_bits(const std::vector<std::vector<int>>& input_matrix) {
-    std::vector<int> result;
-    const int rows = input_matrix.size();
-
-    auto process_row = [](std::vector<int> row) {
-        std::sort(row.rbegin(), row.rend());
-        return row;
-    };
-
-    std::vector<std::pair<std::vector<int>, int>> processed_rows;
-    for (int i = 0; i < rows; ++i) {
-        processed_rows.emplace_back(process_row(input_matrix[i]), i);
+void solve()
+{
+    int n;
+    cin >> n;
+    vi arr(n);
+    read(arr);
+    multiset<int> bac, fro;
+    for(int i = 1; i < n; i++) {
+        
     }
-
-    std::sort(processed_rows.begin(), processed_rows.end(), 
-        [](const auto& a, const auto& b) { return a.first > b.first; });
-
-    std::transform(processed_rows.begin(), processed_rows.end(), 
-        std::back_inserter(result), 
-        [](const auto& pair) { return pair.second; });
-
-    return result;
 }
 
 int main()
@@ -114,13 +103,10 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    // cin >> t;
+    cin >> t;
     while (t--)
     {
-        vvi arr{{1,2,3},{3,0,1},{0,3,2}};
-        vi tem = optimize_bits(arr);
-        for(auto i : tem) cout << i << " ";
-        cout << endl;
+        solve();
     }
     clock_t end = clock();
     

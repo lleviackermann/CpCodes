@@ -84,28 +84,55 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 #endif
 
 
-std::vector<int> optimize_bits(const std::vector<std::vector<int>>& input_matrix) {
-    std::vector<int> result;
-    const int rows = input_matrix.size();
-
-    auto process_row = [](std::vector<int> row) {
-        std::sort(row.rbegin(), row.rend());
-        return row;
-    };
-
-    std::vector<std::pair<std::vector<int>, int>> processed_rows;
-    for (int i = 0; i < rows; ++i) {
-        processed_rows.emplace_back(process_row(input_matrix[i]), i);
+void solve()
+{
+    int n;
+    cin >> n;
+    vvi store(n+1);
+    cout << "? " << 1 << endl;
+    cout.flush();
+    vpi edges;
+    for(int i = 1; i <= n; i++) {
+        int di;
+        cin >> di;
+        store[di].push_back(i);
     }
-
-    std::sort(processed_rows.begin(), processed_rows.end(), 
-        [](const auto& a, const auto& b) { return a.first > b.first; });
-
-    std::transform(processed_rows.begin(), processed_rows.end(), 
-        std::back_inserter(result), 
-        [](const auto& pair) { return pair.second; });
-
-    return result;
+    for(int i = 1; i < n; i += 2) {
+        int j = i;
+        if(i + 1 < n && store[i+1].size() && store[i+1].size() < store[i].size()) j = i+1;
+        for(auto &num : store[j]) {
+            vi dist(n+1, 0);
+            cout << "? " << num << endl;
+            cout.flush();
+            for(int k = 1; k <= n; k++) {
+                int di;
+                cin >> di;
+                dist[k] = di;
+                if((j&1) && di == 1) {
+                    edges.push_back({k, num}); 
+                }
+            }
+            if(!(j&1)) {
+                int pa = -1;
+                for(auto &tem : store[j-1]) {
+                    if(dist[tem] == 1) {
+                        pa = tem;
+                        edges.push_back({tem, num});
+                        break;
+                    }
+                }
+                for(auto &tem : store[j-2]) {
+                    if(dist[tem] == 2) {
+                        edges.push_back({tem, pa});
+                    }
+                }
+            }
+        }
+    }
+    assert((int)edges.size() == n-1);
+    cout << "!\n";
+    for(auto [st,en] : edges) cout << st << " " << en << endl;
+    cout.flush();
 }
 
 int main()
@@ -117,10 +144,7 @@ int main()
     // cin >> t;
     while (t--)
     {
-        vvi arr{{1,2,3},{3,0,1},{0,3,2}};
-        vi tem = optimize_bits(arr);
-        for(auto i : tem) cout << i << " ";
-        cout << endl;
+        solve();
     }
     clock_t end = clock();
     
