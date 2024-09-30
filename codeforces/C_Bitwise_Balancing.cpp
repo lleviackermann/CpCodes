@@ -83,20 +83,35 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-// a1 a2 a3 a4 a5 (a6) a7 a8 a9 a10
-
-// abcdefghi
 
 void solve()
 {
-    int n;
-    cin >> n;
-    vi arr(n);
-    read(arr);
-    multiset<int> bac, fro;
-    for(int i = 1; i < n; i++) {
-        
+    ll b, c, d;
+    cin >> b >> c >> d;
+    int carry = 0;
+    ll ans = 0;
+    for(ll i = 0; i <= 61; i++) {
+        ll b_i = ((b >> i) & 1), c_i = ((c >> i) & 1), d_i = ((d >> i) & 1);
+        debug3(b_i, c_i, d_i);
+        if(c_i == 0 &&  d_i == 0 && b_i == 1) {
+            cout << "-1\n";
+            return;
+        }
+        if(d_i == 1 && c_i == 1 && b_i == 0) {
+            cout << "-1\n";
+            return;
+        }
+        if(d_i) {
+            if(!(c_i == 1 && b_i == 1)) ans = ans | (1ll << i);
+        } else {
+            if(c_i == b_i && b_i == 1) ans = ans | (1ll << i);
+        }
     }
+    assert((ans | b) == d + (ans & c));
+    // if((ans|b) != d + (ans & c)) {
+    //     ans = -1;
+    // }
+    cout << ans << endl;
 }
 
 int main()

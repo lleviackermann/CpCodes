@@ -83,20 +83,27 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-// a1 a2 a3 a4 a5 (a6) a7 a8 a9 a10
-
-// abcdefghi
 
 void solve()
 {
-    int n;
-    cin >> n;
-    vi arr(n);
-    read(arr);
-    multiset<int> bac, fro;
-    for(int i = 1; i < n; i++) {
-        
+    ll n, k;
+    cin >> n >> k;
+    if(k == 1) {
+        cout << n << endl;
+        return;
     }
+    ll ans = 0;
+    ll tem = 1;
+    while(tem <= n) tem *= k;
+    while(n > 0) {
+        if(tem > n) tem /= k;
+        else {
+            ans += n / tem;
+            n = n % tem;
+            tem /= k;
+        }
+    }
+    cout << ans << endl;
 }
 
 int main()

@@ -83,21 +83,62 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-// a1 a2 a3 a4 a5 (a6) a7 a8 a9 a10
-
-// abcdefghi
 
 void solve()
 {
-    int n;
-    cin >> n;
-    vi arr(n);
-    read(arr);
-    multiset<int> bac, fro;
-    for(int i = 1; i < n; i++) {
-        
+    ll n, m;
+    cin >> n >> m;
+    ll ans = 0;
+    vector<vi> store(100, vi(n+1, -1));
+    vector<vector<int>> gra(n+1);
+    ll ma = 0;
+    auto recur = [&](auto&& recur, ll a, ll d) {
+        if(store[(d-1)*10+(a%d)][a] != -1) {
+            if(store[(d-1)*10+(a%d)][a] >= ma) return store[(d-1)*10+(a%d)][a];
+            // gra[a].insert()
+            if(store[(d-1)*10+(a%d)][a] == a) {
+                gra[a].push_back(a+d);
+                gra[a+d].push_back(a);
+                return store[(d-1)*10+(a%d)][a] = recur(recur, a + d, d);
+            }
+            return store[(d-1)*10+(a%d)][a] = recur(recur, store[(d-1)*10+(a%d)][a], d);
+        }
+        if(a >= ma) return store[(d-1)*10+(a%d)][a] = a;
+        gra[a].push_back(a + d);
+        gra[a+d].push_back(a);
+        return store[(d-1)*10+(a%d)][a] = recur(recur, a + d, d);
+    };
+    while(m--) {
+        ll a, d, k;
+        cin >> a >> d >> k;
+        ma = a + d * k;
+        recur(recur, a, d);
     }
-}
+    // for(int i = 1; i <= n; i++) {
+    //     if(gra[i].size()) {
+    //         cout << i << "->";
+    //         for(auto nei : gra[i]) cout << nei << " ";
+    //         line
+    //     }
+    // }
+    vi con(n+1, -1);
+    int cnt = 0;
+    auto dfs = [&](auto&& dfs, int u, int v) -> void {
+        con[u] = cnt;
+        for(auto nei : gra[u]) {
+            if(nei == v) continue;
+            if(con[nei] == -1) dfs(dfs, nei, u);
+        }
+    };
+    for(int i = 1; i <= n; i++) {
+        if(con[i] == -1) {
+            dfs(dfs, i, -1);
+            cnt++;
+        }
+    }
+    // for(int i = 1; i <= n; i++)
+    cout << cnt << endl;
+}   
 
 int main()
 { 

@@ -83,20 +83,31 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-// a1 a2 a3 a4 a5 (a6) a7 a8 a9 a10
-
-// abcdefghi
 
 void solve()
 {
-    int n;
+    ll n;
     cin >> n;
-    vi arr(n);
-    read(arr);
-    multiset<int> bac, fro;
-    for(int i = 1; i < n; i++) {
-        
+    ll l = n, r = (ll)2e18;
+    // ll ans = 0;
+    auto find_sqrt = [](ll middle) {
+        ll tem = 1;
+        ll l = 1, r = 2e9 + 2;
+        while(l <= r) {
+            ll mid = (l + r) / 2;
+            if(mid * mid <= middle) tem = mid, l = mid + 1;
+            else r = mid - 1;
+        }
+        return tem;
+    };
+    ll ans = 1e18;
+    while(l <= r) {
+        ll mid = l + (r - l) / 2;
+        ll ind = find_sqrt(mid);
+        if(mid - ind >= n) ans=mid, r = mid - 1;
+        else l = mid + 1;
     }
+    cout << ans << endl;
 }
 
 int main()
