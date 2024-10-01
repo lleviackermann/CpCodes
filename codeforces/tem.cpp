@@ -1,36 +1,71 @@
 #include <bits/stdc++.h>
-#define int long long
-const int mod = 1e9 + 7;
 using namespace std;
-int n, k;
-int phi(int x)
+const int maxn = 2e5 + 10;
+
+int n;
+struct DSU
 {
-  int ans = x;
-  for (int i = 2; i * i <= x; i++)
+  int d;
+  int fa[maxn], r[maxn];
+  void prepare()
   {
-    if (x % i == 0)
-    {
-      ans = ans / i * (i - 1);
-    }
-    while (x % i == 0)
-    {
-      x /= i;
-    }
+    for (int i = 1; i <= n; i++)
+      fa[i] = i, r[i] = i;
   }
-  if (x > 1)
+  int find(int x)
   {
-    ans = ans / x * (x - 1);
+    if (fa[x] == x)
+      return x;
+    return fa[x] = find(fa[x]);
   }
-  return ans;
+  void merge(int x, int y)
+  {
+    x = find(x), y = find(y);
+    if (x == y)
+      return;
+    fa[x] = y;
+    r[y] = max(r[x], r[y]);
+  }
+  void chg(int L, int R)
+  {
+    for (int p = find(L); p < R; p = find(p))
+      merge(p, p + d);
+  }
+} dsu[11];
+
+void solve()
+{
+  int m;
+  scanf("%d%d", &n, &m);
+  for (int i = 0; i <= 10; i++)
+    dsu[i].prepare(), dsu[i].d = i;
+  for (int i = 1; i <= m; i++)
+  {
+    int a, d, k;
+    scanf("%d%d%d", &a, &d, &k);
+    dsu[d].chg(a, a + d * k);
+  }
+  for(int i = 1; i <= n; i++) {
+    cout << i << "->";
+    cout << dsu[2].fa[i] << "," << dsu[2].fa[i] << endl;
+  }
+  for (int i = 1; i <= 10; i++)
+    for (int j = 1; j <= n; j++)
+      dsu[0].merge(j, dsu[i].find(j));
+  int ans = 0;
+  for (int i = 1; i <= n; i++)
+    if (dsu[0].find(i) == i)
+      ans++;
+  printf("%d\n", ans);
 }
-signed main()
+
+int main()
 {
-  cin >> n >> k;
-  k = (k + 1) / 2;
-  for (int i = 1; i <= k && n > 1; i++)
+  int T;
+  scanf("%d", &T);
+  while (T--)
   {
-    n = phi(n);
+    solve();
   }
-  cout << n % mod;
   return 0;
 }
