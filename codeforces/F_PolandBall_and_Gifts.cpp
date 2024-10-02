@@ -86,44 +86,63 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 void solve()
 {
-    ll n, m;
-    cin >> n >> m;
-    vl arr(n);
+    int n, k;
+    cin >> n >> k;
+    vi arr(n);
     read(arr);
-   
-    ll ma = *max_element(all(arr));
-    ll low = 1, high = *max_element(all(arr));
-    ll ans = 1e18;
-    // int dx[]
-    auto binary = [&](ll mid) {
-        // ll cnt = 0;
-        vl cnt(n, 1e18);
-        int ind = 0;
-        for(auto num : arr) {
-            if(num <= mid) cnt[ind] = mid - num;
-            else {
-                ll temp = num;
-                int ops = 0;
-                while(temp > 0) {
-                    cnt[ind] = min(cnt[ind], abs(mid - temp) + ops);
-                    temp /= 2;
-                    ops++;
-                }
-            }
-            ind++;
-        }
-        sort(cnt.begin(), cnt.end());
-        ll ano = 0;
-        for(int i = 0; i < n-m; i++) ano += cnt[i];
-        ans = min(ans, ano);
-    };
-    for(auto num : arr) {
-        while(num) {
-            binary(num);
-            num /= 2;
+    for(auto &i : arr) --i;
+    vi flag(n, 0);
+    vi store;
+    for(int i = 0; i < n; i++) {
+        if(flag[i]) continue;
+        int x = i;
+        int cnt = 0;
+        while(!flag[x]) flag[x] = 1, x = arr[x], cnt++;
+        store.push_back(cnt);
+    }
+    print(store);
+    // for_ma
+    int ma = 0;
+    int temp = k;
+    for(auto num : store) {
+        if(temp <= 0) break;
+        int half = num / 2;
+        if(half >= temp) ma += temp * 2, temp = 0;
+        else ma += half * 2, temp -= half;
+    }
+    if(temp) {
+        for(auto num : store) {
+            if(temp <= 0) break;
+            if(num & 1) temp--, ma++;
         }
     }
-    cout << ans << endl;
+    sort(all(store));
+    vi dp(k+1, 0);
+    dp[0] = 1;
+    vi cnt(n+1, 0);
+    for(auto num : store) cnt[num]++;
+    for(int i = 0; i < store.size(); i++) {
+        if(i && store[i] == store[i-1]) continue;
+        int num = store[i];
+        if(num >= 100) break;
+        vi curr(k+1, 0);
+        for(int i = num; i <= k; i++) {
+            if(!dp[i] && dp[i-num] && curr[i-num] < cnt[num]) {
+                dp[i] = 1;
+                curr[i] = curr[i-num] + 1;
+            }
+        }
+    } 
+    bitset<1000001> bits;
+    for(int i = 0; i <= k; i++) if(dp[i]) bits[i] = 1;
+    for(auto num : store) {
+        if(num < 100) continue;
+        bits = bits | (bits << num);
+    } 
+    int mi = k+1;
+    if(bits[k]) mi--;
+    cout << mi << " " << ma << endl;
+    
 }
 
 int main()
@@ -132,7 +151,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    cin >> t;
+    // cin >> t;
     while (t--)
     {
         solve();

@@ -42,7 +42,7 @@ typedef set<pair<ll, ll>> spl;
 typedef ordered_set<ll> osl;
 typedef ordered_set<pair<ll, ll>> ospl;
 
-const ll mod = 1e9 + 7;
+const ll mod = 998244353;
 
 bool comp2(pair<ll, ll> &arr, pair<ll, ll> &b)
 {
@@ -83,47 +83,83 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
+long long binpow(long long a, long long b, long long m) {
+    a %= m;
+    long long res = 1;
+    while (b > 0) {
+        if (b & 1)
+            res = res * a % m;
+        a = a * a % m;
+        b >>= 1;
+    }
+    return res;
+}
 
 void solve()
 {
-    ll n, m;
-    cin >> n >> m;
-    vl arr(n);
-    read(arr);
-   
-    ll ma = *max_element(all(arr));
-    ll low = 1, high = *max_element(all(arr));
-    ll ans = 1e18;
-    // int dx[]
-    auto binary = [&](ll mid) {
-        // ll cnt = 0;
-        vl cnt(n, 1e18);
-        int ind = 0;
-        for(auto num : arr) {
-            if(num <= mid) cnt[ind] = mid - num;
-            else {
-                ll temp = num;
-                int ops = 0;
-                while(temp > 0) {
-                    cnt[ind] = min(cnt[ind], abs(mid - temp) + ops);
-                    temp /= 2;
-                    ops++;
-                }
-            }
-            ind++;
-        }
-        sort(cnt.begin(), cnt.end());
-        ll ano = 0;
-        for(int i = 0; i < n-m; i++) ano += cnt[i];
-        ans = min(ans, ano);
-    };
-    for(auto num : arr) {
-        while(num) {
-            binary(num);
-            num /= 2;
-        }
+    int n;
+    cin >> n;
+    ll fact[501];
+    fact[0] = 1;
+    for(int i = 1; i < 501; i++) fact[i] = fact[i-1] * i % mod;
+    vvi tre(n+1);
+    for(int i = 1; i < n; i++) {
+        int st, en;
+        cin >> st >> en;
+        tre[st].push_back(en);
+        tre[en].push_back(st);
     }
-    cout << ans << endl;
+    vi sub(n+1, 0);
+    vl permute(n+1, 0);
+    vi parent(n+1, 1);
+    auto dfs = [&](auto&& dfs, int u, int v) -> void {
+        parent[u] = v;
+        sub[u] = 1;
+        permute[u] = 1;
+        for(int nei : tre[u]) {
+            if(nei == v) continue;
+            dfs(dfs, nei, u);
+            sub[u] += sub[nei];
+            permute[u] = permute[u] * permute[nei] % mod;
+        }
+        permute[u] = permute[u] * fact[tre[u].size() - (u != 1)] % mod;
+    };
+    auto dfs2 = [&](auto&& dfs2, int u, int v) {
+        if(u != 1) {
+            vector<ll> par = dp[v];
+            vector<int> child;
+            for(auto nei : tre[v]) {
+                if(nei == u || nei == parent[v]) continue;
+                child.push_back(nei);
+            }
+            for(auto chi : child) {
+                for(int i = 500; i >= sub[chi]; i--) {
+                    par[i] += ()
+                }
+
+            }
+        }
+    };
+
+    dfs(dfs, 1, -1);
+    vector<vector<ll>> dp(n+1, vl(n+1, 0));
+    dp[1][1] = permute[1];
+    // cout << permute[1] << " ";
+    // for(int i = 2; i <= n; i++) cout << "0 ";
+    // cout << endl;
+    // // auto backtrack = [&](int u, int )
+    // for(int i = 1; i <= n; i++) {
+    //     int child = i;
+    //     vi path;
+    //     while(child != -1) {
+    //         path.push_back(child);
+    //         child = parent[child];
+    //     }
+    //     // cout << i << " ->";
+    //     // print(path);
+    //     vector<vector<ll>> dp(n+1, vl(n+1, 0));
+
+    // }
 }
 
 int main()
@@ -132,7 +168,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    cin >> t;
+    // cin >> t;
     while (t--)
     {
         solve();

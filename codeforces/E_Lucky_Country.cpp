@@ -86,44 +86,63 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 void solve()
 {
-    ll n, m;
+    int n, m;
     cin >> n >> m;
-    vl arr(n);
-    read(arr);
-   
-    ll ma = *max_element(all(arr));
-    ll low = 1, high = *max_element(all(arr));
-    ll ans = 1e18;
-    // int dx[]
-    auto binary = [&](ll mid) {
-        // ll cnt = 0;
-        vl cnt(n, 1e18);
-        int ind = 0;
-        for(auto num : arr) {
-            if(num <= mid) cnt[ind] = mid - num;
-            else {
-                ll temp = num;
-                int ops = 0;
-                while(temp > 0) {
-                    cnt[ind] = min(cnt[ind], abs(mid - temp) + ops);
-                    temp /= 2;
-                    ops++;
-                }
-            }
-            ind++;
+    vvi graph(n);
+    for(int i = 0; i < m; i++) {
+        int st, en;
+        cin >> st >> en;
+        --st, --en;
+        graph[en].push_back(st);
+        graph[st].push_back(en);
+    }
+    vi store;
+    vi visited(n, 0);
+    int cnt = 0;
+    auto dfs = [&](auto&& dfs, int u) -> void {
+        visited[u] = 1;
+        cnt++;
+        for(auto nei : graph[u]) {
+            if(!visited[nei]) dfs(dfs, nei);
         }
-        sort(cnt.begin(), cnt.end());
-        ll ano = 0;
-        for(int i = 0; i < n-m; i++) ano += cnt[i];
-        ans = min(ans, ano);
     };
-    for(auto num : arr) {
-        while(num) {
-            binary(num);
-            num /= 2;
+
+    for(int i = 0; i < n; i++) {
+        if(visited[i]) continue;
+        cnt = 0;
+        dfs(dfs, i);
+        store.push_back(cnt);
+    }
+    print(store);
+    vi flag(n+1, 0);
+    for(auto i : store) flag[i]++;
+    sort(all(store));
+    vi dp(n+1, -1);
+    dp[0] = 0;
+    // n = store.size();
+    int sz = store.size();
+    for(int i = sz-1; i >= 0; i--) {
+        if(i < sz-1 && store[i] == store[i+1]) continue;
+        vi crr(n+1, 0);
+        int num = store[i];
+        for(int i = num; i <= n; i++) {
+            if(dp[i-num] != -1 && crr[i-num] < flag[num] && dp[i] == -1) {
+                dp[i] = dp[i-num] + 1;
+                crr[i] = crr[i-num] + 1;
+            }
         }
     }
-    cout << ans << endl;
+    int ans = 1e9;
+    auto is_lucky = [&](int num) {
+        string s = to_string(num);
+        for(auto ch : s) if(!(ch == '4' || ch == '7')) return false;
+        return true;
+    };
+    for(int i = 4; i <= n; i++) {
+        if(is_lucky(i) && dp[i] != -1) ans = min(ans, dp[i]);
+    }
+    debug(ans);
+    cout << (ans == 1e9 ? -1 : (ans - 1)) << endl;
 }
 
 int main()
@@ -132,7 +151,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    cin >> t;
+    // cin >> t;
     while (t--)
     {
         solve();

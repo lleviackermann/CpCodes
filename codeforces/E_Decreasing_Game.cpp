@@ -86,44 +86,74 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 void solve()
 {
-    ll n, m;
-    cin >> n >> m;
-    vl arr(n);
+    int n;
+    cin >> n;
+    vi arr(n);
     read(arr);
-   
-    ll ma = *max_element(all(arr));
-    ll low = 1, high = *max_element(all(arr));
-    ll ans = 1e18;
-    // int dx[]
-    auto binary = [&](ll mid) {
-        // ll cnt = 0;
-        vl cnt(n, 1e18);
-        int ind = 0;
-        for(auto num : arr) {
-            if(num <= mid) cnt[ind] = mid - num;
-            else {
-                ll temp = num;
-                int ops = 0;
-                while(temp > 0) {
-                    cnt[ind] = min(cnt[ind], abs(mid - temp) + ops);
-                    temp /= 2;
-                    ops++;
-                }
+    vi sum(90001, 0), store(90001, -1);
+    int tot = accumulate(all(arr), 0);
+    sum[0] = 1;
+    for(int i = 0; i < n; i++) {
+        int num = arr[i];
+        for(int j = 90000; j >= num; j--) {
+            if(!sum[j] && sum[j-num]) {
+                sum[j] = 1, store[j] = i;
             }
-            ind++;
-        }
-        sort(cnt.begin(), cnt.end());
-        ll ano = 0;
-        for(int i = 0; i < n-m; i++) ano += cnt[i];
-        ans = min(ans, ano);
-    };
-    for(auto num : arr) {
-        while(num) {
-            binary(num);
-            num /= 2;
         }
     }
-    cout << ans << endl;
+    set<int> sec;
+    if(!(tot & 1) && sum[tot/2]) {
+        int x = store[tot/2];
+        int tem = tot / 2;
+        while(x!=-1) {
+            assert(sec.count(x) == 0);
+            sec.insert(x);
+            x = store[tem -= arr[x]];
+        }
+    }
+    if(sec.size()) {
+        cout << "Second" << endl;
+        cout.flush();
+        while(true) {
+            int ind;
+            cin >> ind;
+            if(ind == 0) return;
+            assert(ind!=-1);
+            ind--;
+            int check = sec.count(ind);
+            check ^= 1;
+            for(int i = 0; i < n; i++) {
+                if(arr[i] != 0 && sec.count(i) == check) {
+                    int mn = min(arr[i], arr[ind]);
+                    arr[ind] -= mn, arr[i] -= mn;
+                    cout << i + 1 << endl;
+                    cout.flush();
+                    break;
+                }
+            }
+        }
+        return;
+    } 
+    cout << "First" << endl;
+    cout.flush();
+    while(true) {
+        int choose;
+        for(int i = 0; i < n; i++) {
+            if(arr[i] != 0) {
+                choose = i;
+                break;
+            }
+        }
+        cout << choose + 1 << endl;
+        cout.flush();
+        int ind;
+        cin >> ind;
+        if(ind == 0) return;
+        assert(ind != -1);
+        --ind;
+        int mn = min(arr[ind], arr[choose]);
+        arr[choose] -= mn, arr[ind] -= mn;
+    }
 }
 
 int main()
@@ -132,7 +162,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    cin >> t;
+    // cin >> t;
     while (t--)
     {
         solve();

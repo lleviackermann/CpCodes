@@ -83,91 +83,50 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-ll ans = 0;
-
-ll findMin(vl &arr, ll n)
-{
-    // Calculate sum of all elements
-    ll sum = 0;
-    for (ll i = 0; i < n; i++)
-        sum += arr[i];
- 
-    // Create an array to store results of subproblems
-    bool dp[n + 1][sum + 1];
- 
-    // Initialize first column as true. 0 sum is possible
-    // with all elements.
-    for (ll i = 0; i <= n; i++)
-        dp[i][0] = true;
- 
-    // Initialize top row, except dp[0][0], as false. With
-    // 0 elements, no other sum except 0 is possible
-    for (ll i = 1; i <= sum; i++)
-        dp[0][i] = false;
- 
-    // Fill the partition table in bottom up manner
-    for (ll i = 1; i <= n; i++) {
-        for (ll j = 1; j <= sum; j++) {
-            // If i'th element is excluded
-            dp[i][j] = dp[i - 1][j];
- 
-            // If i'th element is included
-            if (arr[i - 1] <= j)
-                dp[i][j] |= dp[i - 1][j - arr[i - 1]];
-        }
-    }
- 
-    // Initialize difference of two sums.
-    ll diff = INT64_MAX;
- 
-    // Find the largest j such that dp[n][j]
-    // is true where j loops from sum/2 t0 0
-    for (ll j = sum / 2; j >= 0; j--) {
-        // Find the
-        if (dp[n][j] == true) {
-            diff = sum - 2 * j;
-            break;
-        }
-    }
-    return diff;
-}
-
-ll dfs(ll n, vl tree[], ll v) {
-    ll left = 0;
-    ll si = tree[n].size();
-    vl dp(si, 0);
-    for(int i = 0; i < tree[n].size(); i++) {
-        if(tree[n][i] == v) continue;
-        dp[i] = dfs(tree[n][i], tree, n);
-        left += dp[i];
-    }
-    ll temp = 0;
-    ll mi = findMin(dp, si);
-    ll sum = left;
-    left = (left - mi) / 2;
-    temp = left * (left + mi);
-    ans += (temp);
-    return 1 + sum;
-}
 
 void solve()
 {
-    ll n;
-    cin>>n;
-    // ll ans = 0;
-    vl tree[n+1];
-    for(int i = 2; i <= n; i++) {
-        ll x;
-        cin>>x;
-        tree[x].pb(i);
-        tree[i].pb(x);
+    int n;
+    cin >> n;
+    vvi tre(n);
+    for(int i = 1; i < n; i++) {
+        int pa;
+        cin >> pa;
+        --pa;
+        tre[pa].push_back(i);
     }
-    ll finalAns = 0;
-
-    ll total = dfs(1, tree, -1);
-    debug(total);
-    cout<<ans<<endl;
-    // cout<<"0\n";
+    // for(int i = 0; i < n; i++) {
+    //     cout << i << "->";
+    //     print(tre[i]);
+    // }
+    ll ans = 0;
+    vi sub(n, 0);
+    auto dfs = [&](auto&& dfs, int u) -> void {
+        assert(u < n);
+        vi childs;
+        sub[u] = 1;
+        for(auto nei : tre[u]) {
+            dfs(dfs, nei);
+            childs.push_back(sub[nei]);
+            sub[u] += sub[nei];
+        }
+        if(childs.size() > 1) {
+            bitset<5001> bits;
+            bits[0] = 1;
+            for(auto num : childs) {
+                bits = bits | (bits << num);
+            }
+            ll sum = accumulate(all(childs), 0ll);
+            for(int i = sum / 2; i >= 0; i--) {
+                if(bits[i]) {
+                    ans += i * (sum - i);
+                    break;
+                }
+            }
+        }
+    };
+    dfs(dfs, 0);
+    cout << ans << endl;
 }
 
 int main()
@@ -182,9 +141,9 @@ int main()
         solve();
     }
     clock_t end = clock();
-    double elapsed = double(end - start) / CLOCKS_PER_SEC;
     
     #ifndef ONLINE_JUDGE
+    double elapsed = double(end - start) / CLOCKS_PER_SEC;
     cout << setprecision(10) << elapsed << endl;
     #endif
     return 0;

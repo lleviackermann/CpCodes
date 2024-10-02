@@ -86,42 +86,69 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 void solve()
 {
-    ll n, m;
-    cin >> n >> m;
-    vl arr(n);
-    read(arr);
-   
-    ll ma = *max_element(all(arr));
-    ll low = 1, high = *max_element(all(arr));
-    ll ans = 1e18;
-    // int dx[]
-    auto binary = [&](ll mid) {
-        // ll cnt = 0;
-        vl cnt(n, 1e18);
-        int ind = 0;
-        for(auto num : arr) {
-            if(num <= mid) cnt[ind] = mid - num;
-            else {
-                ll temp = num;
-                int ops = 0;
-                while(temp > 0) {
-                    cnt[ind] = min(cnt[ind], abs(mid - temp) + ops);
-                    temp /= 2;
-                    ops++;
-                }
-            }
-            ind++;
+    int n;
+    cin >> n;
+    vvi tre(n);
+    for(int i = 1; i < n; i++) {
+        int pa;
+        cin >> pa;
+        --pa;
+        tre[pa].push_back(i);
+    }
+    // for(int i = 0; i < n; i++) {
+    //     cout << i << "->";
+    //     print(tre[i]);
+    // }
+    ll ans = 0;
+    vi sub(n, 0);
+    vvi children(n+1);
+    auto dfs = [&](auto&& dfs, int u) -> void {
+        assert(u < n);
+        sub[u] = 1;
+        for(auto nei : tre[u]) {
+            dfs(dfs, nei);
+            children[u].push_back(sub[nei]);
+            sub[u] += sub[nei];
         }
-        sort(cnt.begin(), cnt.end());
-        ll ano = 0;
-        for(int i = 0; i < n-m; i++) ano += cnt[i];
-        ans = min(ans, ano);
+        
     };
-    for(auto num : arr) {
-        while(num) {
-            binary(num);
-            num /= 2;
+    dfs(dfs, 0);
+    auto calc = [&](int val) {
+        auto &childs = children[val];
+        sort(childs.rbegin(), childs.rend());
+        ll sum = accumulate(all(childs), 0ll);
+        if(sum <= 2*childs[0]) {
+            ans += childs[0] * (sum - childs[0]);
+            return;
         }
+        unordered_map<int, int> cnt;
+        for(auto num :  childs) cnt[num]++;
+        vi dp(sum+1, 0);
+        dp[0] = 1;
+        for(int i = childs.size() - 1; i >= 0; i--) {
+            int num = childs[i];
+            if(i < childs.size() - 1 && num == childs[i + 1]) continue;
+            if(num >= 100) break;
+            vi flag(sum+1, 0);
+            for(int i = num; i <= sum; i++) {
+                if(!dp[i] && dp[i-num] && flag[i-num] < cnt[num]) dp[i] = 1, flag[i] = flag[i-num] + 1;
+            }
+        }
+        bitset<1000001> bits;
+        for(int i = 0; i <= sum; i++) if(dp[i]) bits[i] = 1;
+        for(auto num : childs) {
+            if(num < 100) break;
+            bits = bits | (bits << num);
+        }
+        for(int i = sum / 2; i >= 0; i--) {
+            if(bits[i]) {
+                ans += i * (sum - i);
+                break;
+            }
+        }
+    };
+    for(int i = 0; i < n; i++) {
+        if(children[i].size() > 1) calc(i);
     }
     cout << ans << endl;
 }
@@ -132,7 +159,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    cin >> t;
+    // cin >> t;
     while (t--)
     {
         solve();
