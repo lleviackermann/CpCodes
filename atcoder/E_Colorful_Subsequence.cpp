@@ -83,56 +83,39 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-long long binpow(long long a, long long b, long long m) {
-    a %= m;
-    long long res = 1;
-    while (b > 0) {
-        if (b & 1)
-            res = res * a % m;
-        a = a * a % m;
-        b >>= 1;
-    }
-    return res;
-}
-
-const int nmax = 2e5+10;
-ll fact[nmax], inv[nmax];
-void preprocess() {
-    fact[0] = 1;
-    for(int i = 1; i < nmax; i++) fact[i] = fact[i-1] * i % mod;
-    inv[nmax-1] = binpow(fact[nmax-1], mod-2, mod);
-    for(int i = nmax-2; i >= 0; i--) inv[i] = inv[i+1] * (i + 1) % mod;
-}
 
 void solve()
 {
-    ll h, w, n;
-    cin >> h >> w >> n;
-    vpl walls(n);
-    for(auto &i : walls) cin >> i.first >> i.second;
-    sort(all(walls), [&](pl &fir, pl &sec) {
-        if(fir.first == sec.first) return fir.second < sec.second;
-        return fir.first < sec.first;
-    });
-    walls.push_back({h, w});
-    n++;
-    vl dp(n);
-    auto nCr = [&](ll neo, ll deno) {
-        return fact[neo] * inv[deno] % mod * inv[neo - deno] % mod;
-    };
-
-    for(int i = 0; i < n; i++) {
-        auto [fir, sec] = walls[i];
-        dp[i] = nCr(fir + sec - 2, fir-1);
-        debug(dp[i]);
-        for(int j = 0; j < i; j++) {
-            auto [sf, ssec] = walls[j];
-            if(ssec > sec) continue;
-            dp[i] = (dp[i] - (dp[j] * nCr(fir - sf + sec - ssec, fir - sf) % mod) + mod) % mod;
-        }
-        debug3(fir, sec, dp[i]);
+    int n, k;
+    cin >> n >> k;
+    vector<array<ll, 2>> arr(n+1);
+    for(int i = 1; i <= n; i++) cin >> arr[i][0] >> arr[i][1];
+    ll color = arr[1][0], val = arr[1][1];
+    vector<array<ll, 2>> modified;
+    for(int i = 2; i <= n; i++) {
+        if(color != arr[i][0]) {
+            modified.push_back({color, val});
+            color = arr[i][0], val = arr[i][1];
+        } else val = max(val, arr[i][1]);
     }
-    cout << dp[n-1] << endl;
+    modified.push_back({color, val});
+    if(n - modified.size() > k) {
+        cout << "-1\n";
+        return;
+    }
+    if(n - modified.size() == k) {
+        ll sum = 0;
+        for(auto [_, va] : modified) sum += va;
+        cout << sum << endl;
+        return;
+    }
+    k -= (n - modified.size());
+    n = modified.size();
+    modified.insert(modified.begin(), {0, 0});
+    vector<vector<ll>> dp(n+1, vl(k+1, -1e18));
+    for(int i = 1; i <= n; ++i) {
+         
+    }
 }
 
 int main()
@@ -142,7 +125,6 @@ int main()
 
     int t = 1;
     // cin >> t;
-    preprocess();
     while (t--)
     {
         solve();

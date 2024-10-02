@@ -83,56 +83,22 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-long long binpow(long long a, long long b, long long m) {
-    a %= m;
-    long long res = 1;
-    while (b > 0) {
-        if (b & 1)
-            res = res * a % m;
-        a = a * a % m;
-        b >>= 1;
-    }
-    return res;
-}
-
-const int nmax = 2e5+10;
-ll fact[nmax], inv[nmax];
-void preprocess() {
-    fact[0] = 1;
-    for(int i = 1; i < nmax; i++) fact[i] = fact[i-1] * i % mod;
-    inv[nmax-1] = binpow(fact[nmax-1], mod-2, mod);
-    for(int i = nmax-2; i >= 0; i--) inv[i] = inv[i+1] * (i + 1) % mod;
-}
 
 void solve()
 {
-    ll h, w, n;
-    cin >> h >> w >> n;
-    vpl walls(n);
-    for(auto &i : walls) cin >> i.first >> i.second;
-    sort(all(walls), [&](pl &fir, pl &sec) {
-        if(fir.first == sec.first) return fir.second < sec.second;
-        return fir.first < sec.first;
-    });
-    walls.push_back({h, w});
-    n++;
-    vl dp(n);
-    auto nCr = [&](ll neo, ll deno) {
-        return fact[neo] * inv[deno] % mod * inv[neo - deno] % mod;
-    };
-
-    for(int i = 0; i < n; i++) {
-        auto [fir, sec] = walls[i];
-        dp[i] = nCr(fir + sec - 2, fir-1);
-        debug(dp[i]);
-        for(int j = 0; j < i; j++) {
-            auto [sf, ssec] = walls[j];
-            if(ssec > sec) continue;
-            dp[i] = (dp[i] - (dp[j] * nCr(fir - sf + sec - ssec, fir - sf) % mod) + mod) % mod;
-        }
-        debug3(fir, sec, dp[i]);
+    int n, m, c;
+    cin >> n >> m >> c;
+    ll ans = INT64_MAX;
+    vvi gra(n);
+    for(int i = 1; i <= m; i++) {
+        int st, en;
+        cin >> st >> en;
+        --st, --en;
+        gra[st].push_back(en);
+        gra[en].push_back(st);
     }
-    cout << dp[n-1] << endl;
+    
+
 }
 
 int main()
@@ -142,7 +108,6 @@ int main()
 
     int t = 1;
     // cin >> t;
-    preprocess();
     while (t--)
     {
         solve();
