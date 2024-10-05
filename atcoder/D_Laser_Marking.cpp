@@ -42,7 +42,7 @@ typedef set<pair<ll, ll>> spl;
 typedef ordered_set<ll> osl;
 typedef ordered_set<pair<ll, ll>> ospl;
 
-const ll mod = 998244353;
+const ll mod = 1e9 + 7;
 
 bool comp2(pair<ll, ll> &arr, pair<ll, ll> &b)
 {
@@ -83,20 +83,50 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-struct pt {
-    ll sum;
-    ll y;
+struct lineseg {
+    int x1, x2, y1, y2;
 };
+
+double calc_dist(ll x1, ll y1, ll x2, ll y2) {
+    ll x = (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2);
+    return sqrtl(x);
+}
 
 void solve()
 {
-    ll n, m, k;
-    cin >> n >> m >> k;
-    vl powe(19);
-    powe[0] = 1;
-    for(int i = 1; i < 19; i++) powe[i] = powe[i-1] * 10;
-    pt arr[2][n+1][(1<<10)];
+    int n;
+    double s, t;
+    cin >> n >> s >> t;
+    vector<lineseg> arr(n);
+    for(auto &i : arr) cin >> i.x1 >> i.y1 >> i.x2 >> i.y2;
+    double tem = 0;
+    for(auto i : arr) {
+        tem += calc_dist(i.x1, i.y1, i.x2, i.y2);
+        debug(tem);
+    }
 
+    vector<int> permute;
+    for(int i = 0; i < n; i++) permute.push_back(i);
+    double ano = 1e18;
+    auto calc = [&](auto&& calc, ll st, ll en, int ind) -> double {
+        if(ind == n) {
+            return 0;
+        }
+        double tem1 = 1e18;
+        lineseg temp = arr[permute[ind]];
+        tem1 = calc_dist(st, en, temp.x1, temp.y1) + calc(calc, temp.x2, temp.y2, ind+1);
+        tem1 = min(tem1, calc_dist(st, en, temp.x2, temp.y2) + calc(calc, temp.x1, temp.y1, ind+1));
+        return tem1;
+    };
+
+    do {
+        ano = min(ano, calc(calc, 0, 0, 0));
+        // print(permute)
+    } while(next_permutation(all(permute)));
+    debug2(tem, ano);
+    double ans = tem / t;
+    ans += ano / s;
+    cout << setprecision(12) << ans << endl;
 }
 
 int main()

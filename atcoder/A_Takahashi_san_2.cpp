@@ -42,7 +42,7 @@ typedef set<pair<ll, ll>> spl;
 typedef ordered_set<ll> osl;
 typedef ordered_set<pair<ll, ll>> ospl;
 
-const ll mod = 998244353;
+const ll mod = 1e9 + 7;
 
 bool comp2(pair<ll, ll> &arr, pair<ll, ll> &b)
 {
@@ -83,20 +83,22 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-struct pt {
-    ll sum;
-    ll y;
-};
 
 void solve()
 {
-    ll n, m, k;
-    cin >> n >> m >> k;
-    vl powe(19);
-    powe[0] = 1;
-    for(int i = 1; i < 19; i++) powe[i] = powe[i-1] * 10;
-    pt arr[2][n+1][(1<<10)];
-
+    string s;
+    cin >> s;
+    if(s.size() < 3) {
+        cout << "No\n";
+        return;
+    }
+    int n = s.size();
+    string tem = s.substr(n-3);
+    // tem += s[n-3] + s[n-2] + s[n-1];
+    debug(tem);
+    if(tem == "san") {
+        cout << "Yes\n";
+    } else cout << "No" << endl;
 }
 
 int main()

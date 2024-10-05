@@ -42,7 +42,7 @@ typedef set<pair<ll, ll>> spl;
 typedef ordered_set<ll> osl;
 typedef ordered_set<pair<ll, ll>> ospl;
 
-const ll mod = 998244353;
+const ll mod = 1e9 + 7;
 
 bool comp2(pair<ll, ll> &arr, pair<ll, ll> &b)
 {
@@ -83,20 +83,63 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-struct pt {
-    ll sum;
-    ll y;
+struct machine {
+    ll a1, p1, b1, q1;
+    // cin >> a1 >> p1 >> b1 >> 
 };
 
 void solve()
 {
-    ll n, m, k;
-    cin >> n >> m >> k;
-    vl powe(19);
-    powe[0] = 1;
-    for(int i = 1; i < 19; i++) powe[i] = powe[i-1] * 10;
-    pt arr[2][n+1][(1<<10)];
+    ll n, x;
+    cin >> n >> x;
+    vector<machine> arr(n);
+    for(auto &i : arr) cin >> i.a1 >> i.p1 >> i.b1 >> i.q1;
+    ll low = 0, high = 1e9+2;
+    ll ans = 0;
+    
+    auto price_getter = [&](ll lc, ll units, ll cost) {
+        return lc / units * cost;
+    };
 
+    auto helper = [&](ll mid, int ind) {
+        machine temp = arr[ind];
+        ll lc = temp.a1 * temp.b1 / __gcd(temp.a1, temp.b1);
+        ll div = mid / lc;
+        ll curr = (div - 1) * min(price_getter(lc, temp.a1, temp.p1), price_getter(lc, temp.b1, temp.q1));
+        curr = max(0ll, curr);
+        ll remain = mid % lc;
+        if(div > 0) remain += lc;
+        vl dp(2*lc+1, 1e17);
+        dp[0] = 0;
+        ll cur_min = 1e17;
+        for(int i = 1; i <= 2*lc; i++) {
+            if(i >= temp.b1) dp[i] = min(dp[i], dp[i-temp.b1] + temp.q1);
+            if(i >= temp.a1) dp[i] = min(dp[i], dp[i-temp.a1] + temp.p1);
+            if(i >= remain) cur_min = min(cur_min, dp[i]);
+        }
+        return cur_min + curr;
+    };
+
+    auto check = [&](ll mid) {
+        ll sum = 0;
+        int in = 0;
+        for(auto i : arr) {
+            ll tem = (mid + i.a1 - 1) / i.a1 * i.p1;
+            tem = min(tem, (mid + i.b1 - 1) / i.b1 * i.q1);
+            // tem = min(tem, mid * (i.p1 * i.b1 + i.q1 * i.a1) / (i.a1 * i.b1));
+            tem = min(tem, helper(mid, in));
+            in++;
+            sum += tem;
+        }
+        return sum <= x;
+    };
+
+    while(low <= high) {
+        ll mid = (low + high) / 2;
+        if(check(mid)) ans = mid, low = mid + 1;
+        else high = mid - 1;
+    }
+    cout << ans << endl;
 }
 
 int main()
