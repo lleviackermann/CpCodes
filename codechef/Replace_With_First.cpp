@@ -83,23 +83,35 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-long long binpow(long long a, long long b, long long m) {
-    a %= m;
-    long long res = 1;
-    while (b > 0) {
-        if (b & 1)
-            res = res * a % m;
-        a = a * a % m;
-        b >>= 1;
-    }
-    return res;
-}
 
 void solve()
 {
-    ll a, b, c;
-    cin >> a >> b >> c;
-    ll ans = c * binpow(c, (a-1), mod) % mod;
+    int n, m;
+    cin >> n >> m;
+    string s, t;
+    cin >> s >> t;
+    set<int> fir;
+    for(auto ch : s) fir.insert(ch);
+    int flag = 1;
+    for(auto ch : t) {
+        if(fir.count(ch)) flag = 0;
+    }
+    if(flag || s[0] != t[0]) {
+        cout << -1 << endl;
+        return;
+    }
+    int ans = 2;
+    auto is_sequence = [&](string f, string sec) {
+        if(f.size() > sec.size()) swap(f, sec);
+        int st = 0;
+        while(st < f.size() && st < sec.size() && f[st] == sec[st]) st++;
+        int tem = f.size() - 1;
+        int pre = sec.size() - 1;
+        while(tem >= 0 && f[tem] == sec[pre]) tem--, pre--;
+        return st >= tem + 1;
+    };
+    if(is_sequence(s, t)) ans = 1;
+    if(s == t) ans = 0;
     cout << ans << endl;
 }
 
@@ -109,7 +121,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    // cin >> t;
+    cin >> t;
     while (t--)
     {
         solve();

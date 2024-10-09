@@ -83,24 +83,21 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-long long binpow(long long a, long long b, long long m) {
-    a %= m;
-    long long res = 1;
-    while (b > 0) {
-        if (b & 1)
-            res = res * a % m;
-        a = a * a % m;
-        b >>= 1;
-    }
-    return res;
-}
 
 void solve()
 {
-    ll a, b, c;
-    cin >> a >> b >> c;
-    ll ans = c * binpow(c, (a-1), mod) % mod;
-    cout << ans << endl;
+    int n, m;
+    cin >> n >> m;
+    vvi mat(n, vi(m, 2));
+    for(int i = 0; i < n; i++) {
+        for(int j = 0; j < m; j++) {
+            if(j%n == i || i%m==j) mat[i][j] = 3;
+        }
+    }
+    for(auto &i : mat) {
+        for(auto &j : i) cout << j << " ";
+        cout << endl;
+    }
 }
 
 int main()
@@ -109,7 +106,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    // cin >> t;
+    cin >> t;
     while (t--)
     {
         solve();
