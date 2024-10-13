@@ -86,48 +86,22 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 void solve()
 {
-    int n;
-    cin >> n;
-    int root;
-    vi brightness(n, -1);
-    vvi tre(n);
-    ll sum = 0;
-    for(int i = 0; i < n; i++) {
-        int ai;
-        cin >> ai >> brightness[i];
-        sum += brightness[i];
-        --ai;
-        if(ai == -1) root = i;
-        if(ai >= 0) {
-            // tre[i].push_back(ai);
-            tre[ai].push_back(i);
-        }
-    }
-    if(sum % 3) {
-        cout << -1 << endl;
+    ll n, x;
+    cin >> n >> x;
+    vl arr(n);
+    read(arr);
+    // sort(all(arr));
+    if(x >= n) {
+        cout << *max_element(all(arr)) << endl;
         return;
     }
-    vi ans;
-    auto dfs = [&](auto&& dfs, int u) -> int {
-        int sz = 0;
-        sz += brightness[u];
-        for(auto nei : tre[u]) {    
-            sz += dfs(dfs, nei);
-        }
-        if(sz == sum / 3 && u != root && ans.size() < 2) {
-
-            debug2(u, sz);
-            ans.push_back(u+1);
-            sz = 0;
-        }
-        return sz;
-    };
-    dfs(dfs, root);
-    if(ans.size() == 2) {
-        for(auto i : ans) cout << i << " ";
-        cout << endl;
-    }
-    else cout << "-1" << endl;
+    sort(all(arr));
+    ll ans = 0;
+    // ll ci = 
+    ll sum = accumulate(all(arr), 0ll);
+    ll ce = (sum + x - 1) / x;
+    ll tem = max(ce, *max_element(all(arr)));
+    cout << tem << endl;
 }
 
 int main()
@@ -136,7 +110,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    // cin >> t;
+    cin >> t;
     while (t--)
     {
         solve();

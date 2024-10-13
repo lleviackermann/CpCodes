@@ -86,48 +86,16 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 void solve()
 {
-    int n;
-    cin >> n;
-    int root;
-    vi brightness(n, -1);
-    vvi tre(n);
-    ll sum = 0;
-    for(int i = 0; i < n; i++) {
-        int ai;
-        cin >> ai >> brightness[i];
-        sum += brightness[i];
-        --ai;
-        if(ai == -1) root = i;
-        if(ai >= 0) {
-            // tre[i].push_back(ai);
-            tre[ai].push_back(i);
-        }
+    int n, m;
+    cin >> n >> m;
+    vvi tre(n+1);
+    for(int i = 1; i <= m; i++) {
+        int st, en;
+        cin >> st >> en;
+        tre[st].push_back(en);
+        tre[en].push_back(st);
     }
-    if(sum % 3) {
-        cout << -1 << endl;
-        return;
-    }
-    vi ans;
-    auto dfs = [&](auto&& dfs, int u) -> int {
-        int sz = 0;
-        sz += brightness[u];
-        for(auto nei : tre[u]) {    
-            sz += dfs(dfs, nei);
-        }
-        if(sz == sum / 3 && u != root && ans.size() < 2) {
-
-            debug2(u, sz);
-            ans.push_back(u+1);
-            sz = 0;
-        }
-        return sz;
-    };
-    dfs(dfs, root);
-    if(ans.size() == 2) {
-        for(auto i : ans) cout << i << " ";
-        cout << endl;
-    }
-    else cout << "-1" << endl;
+    
 }
 
 int main()

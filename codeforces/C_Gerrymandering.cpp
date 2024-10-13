@@ -83,51 +83,85 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
+int dp[4][4][100001];
+
+string s, t;
+int n;
+vi fir, sec;
+
+int recur(int ind, int row_mask, int col_mask) {
+    if(ind == n) {
+        // cout << ind << " " << row_mask << " " << col_mask << endl;
+        if(row_mask == 3 && col_mask == 3) return 0;        
+        return -1e9;
+    }
+    if(dp[row_mask][col_mask][ind] != -1) return dp[row_mask][col_mask][ind];
+    int ans = 0;
+    if(row_mask == 0) {
+        if(col_mask == 2) {
+            int sum = fir[ind-1] + fir[ind-2] + fir[ind];
+            int flag = (sum >= 2 ? 1 : 0);
+            ans = max(ans, flag + recur(ind+1, 3, 0));
+        } else if(col_mask == 0) {
+            int sum = fir[ind-1] + fir[ind-2] + fir[ind];
+            int sum2 = sec[ind-1] + sec[ind-2] + sec[ind];
+            int flag = sum / 2 + sum2 / 2;
+            ans = max(ans, flag + recur(ind+1, 3, 3));
+        } else if(col_mask == 3) {
+            int sum = fir[ind-1] + fir[ind-2] + fir[ind];
+            int flag = sum / 2;
+            ans = max(ans, flag + recur(ind+1, 3, 2));
+        }
+    } else if(row_mask == 2) {
+        if(col_mask == 2) {
+            int sum = fir[ind-1] + sec[ind-1];
+            int flag1 = (sum + fir[ind]) / 2;
+            ans = max(ans, flag1 + recur(ind+1, 3, 2));
+            flag1 = (sum + sec[ind]) / 2;
+            ans = max(ans, flag1 + recur(ind+1, 2, 3));
+            ans = max(ans, recur(ind+1, 0, 0));
+        } else if(col_mask == 3) {
+            ans = max(ans, recur(ind+1, 0, 2));
+            int flag = (fir[ind-1] + fir[ind] + sec[ind]) / 2;
+            ans = max(ans, flag + recur(ind + 1, 3, 3));
+        } else if(col_mask == 0) {
+            int flag = (sec[ind-2] + sec[ind-1] + sec[ind]) / 2;
+            ans = max(ans, flag + recur(ind+1, 0, 3));
+        }
+    } else if(row_mask == 3) {
+        if(col_mask == 2) {
+            ans = max(ans, recur(ind + 1, 2, 0));
+            int flag = (fir[ind] + sec[ind-1] + sec[ind]) / 2;
+            ans = max(ans, flag + recur(ind+1, 3, 3));
+        } else if(col_mask == 3) {
+            ans = max(ans, recur(ind+1, 2, 2));
+        } else if(col_mask == 0) {
+            int flag = (sec[ind-2] + sec[ind-1] + sec[ind]) / 2;
+            ans = max(ans, flag + recur(ind + 1, 2, 3));
+        }
+    }
+    debug4(ind, row_mask, col_mask, ans);
+    return dp[row_mask][col_mask][ind] = ans;
+}
 
 void solve()
 {
-    int n;
     cin >> n;
-    int root;
-    vi brightness(n, -1);
-    vvi tre(n);
-    ll sum = 0;
+    cin >> s >> t;
+    fir.clear();
+    sec.clear();
+    fir.resize(n, 0);
+    sec.resize(n, 0);
     for(int i = 0; i < n; i++) {
-        int ai;
-        cin >> ai >> brightness[i];
-        sum += brightness[i];
-        --ai;
-        if(ai == -1) root = i;
-        if(ai >= 0) {
-            // tre[i].push_back(ai);
-            tre[ai].push_back(i);
-        }
+        if(s[i] == 'A') fir[i] = 1;
+        if(t[i] == 'A') sec[i] = 1;
     }
-    if(sum % 3) {
-        cout << -1 << endl;
-        return;
+    // memset(dp, -1, sizeof(dp));
+    for(int i = 0; i < 4; i++) {
+        for(int j = 0; j < 4; j++) for(int k = 0; k < n; k++) dp[i][j][k] = -1;
     }
-    vi ans;
-    auto dfs = [&](auto&& dfs, int u) -> int {
-        int sz = 0;
-        sz += brightness[u];
-        for(auto nei : tre[u]) {    
-            sz += dfs(dfs, nei);
-        }
-        if(sz == sum / 3 && u != root && ans.size() < 2) {
 
-            debug2(u, sz);
-            ans.push_back(u+1);
-            sz = 0;
-        }
-        return sz;
-    };
-    dfs(dfs, root);
-    if(ans.size() == 2) {
-        for(auto i : ans) cout << i << " ";
-        cout << endl;
-    }
-    else cout << "-1" << endl;
+    cout << recur(0, 3, 3) << endl;
 }
 
 int main()
@@ -136,7 +170,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    // cin >> t;
+    cin >> t;
     while (t--)
     {
         solve();

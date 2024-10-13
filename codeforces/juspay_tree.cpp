@@ -68,8 +68,9 @@ void solve()
             }
             level *= m;
         }
-        int no_flag = -1e9, des_flag = -1e9 + 10;
-        vector<int> uid_store(n, no_flag);
+        ll no_flag = -1e10;
+        vector<ll> uid_store(n, no_flag);
+        vector<ll> descending(n, 0);
         while (q--)
         {
             int sign, uid;
@@ -82,26 +83,25 @@ void solve()
                 int mp = maped;
                 while (mp != -1)
                 {
-                    if (uid_store[mp] != no_flag  && uid_store[mp] != des_flag) {
+                    if (uid_store[mp] != no_flag) {
                         pa_flag = true;
                         break;
                     }
-                        
                     mp = parent[mp];
                 }
-                if (uid_store[maped] != no_flag || pa_flag)
+                if (uid_store[maped] != no_flag || descending[maped] > 0 || pa_flag)
                 {
                     cout << "false" << endl;
                 }
                 else
                 {
                     mp = maped;
+                    uid_store[mp] = uid;
                     while (mp != -1)
                     {
-                        uid_store[mp] = des_flag;
+                        descending[mp]++;
                         mp = parent[mp];
                     }
-                    uid_store[maped] = uid;
                     cout << "true" << endl;
                 }
             }
@@ -111,9 +111,10 @@ void solve()
                 {
                     // uid_store[maped] = no_flag;
                     int x = maped;
+                    uid_store[maped] = no_flag;
                     while (maped != -1)
                     {
-                        uid_store[maped] = no_flag;
+                        descending[maped]--;
                         maped = parent[maped];
                     }
                     cout << "true" << endl;
@@ -123,6 +124,8 @@ void solve()
                     cout << "false" << endl;
                 }
             }
+            // for(auto i : uid_store) cout << i << " ";
+            // cout << endl;
         }
     }
 }
