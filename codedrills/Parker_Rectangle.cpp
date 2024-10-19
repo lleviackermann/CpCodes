@@ -156,167 +156,46 @@ void print(T t) { cout << t << "\n"; }
 
 #endif
 
-bool validOrNot(vvi &mat)
+bool validOrNot(vl &mat, int n)
 {
-    int n = mat.size();
-    vl arr;
-    for (int i = 0; i < n; i++)
-    {
-        ll sum = 0;
-        for (int j = 0; j < n; j++)
-            sum += mat[i][j];
-        arr.pb(sum);
+    // int n = mat.size();
+    vi row(n, 0), col(n, 0);
+    for(int i = 0; i < n*n; i++) {
+        row[i/n] += mat[i];
+        col[i%n] += mat[i];
     }
-    for (int i = 0; i < n; i++)
-    {
-        ll sum = 0;
-        for (int j = 0; j < n; j++)
-            sum += mat[j][i];
-        arr.pb(sum);
+    int mn = 1e9, mx = -1e9;
+    for(int i = 0; i < n; i++) {
+        mn = min(mn, min(row[i], col[i]));
+        mx = max(mx, max(row[i], col[i]));
     }
-    sort(all(arr));
-    // print(arr);
-    ll ma_diff = n;
-    return arr.back() - arr[0] <= ma_diff;
+    return mx - mn <= n;
 }
 // 1 7 6
 // 5 2 8
 // 9 4 3
 void solve()
 {
-    int n;
-    cin >> n;
-    if(n == 3) {
-        cout<<"1 2\n";
-        cout<<"1 2\n";
-        return;
-    }
-    if(n == 5) {
-        cout<<"2 3\n";
-        cout<<"0 4 3\n";
-        cout<<"5 1 2\n";
-    }
-    if (n & 1)
-    {
-        cout << "-1\n";
-        return;
-    }
-    int row = n / 2;
-    vvi mat(row, vi(row));
-    int start = 1, end = row * row;
-    if (row % 4 == 0 || row % 4 == 1)
-    {
-        for (int i = 0; i < row; i += 4)
-        {
-            if (i + 3 >= row)
-                continue;
-            for (int j = i; j < i + 4; j++)
-            {
-                int mid = (row / 4) * 4 / 2;
-                if (j == i || j == i + 3)
-                {
-                    for (int k = 0; k < mid; k++)
-                        mat[j][k] = start++;
-                    for (int k = 2 * mid - 1; k >= mid; k--)
-                        mat[j][k] = end--;
-                }
-                else
-                {
-                    for (int k = 0; k < mid; k++)
-                        mat[j][k] = end--;
-                    for (int k = 2 * mid - 1; k >= mid; k--)
-                        mat[j][k] = start++;
-                }
-            }
+    // int n;
+    // cin >> n;
+    for(int i = 6; i <= 6; i += 2) {
+        cout << i << " hah " << endl;
+        ll n = i;
+        vl num;
+        for(int j = 1; j <= n * n / 4; j++) {
+            num.push_back(j);
         }
-        if (row % 4)
-        {
-            int change = 1;
-            while (change < row)
-            {
-                for (int i = 0; i < row; i += 2)
-                {
-                    swap(mat[change][i], mat[change][i + 1]);
+        do {
+            // cout << "hi\n";
+            if(validOrNot(num, i / 2)) {
+                for(int j = 0; j < n * n / 4; j++) {
+                    cout << num[j] << " ";
+                    if(j % (n / 2) == (n / 2 - 1)) cout << endl;
                 }
-                change++;
-                if (change % 4 == 3)
-                    change += 2;
+                cout << "nex\n";
             }
-            for (int i = 1; i < row; i += 2)
-            {
-                mat[row - 1][i] = start++;
-            }
-            for (int i = 0; i < row - 1; i++)
-                mat[i][row - 1] = start++;
-            for (int i = 0; i < row; i += 2)
-                mat[row - 1][i] = start++;
-        }
-    }
-    else
-    {
-        for (int i = 0; i < row; i += 4)
-        {
-            if (i + 3 >= row)
-                continue;
-            for (int j = i; j < i + 4; j++)
-            {
-                int mid = row / 2;
-                if (j == i || j == i + 3)
-                {
-                    for (int k = 0; k < mid; k++)
-                        mat[j][k] = start++;
-                    for (int k = 2 * mid - 1; k >= mid; k--)
-                        mat[j][k] = end--;
-                }
-                else
-                {
-                    for (int k = 0; k < mid; k++)
-                        mat[j][k] = end--;
-                    for (int k = 2 * mid - 1; k >= mid; k--)
-                        mat[j][k] = start++;
-                }
-            }
-        }
-        if (row % 4 == 2)
-        {
-            for (int i = 0; i < row; i++)
-            {
-                if (i % 2)
-                {
-                    mat[row - 2][i] = start++;
-                    mat[row - 1][i] = end--;
-                }
-                else
-                {
-                    mat[row - 2][i] = end--;
-                    mat[row - 1][i] = start++;
-                }
-            }
-        }
-        else
-        {
-            int mid = row / 2;
-            for (int k = 0; k < mid; k++)
-                mat[row-3][k] = start++;
-            for (int k = 2 * mid - 1; k >= mid; k--)
-                mat[row-3][k] = end--;
-            for (int k = 0; k < mid; k++)
-                mat[row-2][k] = end--;
-            for (int k = 2 * mid - 1; k >= mid; k--)
-                mat[row-2][k] = start++;
-            for(int k = mid; k < 2*mid; k++) mat[row-1][k] = start++;
-            for(int k = 0; k < row-1; k++) mat[k][row-1] = start++;
-            for(int k = 0; k < mid; k++) mat[row-1][k] = start++;
-            mat[row-1][row-1] = start++;
-        }
-    }
-    debug(validOrNot(mat));
-    cout<<row<<" "<<row<<endl;
-    for (auto r : mat)
-    {
-        for (auto c : r)
-            cout << c << " ";
-        cout << endl;
+        } while(next_permutation(all(num)));
+
     }
 }
 
@@ -326,7 +205,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    cin >> t;
+    // cin >> t;
     while (t--)
     {
         solve();
