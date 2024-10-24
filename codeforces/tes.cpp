@@ -1,40 +1,32 @@
-#include <bits/stdc++.h>
+#include<bits/stdc++.h>
 #define ll long long
 using namespace std;
-
-void solve() {
-    int n;
-    cin >> n;
-    vector<pair<ll, ll>> shop(n);
-    for(auto &i : shop) cin >> i.first >> i.second;
-    sort(shop.begin(), shop.end(), [&](pair<ll, ll>& fir, pair<ll, ll>& sec) {
-        if(fir.first == sec.first) return fir.second < sec.second;
-        return fir.first < sec.first;
-    }); 
-    ll low = 0, high = 1e15;
-    ll ans = 0;
-    while(low <= high) {
-        ll mid = (low + high) / 2;
-        ll st = shop[0].first;
-        int flag = 1;
-        for(int i = 1; i < n; i++) {
-            if(st + mid > shop[i].second) {
-                flag = 0;
-                break;
-            }
-            st = max(st + mid, shop[i].first);
-        }
-        if(flag) ans = mid, low = mid + 1;
-        else high = mid - 1;
+ll a,m,d,p;
+const ll mod=1e9+7;
+void solve()
+{
+    ll n,k;
+    scanf("%lld%lld",&n,&k);
+    ll cnt=0;
+    ll l=0,r=1;
+    while(1)
+    {
+        swap(l,r);
+        (l+=r)%=k;
+        cout << l << " " << r << endl;
+        cnt++;
+        if(!l) break;
     }
-    cout << ans << endl;
-    // for()
+    cout << cnt << endl;
+    printf("%lld\n",((n%mod)*cnt)%mod);
 }
-
-int main() {
-    int t = 1;
-    while(t--) {
+int main()
+{
+    int t;
+    scanf("%d",&t);
+    while(t--)
+    {
         solve();
     }
-    return 0;
+	return 0;
 }

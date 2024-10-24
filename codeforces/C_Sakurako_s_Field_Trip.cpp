@@ -83,91 +83,41 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-const int nmax = 6;
-vector<vector<int>> mat(nmax, vi(nmax + 1, 0));
-vector<vector<int>> visited(6, vi(7, -1));
 
-int dp[7][7][7][7][7][7][7][2];
-vi las(7, 5);
-
-bool won(int row, int col, int sign) {
-    for(int i = -3; i <= 0; i++) {
-        int hor = 0, vert = 0, diag = 0, secdiag = 0;
-        for(int j = i; j < i + 4; j++) {
-            //hor
-            int ny = col + j, nx = row;
-            if(ny >= 7 || ny < 0 || visited[nx][ny] != sign) {}
-            else hor++;
-            nx = row + j, ny = col;
-            if(nx >= 6 || nx < 0 || visited[nx][ny] != sign) {}
-            else vert++;
-            nx = row + j, ny = col + j;
-            if(nx >= 6 || nx < 0 || ny >= 7 || ny < 0 || visited[nx][ny] != sign) {}
-            else diag++;
-            nx = row - j, ny = col + j;
-            if(nx >= 6 || nx < 0 || ny >= 7 || ny < 0 || visited[nx][ny] != sign) {}
-            else secdiag++;
-        }
-        if(hor == 4 || vert == 4 || diag == 4 || secdiag == 4) return true;
-    }
-    return false;
-}
-
-set<int> se;
-int recur(int per) {
-    if(dp[las[0]+1][las[1]+1][las[2]+1][las[3]+1][las[4]+1][las[5]+1][las[6]+1][per] != -1) return 1;
-
-    for(int i = 0; i < 7; i++) {
-        if(las[i] != -1) {
-            if(mat[las[i]][i] == per) {
-                visited[las[i]][i] = per;
-                if(won(las[i], i, per)) {
-                    se.insert(per);
-                    // return dp[las[0]+1][las[1]+1][las[2]+1][las[3]+1][las[4]+1][las[5]+1][las[6]+1][per] = 1;
-                    // continue;
-                }
-                las[i]--;
-
-                recur(per^1);
-                las[i]++;
-                visited[las[i]][i] = -1;
-            }
-        }
-    }
-    return dp[las[0]+1][las[1]+1][las[2]+1][las[3]+1][las[4]+1][las[5]+1][las[6]+1][per] = 1;
-}
-
-int tt = 0;
 void solve()
 {
-    tt++;
-    for(int i = 0; i < 6; i++) {
-        string s;
-        cin >> s;
-        // cout << s << endl;
-        for(int j = 0; j < 7; j++) {
-            if(s[j] == 'F') mat[i][j] = 1;
-            else mat[i][j] = 0;
-            visited[i][j] = -1;
-        }
+    int n;
+    cin >> n;
+    vi arr(n);
+    read(arr);
+    vvi dp(n, vi(2, 1e9));
+    dp[0][0] = 0;
+    dp[1][0] = 0;
+    for(int i = 1; i < n / 2; i++) {
+        dp[i][0] = min(dp[i-1][0] + (arr[i-1] == arr[i]) + (arr[n-1-i] == arr[n-i]), 
+                    dp[i-1][1] + (arr[n-i] == arr[i]) + (arr[n-1-i] == arr[i-1]));
+        dp[i][1] = min(dp[i-1][0] + (arr[i-1] == arr[n-1-i]) + (arr[i] == arr[n-i]),
+                    dp[i-1][1] + (arr[n-1-i] == arr[n-i]) + (arr[i] == arr[i-1]));
+        debug(i);
+        debug2(dp[i][0], dp[i][1]);
     }
-    se.clear();
-    las.clear();
-    las.resize(7, 5);
-    memset(dp, -1, sizeof(dp));
-    recur(0);
-    char ans = '0';
-    if(se.size() == 2) ans = '?';
-    else if(se.size() == 1) {
-        if(*se.begin() == 0) ans = 'C';
-        else ans = 'F';
-    } 
-    cout << "Case #" << tt << ": " << ans << endl;
+    if(n%2) {
+        dp[n/2][0] = min(dp[n/2-1][0] + (arr[n/2-1] == arr[n/2]) + (arr[n/2] == arr[n/2+1]),
+                        dp[n/2-1][1] + (arr[n/2+1] == arr[n/2]) + (arr[n/2] == arr[n/2-1]));
+        dp[n/2][1] = dp[n/2][0];
+    } else {
+        dp[n/2-1][0] += (arr[n/2] == arr[n/2-1]);
+        dp[n/2-1][1] += (arr[n/2] == arr[n/2-1]);
+    }
+    int ind = n/2 - 1;
+    if(n%2) ind++;
+    cout << min(dp[ind][0], dp[ind][1]) << endl;
 }
 
 int main()
 { 
     suprit;
+    clock_t start = clock();
 
     int t = 1;
     cin >> t;
@@ -175,5 +125,11 @@ int main()
     {
         solve();
     }
+    clock_t end = clock();
+    
+    #ifndef ONLINE_JUDGE
+    double elapsed = double(end - start) / CLOCKS_PER_SEC;
+    cout << setprecision(10) << elapsed << endl;
+    #endif
     return 0;
 }
