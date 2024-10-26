@@ -83,45 +83,80 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
+long long binpow(long long a, long long b, long long m) {
+    a %= m;
+    long long res = 1;
+    while (b > 0) {
+        if (b & 1)
+            res = res * a % m;
+        a = a * a % m;
+        b >>= 1;
+    }
+    return res;
+}
 
 void solve()
 {
-    int n;
-    cin >> n;
-    vi arr(n);
+    ll n, m;
+    cin >> n >> m;
+    vl arr(n), brr(m);
     read(arr);
-    for(int i = 0; i < n; i++) arr.push_back(arr[i]);
-    int pre = 1, suf = 1;
-    // int pre 
-    for(int i = 1; i < n; i++) {
-        if(arr[i-1] >= arr[i]) pre++;
-        else break;
-    }
-    for(int i = n-2; i >= 0; i--) {
-        if(arr[i] >= arr[i+1]) suf++;
-        else break;
-    }
-    int ans = 1e9;
-    if(pre + suf == n) {
-        ans = min(suf+1, pre + 1);
-    }
-    debug2(pre, suf);
-    pre = 1;
-    for(int i = 1; i < n; i++) {
-        if(arr[i] >= arr[i-1]) pre++;
-        else break;
-    }
-    if(pre == n) ans = 0;
-    else if(arr[n-1] <= arr[0]) {
-        int x = 1;
-        for(int i = pre + 1; i < n; i++) {
-            if(arr[i] >= arr[i-1]) x++;
-            else break;
+    read(brr);
+    vvl dp(n+1, vl(m+1, 1e13));
+    dp[n][m] = (arr.back() > brr.back() ? 1e13 : 0);
+    vl store(n+1, 1e13);
+    vl countt(n+1, 0);
+    vl which(n+1, -1);
+    vl sum(n+1, 0);
+    for(int i = 1; i <= n; i++) sum[i] = sum[i-1] + arr[i-1];
+    store[n] = min(store[n], dp[n][m]);
+    if(store[n] == 0) countt[n] = 1;
+    for(int i = m; i >= 1; i--) {
+        vl temp_sum = countt;
+        temp_sum.push_back(1ll);
+        for(int j = n; j >= 0; j--) temp_sum[j] = (temp_sum[j] + temp_sum[j+1]) % mod;
+        for(int j = n; j >= 1; j--) {
+            if(j == n && i == m) continue;
+            if((j != n && dp[j+1][i] >= 1e13) || arr[j-1] > brr[i-1]) break;
+            ll low = j, high = n;
+            ll tem = j;
+            while(low <= high) {
+                ll mid = (low + high) / 2;
+                if(sum[mid] - sum[j-1] <= brr[i-1]) low = mid + 1, tem = mid;
+                else high = mid - 1; 
+            }
+            // debug3(j, i, tem);
+            ll nex = (tem == n ? 0 : store[tem+1]);
+            dp[j][i] = min(dp[j][i], m - i + nex);
+            store[j] = min(dp[j][i], store[j]);
+            if(store[j] == dp[j][i]) {
+                ll fir = j;
+                low = j, high = tem;
+                while(low <= high) {
+                    ll mid = (low + high) / 2;
+                    ll tem_nex = (mid == n ? 0ll : store[mid+1]);
+                    ll cost = m - i + tem_nex;
+                    if(cost > store[j]) low = mid + 1;
+                    else high = mid - 1, fir = mid;
+                }
+                debug4(j, i, fir, tem);
+                // print(temp_sum);
+                // countt[j] += 
+                ll ano = 0;
+                if(tem + 2 <= n) ano = temp_sum[tem + 2];
+                else if(tem + 2 == n + 1) ano = 1;
+                countt[j] += (temp_sum[fir + 1] - ano + mod);
+                countt[j] %= mod;
+            }
+            if(j == n) temp_sum[j] = countt[j] + 1;
+            else temp_sum[j] = (temp_sum[j+1] + countt[j]) % mod;
+            temp_sum[j] %= mod;
         }
-        debug2(pre, x);
-        if(x == n - pre) ans = min(ans, x);
+        // for(int j = 1; j <= n; j++) cout << countt[j] << " ";
+        // cout << endl;
     }
-    cout << (ans == 1e9 ? -1 : ans) << endl;
+    if(store[1] >= 1e13) cout << "-1\n";
+    else cout << store[1] << " " << countt[1] << endl;
 }
 
 int main()
@@ -136,9 +171,9 @@ int main()
         solve();
     }
     clock_t end = clock();
-    double elapsed = double(end - start) / CLOCKS_PER_SEC;
     
     #ifndef ONLINE_JUDGE
+    double elapsed = double(end - start) / CLOCKS_PER_SEC;
     cout << setprecision(10) << elapsed << endl;
     #endif
     return 0;

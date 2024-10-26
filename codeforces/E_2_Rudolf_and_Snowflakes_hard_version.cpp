@@ -83,45 +83,49 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
+constexpr ll ma = 1e18+10;
 
 void solve()
 {
-    int n;
+    ll n;
     cin >> n;
-    vi arr(n);
-    read(arr);
-    for(int i = 0; i < n; i++) arr.push_back(arr[i]);
-    int pre = 1, suf = 1;
-    // int pre 
-    for(int i = 1; i < n; i++) {
-        if(arr[i-1] >= arr[i]) pre++;
-        else break;
-    }
-    for(int i = n-2; i >= 0; i--) {
-        if(arr[i] >= arr[i+1]) suf++;
-        else break;
-    }
-    int ans = 1e9;
-    if(pre + suf == n) {
-        ans = min(suf+1, pre + 1);
-    }
-    debug2(pre, suf);
-    pre = 1;
-    for(int i = 1; i < n; i++) {
-        if(arr[i] >= arr[i-1]) pre++;
-        else break;
-    }
-    if(pre == n) ans = 0;
-    else if(arr[n-1] <= arr[0]) {
-        int x = 1;
-        for(int i = pre + 1; i < n; i++) {
-            if(arr[i] >= arr[i-1]) x++;
-            else break;
+    ll ind = log2(n + 1);
+    // cout << ind << endl;
+    int flag = 0;
+    auto binary_check = [&](ll num, ll k) {
+        ll curr = 1;
+        ll tem = 0;
+        while(true) {
+            if(ma / curr < num) return true;
+            curr *= num;
+            tem++;
+            if(tem == k) break;
         }
-        debug2(pre, x);
-        if(x == n - pre) ans = min(ans, x);
+        ll sum = 0;
+        while(curr > 0) {
+            sum += curr;
+            curr /= num;
+        }
+        if(sum == n) {
+            cout << "YES" << endl;
+            flag = 1;
+            return true;
+        }
+        return sum >= n;
+    };
+    // binary_check(2, 3);
+    for(ll i = ind; i >= 2; i--) {
+        ll low = 2, high = 1e9;
+        while(low <= high) {
+            ll mid = (low + high) / 2;
+            if(binary_check(mid, i)) {
+                high = mid - 1;
+            }
+            else low = mid + 1;
+            if(flag) return;
+        }
     }
-    cout << (ans == 1e9 ? -1 : ans) << endl;
+    cout << "NO" << endl;
 }
 
 int main()
@@ -136,9 +140,9 @@ int main()
         solve();
     }
     clock_t end = clock();
-    double elapsed = double(end - start) / CLOCKS_PER_SEC;
     
     #ifndef ONLINE_JUDGE
+    double elapsed = double(end - start) / CLOCKS_PER_SEC;
     cout << setprecision(10) << elapsed << endl;
     #endif
     return 0;

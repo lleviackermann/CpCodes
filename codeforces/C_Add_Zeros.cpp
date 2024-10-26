@@ -86,42 +86,24 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 void solve()
 {
-    int n;
+    ll n;
     cin >> n;
-    vi arr(n);
+    vl arr(n);
     read(arr);
-    for(int i = 0; i < n; i++) arr.push_back(arr[i]);
-    int pre = 1, suf = 1;
-    // int pre 
-    for(int i = 1; i < n; i++) {
-        if(arr[i-1] >= arr[i]) pre++;
-        else break;
+    map<ll, vl> store;
+    for(int i = 0; i < n; i++) {
+        store[i + arr[i]].push_back(i+1);
     }
-    for(int i = n-2; i >= 0; i--) {
-        if(arr[i] >= arr[i+1]) suf++;
-        else break;
-    }
-    int ans = 1e9;
-    if(pre + suf == n) {
-        ans = min(suf+1, pre + 1);
-    }
-    debug2(pre, suf);
-    pre = 1;
-    for(int i = 1; i < n; i++) {
-        if(arr[i] >= arr[i-1]) pre++;
-        else break;
-    }
-    if(pre == n) ans = 0;
-    else if(arr[n-1] <= arr[0]) {
-        int x = 1;
-        for(int i = pre + 1; i < n; i++) {
-            if(arr[i] >= arr[i-1]) x++;
-            else break;
+    set<ll> val;
+    val.insert(n);
+    for(auto &[fir, sec] : store) {
+        if(val.count(fir)) {
+            for(auto &ele : sec) {
+                val.insert(fir + ele - 1);
+            }
         }
-        debug2(pre, x);
-        if(x == n - pre) ans = min(ans, x);
-    }
-    cout << (ans == 1e9 ? -1 : ans) << endl;
+    }    
+    cout << *val.rbegin() << endl;
 }
 
 int main()
@@ -136,9 +118,9 @@ int main()
         solve();
     }
     clock_t end = clock();
-    double elapsed = double(end - start) / CLOCKS_PER_SEC;
     
     #ifndef ONLINE_JUDGE
+    double elapsed = double(end - start) / CLOCKS_PER_SEC;
     cout << setprecision(10) << elapsed << endl;
     #endif
     return 0;

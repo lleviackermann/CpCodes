@@ -95,21 +95,6 @@ long long binpow(long long a, long long b, long long m) {
     return res;
 }
 
-constexpr int nmax = 2e5+1;
-ll fact[nmax], inv[nmax];
-
-void precalc() {
-    fact[0] = 1;
-    for(int i = 1; i < nmax; i++) fact[i] = fact[i-1] * i % mod;
-    inv[nmax-1] = binpow(fact[nmax-1], mod-2, mod);
-    for(int i = nmax-2; i >= 0; i--) inv[i] = inv[i+1] * (i + 1) % mod;
-}
-
-ll nCr(ll n, ll r) {
-    ll ans = fact[n] * inv[r] % mod;
-    return ans * inv[n-r] % mod;
-}
-
 void solve()
 {
     ll n;
@@ -117,46 +102,38 @@ void solve()
     vi arr(n), prr(n);
     read(arr);
     read(prr);
+    ll inverse = binpow(10000, mod-2, mod);
+    vvi store(1024);
+    for(int i = 0; i < n; i++) store[arr[i]].push_back(prr[i]);
+    vvl num_dp(2, vl(1024, 0));
+    for(int i = 1; i < 1024; i++) {
+        num_dp[0][i] = 1;
+        num_dp[1][i] = 0;
+        for(auto &pr : store[i]) {
+            ll odd = num_dp[1][i], even = num_dp[0][i];
+            num_dp[0][i] = (odd * pr % mod * inverse % mod + even * (10000 - pr) % mod * inverse % mod) % mod;
+            num_dp[1][i] = (even * pr % mod * inverse % mod + odd * (10000 - pr) % mod * inverse % mod) % mod;
+        }
+    }
+    vvl dp(2, vl(1024, 0));
+    dp[0][0] = 1;
+    int prev = 0;
     ll ans = 0;
-    vector<vector<pair<int, ll>>> dp(n);
-    for(int i = 0; i < n; i++) dp[i].push_back({0, 1ll});
-    for(int i = 1; i >= 0; i--) {
-        int zero = 0, ones = 0;
-        for(int j = 0; j < n; j++) {
-            if((arr[j] >> i) & 1) ones++;
-            else zero++;
-        }
-        debug(i);
-        debug2(zero, ones);
-        // ll for_zero = 
-        for(int j = 0; j < n; j++) {
-            int is_set = (arr[j] >> i) & 1;
-            vector<pair<int, ll>> new_pa;
-            ll for_zero = 0, for_one = 0;
-            if(is_set) {
-                for_one = binpow(2, zero, mod) * binpow(2, ones-2, mod) % mod;
-                for_zero = binpow(2, zero, mod) * binpow(2, ones-2, mod) % mod;
-            } else {
-                for_one = binpow(2, zero-1, mod) * binpow(2, ones - 1, mod) % mod;
-                for_zero = binpow(2, zero-1, mod) * binpow(2, ones - 1, mod) % mod;
-            }
-            debug2(for_zero, for_one);
-            auto &vec = dp[j];
-            for(auto [fir, sec] : vec) {
-                new_pa.push_back({fir | (1 << i), sec * for_one % mod});
-                new_pa.push_back({fir, sec * for_zero % mod});
-            }
-            vec.clear();
-            vec = new_pa;
-        }
-    }
+    sort(all(arr));
+    arr.erase(unique(all(arr)), arr.end());
+    n = arr.size();
     for(int i = 0; i < n; i++) {
-        // auto &vec = dp[i]
-        cout << i << "->";
-        for(auto [fir, sec] : dp[i]) {
-            cout << fir << " " << sec << endl;
+        int nex = prev ^ 1;
+        for(int j = 0; j < 1024; j++) {
+            dp[nex][j] = dp[prev][j] * num_dp[0][arr[i]] % mod + dp[prev][j^arr[i]] * num_dp[1][arr[i]] % mod;
+            // dp[nex][j] %= mod;
         }
+        prev = prev ^ 1;
     }
+    for(ll i = 1; i < 1024; i++) {
+        ans = (ans + (i * i) * dp[prev][i] % mod) % mod;
+    }
+    cout << ans << endl;
 }
 
 int main()
@@ -165,7 +142,6 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    precalc();
     cin >> t;
     while (t--)
     {

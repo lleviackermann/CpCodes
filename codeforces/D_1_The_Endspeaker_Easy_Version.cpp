@@ -86,42 +86,37 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 void solve()
 {
-    int n;
-    cin >> n;
-    vi arr(n);
+    ll n, m;
+    cin >> n >> m;
+    vl arr(n), brr(m);
     read(arr);
-    for(int i = 0; i < n; i++) arr.push_back(arr[i]);
-    int pre = 1, suf = 1;
-    // int pre 
-    for(int i = 1; i < n; i++) {
-        if(arr[i-1] >= arr[i]) pre++;
-        else break;
-    }
-    for(int i = n-2; i >= 0; i--) {
-        if(arr[i] >= arr[i+1]) suf++;
-        else break;
-    }
-    int ans = 1e9;
-    if(pre + suf == n) {
-        ans = min(suf+1, pre + 1);
-    }
-    debug2(pre, suf);
-    pre = 1;
-    for(int i = 1; i < n; i++) {
-        if(arr[i] >= arr[i-1]) pre++;
-        else break;
-    }
-    if(pre == n) ans = 0;
-    else if(arr[n-1] <= arr[0]) {
-        int x = 1;
-        for(int i = pre + 1; i < n; i++) {
-            if(arr[i] >= arr[i-1]) x++;
-            else break;
+    read(brr);
+    vvl dp(n+1, vl(m+1, 1e13));
+    dp[n][m] = (arr.back() > brr.back() ? 1e13 : 0);
+    vl store(n+1, 1e13);
+    vl sum(n+1, 0);
+    for(int i = 1; i <= n; i++) sum[i] = sum[i-1] + arr[i-1];
+    store[n] = min(store[n], dp[n][m]);
+    for(int i = m; i >= 1; i--) {
+        for(int j = n; j >= 1; j--) {
+            if(j == n && i == m) continue;
+            if((j != n && dp[j+1][i] >= 1e13) || arr[j-1] > brr[i-1]) break;
+            ll low = j, high = n;
+            ll tem = j;
+            while(low <= high) {
+                ll mid = (low + high) / 2;
+                if(sum[mid] - sum[j-1] <= brr[i-1]) low = mid + 1, tem = mid;
+                else high = mid - 1; 
+            }
+            debug3(j, i, tem);
+            ll nex = (tem == n ? 0 : store[tem+1]);
+            dp[j][i] = min(dp[j][i], m - i + nex);
+            store[j] = min(store[j], dp[j][i]);
         }
-        debug2(pre, x);
-        if(x == n - pre) ans = min(ans, x);
+        // for(int j = 1; j <= n; j++) cout << dp[j][i] << " ";
+        // cout << endl;
     }
-    cout << (ans == 1e9 ? -1 : ans) << endl;
+    cout << (store[1] >= 1e13 ? -1 : store[1]) << endl;
 }
 
 int main()
@@ -136,9 +131,9 @@ int main()
         solve();
     }
     clock_t end = clock();
-    double elapsed = double(end - start) / CLOCKS_PER_SEC;
     
     #ifndef ONLINE_JUDGE
+    double elapsed = double(end - start) / CLOCKS_PER_SEC;
     cout << setprecision(10) << elapsed << endl;
     #endif
     return 0;

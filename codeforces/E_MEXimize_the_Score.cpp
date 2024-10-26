@@ -120,20 +120,50 @@ void solve()
     for(int i = 0; i < n; i++) cnt[arr[i]]++;
     dp[0].push_back(0);
     ll ans = 0;
+    ll sum = n;
+    sum -= cnt[0];
     for(int i = 1; i <= cnt[0]; i++) {
         dp[0].push_back(nCr(cnt[0], i));
-        ans += dp[0][i] * i;
+        ans += dp[0][i] * i % mod *binpow(2, sum, mod) % mod;
         ans %= mod;
     }
+    // for(int i = 0; i <= cnt[0]; i++) cout << dp[0][i] << " ";
+    // cout << endl;
     for(int i = cnt[0] - 1; i >= 0; i--) dp[0][i] = (dp[0][i] + dp[0][i+1]) % mod;
+    //     for(int i = 0; i <= cnt[0]; i++) cout << dp[0][i] << " ";
+    // cout << endl;
     for(int i = 1; i < n; i++) {
         dp[i].push_back(0ll);
-        for(int j = 1; j <= min((ll)dp[i-1].size(), cnt[i]); j++) {
-            dp[i].push_back(dp[i-1][j] * nCr(cnt[i], j) % mod);
-            ans += dp[i][j] * j;
-            ans %= mod;
+        // cout << dp[i].back() << " ";
+        ll ncr_sum = 0;
+        for(int j = 1; j <= cnt[i]; j++) {
+            ncr_sum += nCr(cnt[i], j);
+            ncr_sum %= mod;
         }
-        for(int j = dp[i].size() - 1; j >= 0; j--) dp[i][j] = (dp[i][j] + dp[i][j+1]) % mod;
+        sum -= cnt[i];
+        for(int j = 1; j < min((ll)dp[i-1].size(), cnt[i] + 1); j++) {
+            ll curr = 0;
+            int p_s = dp[i-1].size();
+            if(j < p_s - 1) {
+                curr += dp[i-1][j+1] * nCr(cnt[i], j) % mod;
+                curr %= mod;
+            }
+            ll prev = dp[i-1][j];
+            if(j + 1 < p_s) prev = (prev - dp[i-1][j+1] + mod) % mod;
+            curr += ncr_sum * prev % mod;
+            curr %= mod;
+            ans += curr * j % mod * binpow(2, sum, mod) % mod;
+            ans %= mod;
+            dp[i].push_back(curr);
+            // cout << dp[i].back() << " ";
+            ncr_sum = (ncr_sum - nCr(cnt[i], j) + mod) % mod;
+        }
+        // cout << endl;
+        int ano = dp[i].size();
+        for(int j = ano - 2; j >= 0; j--) {
+            dp[i][j] += dp[i][j+1];
+            dp[i][j] %= mod;
+        }
     }
     cout << ans << endl;
 }

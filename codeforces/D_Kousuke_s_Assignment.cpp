@@ -101,7 +101,7 @@ void solve()
     int cur_max = 0;
     vi end(n, 0);
     for(int i = 0; i < n; i++) {
-        int bac = (i ? prefix[i-1] : 0);
+        ll bac = (i ? prefix[i-1] : 0);
         auto& vec = store[bac];
         int ind = lower_bound(all(vec), i) - vec.begin();
         if(ind != vec.size()) {

@@ -86,42 +86,59 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 void solve()
 {
-    int n;
-    cin >> n;
-    vi arr(n);
-    read(arr);
-    for(int i = 0; i < n; i++) arr.push_back(arr[i]);
-    int pre = 1, suf = 1;
-    // int pre 
-    for(int i = 1; i < n; i++) {
-        if(arr[i-1] >= arr[i]) pre++;
-        else break;
+    int n, m, p;
+    cin >> n >> m >> p;
+    vvl dp(n, vl(n, 1e9));
+    vi needs(p);
+    read(needs);
+    for(int i = 0; i < m; i++) {
+        int st, en, lat;
+        cin >> st >> en >> lat;
+        --st, --en;
+        dp[st][en] = dp[en][st] = lat;
     }
-    for(int i = n-2; i >= 0; i--) {
-        if(arr[i] >= arr[i+1]) suf++;
-        else break;
-    }
-    int ans = 1e9;
-    if(pre + suf == n) {
-        ans = min(suf+1, pre + 1);
-    }
-    debug2(pre, suf);
-    pre = 1;
-    for(int i = 1; i < n; i++) {
-        if(arr[i] >= arr[i-1]) pre++;
-        else break;
-    }
-    if(pre == n) ans = 0;
-    else if(arr[n-1] <= arr[0]) {
-        int x = 1;
-        for(int i = pre + 1; i < n; i++) {
-            if(arr[i] >= arr[i-1]) x++;
-            else break;
+    for(int k = 0; k < n; k++) {
+        for(int i = 0; i < n; i++) {
+            for(int j = 0; j < n; j++) {
+                dp[i][j] = min(dp[i][j], max(dp[i][k], dp[k][j]));
+                if(i == j) dp[i][j] = 0;
+            }
         }
-        debug2(pre, x);
-        if(x == n - pre) ans = min(ans, x);
     }
-    cout << (ans == 1e9 ? -1 : ans) << endl;
+    // for(int i = 0; i < n; i++) {
+    //     for(int j = 0; j < n; j++) cout << dp[i][j] << " ";
+    //     cout << endl;
+    // }
+    vi flag(n, 0);
+    vl cur_min(p, 1e15);
+    for(int k = 1; k <= n; k++) {
+        // vi cop = flag;
+        int ind = -1;
+        ll curr = accumulate(all(cur_min), 0ll);
+        vl another = cur_min;
+        for(int j = 0; j < n; j++) {
+            vl temp = cur_min;
+            if(flag[j]) continue;
+            // flag[j] = 1;
+            for(int i = 0; i < p; i++) {
+                temp[i] = min(temp[i], dp[needs[i]-1][j]);
+            }
+            debug2(k, j);
+            print(temp);
+            if(accumulate(all(temp), 0ll) < curr) {
+                ind = j;
+                // cur_min = temp;
+                curr = accumulate(all(temp), 0ll);
+                another = temp;
+            }
+        }
+        debug2(k, ind);
+        // assert(ind != -1);
+        if(ind != -1) flag[ind] = 1;
+        cur_min = another;
+        cout << accumulate(all(cur_min), 0ll) << " ";
+    }
+    cout << endl;
 }
 
 int main()
@@ -136,9 +153,9 @@ int main()
         solve();
     }
     clock_t end = clock();
-    double elapsed = double(end - start) / CLOCKS_PER_SEC;
     
     #ifndef ONLINE_JUDGE
+    double elapsed = double(end - start) / CLOCKS_PER_SEC;
     cout << setprecision(10) << elapsed << endl;
     #endif
     return 0;

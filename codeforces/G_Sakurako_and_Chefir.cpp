@@ -107,9 +107,10 @@ void solve()
         tre[st].push_back(en);
         tre[en].push_back(st);
     }
-    vvi par(n, vi(21, 0));
+    vvi par(n, vi(21, -1));
     vi sub(n, 0);
     vvi ma_store(n);
+    vector<vector<pi>> child(n);
     auto dfs = [&](auto&& dfs, int u, int v) -> void {
         par[u][0] = v;
         sub[u] = 0;
@@ -118,8 +119,10 @@ void solve()
                 dfs(dfs, nei, u);
                 sub[u] = max(sub[u], 1 + sub[nei]);
                 if(sub[u] == 1 + sub[nei]) ma_store[u].push_back(nei);
+                child[u].push_back({sub[nei] + 1, nei});
             }
         }
+        sort(all(child[u]));
     };
     vi zero(n, 0);
     auto dfs2 = [&](auto&& dfs2, int u, int v, int curr) -> void {
@@ -132,15 +135,16 @@ void solve()
     };
     dfs(dfs, 0, -1);
     dfs2(dfs2, 0, -1, 0);
-    vvi dp(n, vi(21, 0));
-    for(int i = 0; i < 21; i++) par[0][i] = 0, dp[0][i] = sub[0];
+    vvi dp(n, vi(21, -1));
+    for(int i = 0; i < 21; i++) par[0][i] = -1, dp[0][i] = -1;
     for(int i = 1; i < n; i++) {
         int up = (ma_store[par[i][0]].size() == 1 && ma_store[par[i][0]][0] == i ? 0 : 1);
         dp[i][0] = max(sub[i], up + sub[par[i][0]]);
     }
     for(int i = 1; i < 21; i++) {
         for(int j = 1; j < n; j++) {
-            par[j][i] = par[par[j][i-1]][i-1];
+            if(par[j][i-1] != -1) par[j][i] = par[par[j][i-1]][i-1];
+            if(par[j][i] == -1) continue;
             int up = zero[j] - zero[par[j][i-1]];
             dp[j][i] = max(dp[j][i-1],  up + dp[par[j][i-1]][i-1]);
         }
@@ -166,6 +170,7 @@ void solve()
         int v, k;
         cin >> v >> k;
         --v;
+        k = min(k, zero[v]);
         cout << max(calc(v, k), sub[v]) << " ";
     }
     cout << endl;
