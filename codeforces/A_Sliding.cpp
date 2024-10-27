@@ -86,26 +86,12 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 void solve()
 {
-    ll n;
-    cin >> n;
-    vl arr(n);
-    read(arr);
-    for(int i = 1; i < n; i++) {
-        if(arr[i] == 1 && arr[i-1] != 1) {
-            cout << "-1\n";
-            return;
-        }
-    }
+    ll n, m, r, c;
+    cin >> n >> m >> r >> c;
     ll ans = 0;
-    vl ops(n, 0);
-    for(int i = 1; i < n; i++) {
-        ll curr = arr[i], prev = arr[i-1];
-        ll extra = 0;
-        while(prev != 1 && prev * prev <= curr) prev *= prev, extra--;
-        while(curr < prev) curr *= curr, extra++;
-        ops[i] = max(0ll, ops[i-1] + extra);
-    }
-    ans = accumulate(all(ops), 0ll);
+    ans += (n - r) * (m - 1);
+    ll tem = (n - r) * m + (m - c);
+    ans += tem;
     cout << ans << endl;
 }
 

@@ -86,26 +86,50 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 void solve()
 {
-    ll n;
-    cin >> n;
-    vl arr(n);
-    read(arr);
-    for(int i = 1; i < n; i++) {
-        if(arr[i] == 1 && arr[i-1] != 1) {
-            cout << "-1\n";
-            return;
+    ll x, y, z, k;
+    cin >> x >> y >> z >> k;
+    ll ans = INT64_MAX;
+    ll sum = 0;
+    ll cost = 0;
+    if(k == 1) {
+        for(ll i = 1; i*i <= z; i++) {
+            cost = i * x + i * y;
+            sum = i * (i + 1) / 2;
+            ll ma = max(0ll, z - sum);
+            ans = min(ans, cost + (ma + i - 1) / i * y);
+            if(sum >= z) break;
         }
+        cout << ans << endl;
+        return;
     }
-    ll ans = 0;
-    vl ops(n, 0);
-    for(int i = 1; i < n; i++) {
-        ll curr = arr[i], prev = arr[i-1];
-        ll extra = 0;
-        while(prev != 1 && prev * prev <= curr) prev *= prev, extra--;
-        while(curr < prev) curr *= curr, extra++;
-        ops[i] = max(0ll, ops[i-1] + extra);
+    for(ll i = 0; i <= 1e4+10; i++) {
+        ll low = k*i + 1, high = k * (i + 1);
+        sum += k * i;
+        // cost += ;
+        // if(i!=0) cost += y;
+        ll diff = z - sum;
+        // ans = min(ans, cost);
+        if(diff <= 0) {
+            debug3(i, sum, cost);
+            ans = min(ans, cost);
+            break;
+        }
+        low = (diff + low - 1) / low, high = (diff + high - 1) / high;
+        // debug3(low, high, i);
+        for(ll j = high; j <= low; j++) {
+            ll tem = (diff + j - 1) / j;
+            tem = max(tem, i * k + 1);
+            // if(i == 0 && tem == 1) {
+            //     cout << cost + j * y + (tem - i * k) * x << endl;
+            // }
+            ans = min(ans, cost + j * y + (tem - i * k) * x);
+            if(ans == 100 && cost + j * y + (tem - i * k) * x == 100) {
+                debug4(tem, i, sum, cost);
+            }
+        }
+        cost += k * x;
+        cost += y;
     }
-    ans = accumulate(all(ops), 0ll);
     cout << ans << endl;
 }
 

@@ -88,25 +88,57 @@ void solve()
 {
     ll n;
     cin >> n;
-    vl arr(n);
-    read(arr);
-    for(int i = 1; i < n; i++) {
-        if(arr[i] == 1 && arr[i-1] != 1) {
-            cout << "-1\n";
-            return;
+    if(n&1) {
+        cout << n << endl;
+        vl arr{n, n-1, n-2, 1};
+
+        for(int i = 2; i <= n-3; i++) arr.push_back(i);
+        reverse(all(arr));
+        ll check = 0;
+        for(int i = 0; i < n; i++) {
+            if(i&1) check |= arr[i];
+            else check &= arr[i];
         }
+        assert(check == n);
+        assert((n-2 | n - 1) & n == n);
+        for(auto i : arr) cout << i << " ";
+        cout << endl;
+    } else {
+        ll ans = 0;
+        for(int i = 23; i >= 0; i--) {
+            if((n >> i) & 1) {
+                ans = (1ll << (i + 1)) - 1;
+                break;
+            }
+        }
+        vl arr;
+        int ind = 1;
+        arr.push_back(1);
+        while(true) {
+            arr.push_back((1ll << ind));
+            arr.push_back((1ll << (ind + 1)) - 1);
+            ind++;
+            if((1ll << ind) > n) break;
+        }
+        while(arr.back() > n) arr.pop_back();
+        vl flag(n+1, 0);
+        for(auto i : arr) flag[i] = 1;
+        reverse(all(arr));
+        for(int i = 1; i <= n; i++) {
+            if(flag[i] == 0) arr.push_back(i);
+        }
+        reverse(all(arr));
+        assert(arr.size() == n);
+        ll check = 0;
+        for(int i = 0; i < n; i++) {
+            if(i&1) check |= arr[i];
+            else check &= arr[i];
+        }
+        assert(check == ans);
+        cout << ans << endl;
+        for(auto i : arr) cout << i << " ";
+        cout << endl;
     }
-    ll ans = 0;
-    vl ops(n, 0);
-    for(int i = 1; i < n; i++) {
-        ll curr = arr[i], prev = arr[i-1];
-        ll extra = 0;
-        while(prev != 1 && prev * prev <= curr) prev *= prev, extra--;
-        while(curr < prev) curr *= curr, extra++;
-        ops[i] = max(0ll, ops[i-1] + extra);
-    }
-    ans = accumulate(all(ops), 0ll);
-    cout << ans << endl;
 }
 
 int main()

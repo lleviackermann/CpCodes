@@ -83,30 +83,63 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
+long long binpow(long long a, long long b, long long m) {
+    a %= m;
+    long long res = 1;
+    while (b > 0) {
+        if (b & 1)
+            res = res * a % m;
+        a = a * a % m;
+        b >>= 1;
+    }
+    return res;
+}
 
+vl two_pow;
+void precalc() {
+    const int nmax = (2e5+2)*33;
+    two_pow.resize(nmax, 1);
+    for(int i = 1; i < nmax; i++) two_pow[i] = two_pow[i-1] * 2 % mod;
+
+}
 void solve()
 {
     ll n;
     cin >> n;
     vl arr(n);
     read(arr);
-    for(int i = 1; i < n; i++) {
-        if(arr[i] == 1 && arr[i-1] != 1) {
-            cout << "-1\n";
-            return;
-        }
+    vl ops(n, 0), sec(n, 0);
+    int ind = 0;
+    for(auto i : arr) {
+        ll tem = i;
+        int cnt = 0;
+        while(tem % 2 == 0) tem /= 2, cnt++;
+        ops[ind] = cnt;
+        sec[ind] = tem;
+        
+        ind++;
     }
+    vpl ar_pr;
     ll ans = 0;
-    vl ops(n, 0);
-    for(int i = 1; i < n; i++) {
-        ll curr = arr[i], prev = arr[i-1];
-        ll extra = 0;
-        while(prev != 1 && prev * prev <= curr) prev *= prev, extra--;
-        while(curr < prev) curr *= curr, extra++;
-        ops[i] = max(0ll, ops[i-1] + extra);
+    auto cond = [&](ll fir, ll s, ll t) -> bool {
+        if(t > 30) return 1;
+        return fir < s * (1ll << t);
+    };
+    for(int i = 0; i < n; i++) {
+        ll cur = sec[i], val = ops[i];
+        while(ar_pr.size() && cond(ar_pr[ar_pr.size() - 1].first, cur, val)) {
+            ans = (ans - ar_pr[ar_pr.size() - 1].first * two_pow[ar_pr[ar_pr.size() - 1].second] % mod + mod) % mod;
+            ans += ar_pr[ar_pr.size()-1].first;
+            val += ar_pr[ar_pr.size() - 1].second;
+            ans %= mod;
+            ar_pr.pop_back();
+        }
+        ar_pr.push_back({cur, val});
+        ans += cur * two_pow[val] % mod;
+        ans %= mod;
+        cout << ans << " ";
     }
-    ans = accumulate(all(ops), 0ll);
-    cout << ans << endl;
+    cout << endl;
 }
 
 int main()
@@ -115,6 +148,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
+    precalc();
     cin >> t;
     while (t--)
     {

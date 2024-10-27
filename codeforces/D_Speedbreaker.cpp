@@ -95,7 +95,7 @@ void solve()
     read(arr);
     multiset<int> bac, fro;
     for(int i = 1; i < n; i++) {
-        
+         
     }
 }
 

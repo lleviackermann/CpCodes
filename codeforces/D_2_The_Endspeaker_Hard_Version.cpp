@@ -128,6 +128,7 @@ void solve()
             // debug3(j, i, tem);
             ll nex = (tem == n ? 0 : store[tem+1]);
             dp[j][i] = min(dp[j][i], m - i + nex);
+            ll prev = store[j];
             store[j] = min(dp[j][i], store[j]);
             if(store[j] == dp[j][i]) {
                 ll fir = j;
@@ -145,7 +146,8 @@ void solve()
                 ll ano = 0;
                 if(tem + 2 <= n) ano = temp_sum[tem + 2];
                 else if(tem + 2 == n + 1) ano = 1;
-                countt[j] += (temp_sum[fir + 1] - ano + mod);
+                ll prev_bac = (store[j] < prev ? 0 : countt[j]);
+                countt[j] = (prev_bac + temp_sum[fir + 1] - ano + 2*mod);
                 countt[j] %= mod;
             }
             if(j == n) temp_sum[j] = countt[j] + 1;

@@ -88,25 +88,20 @@ void solve()
 {
     ll n;
     cin >> n;
-    vl arr(n);
-    read(arr);
-    for(int i = 1; i < n; i++) {
-        if(arr[i] == 1 && arr[i-1] != 1) {
-            cout << "-1\n";
-            return;
+    if(n == 1 || n == 3) cout << "-1\n";
+    else {
+        if(n == 2) cout << "66" << endl;
+        else {
+            string ans = "";
+            ans += "66";
+            while(ans.size() < n) ans.push_back('3');
+            reverse(all(ans));
+            if(n%2) {
+                ans[n-4] = '6';
+            }
+            cout << ans << endl;
         }
     }
-    ll ans = 0;
-    vl ops(n, 0);
-    for(int i = 1; i < n; i++) {
-        ll curr = arr[i], prev = arr[i-1];
-        ll extra = 0;
-        while(prev != 1 && prev * prev <= curr) prev *= prev, extra--;
-        while(curr < prev) curr *= curr, extra++;
-        ops[i] = max(0ll, ops[i-1] + extra);
-    }
-    ans = accumulate(all(ops), 0ll);
-    cout << ans << endl;
 }
 
 int main()
