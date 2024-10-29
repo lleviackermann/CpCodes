@@ -83,57 +83,66 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
+// 1 2 3 5 7 8
+// 6 5 4 3 2 1
 
 void solve()
 {
-    ll x, y, z, k;
-    cin >> x >> y >> z >> k;
-    ll ans = INT64_MAX;
-    auto cost_calc = [&](ll a, ll b) {
-        ll curr = a * x + b * y;
-        if(curr == 214) {
-            debug2(a, b);
-        }
-        return a * x + b * y;
-    };
-
-    auto damage_calc = [&](ll a, ll b) {
-        if(b == 0) return 0ll;
-        ll k_times = a / k;
-        ll damaged_dealt = k_times * (k_times + 1) / 2 * k + (b - k_times) * a;
-        if(a == 34 && b == 3) {
-            debug(damaged_dealt);
-        }
-        return damaged_dealt;
-    };
-    debug(damage_calc(34, 3));
-
-    auto binary_func = [&](ll a, ll b) {
-        return damage_calc(a, b) >= z;
-    };
-
-    ll val = sqrtl(2*z+10);
-    for(ll i = 1; i <= val; i++) {
-        // fixed a
-        ll low = (i / k), high = 2*z+1;
-        ll tem = -1;
-        while(low <= high) {
-            ll mid = (low + high) / 2;
-            if(binary_func(i, mid)) tem = mid, high = mid - 1;
-            else low = mid + 1;
-        }
-        if(tem != -1) ans = min(ans, cost_calc(i, tem));
-
-        low = 1, high = k * (i + 1) - 1;
-        tem = -1;
-        while(low <= high) {
-            ll mid = (low + high) / 2;
-            if(binary_func(mid, i)) tem = mid, high = mid - 1;
-            else low = mid + 1;
-        }
-        if(tem != -1) ans = min(ans, cost_calc(tem, i));
+    ll n;
+    cin >> n;
+    vl arr(n);
+    read(arr);
+    int q;
+    cin >> q;
+    vl cnt_sum(n, 0), sum(n+1);
+    for(int i = n-1; i >= 0; i--) {
+        ll cnt = n - i;
+        cnt_sum[i] = arr[i] * cnt;
+        if(i != n-1) cnt_sum[i] += cnt_sum[i+1];
     }
-    cout << ans << endl;
+    print(cnt_sum);
+    vl prefix_sum(n+1, 0);
+    prefix_sum[0] = 0;
+    for(int i = 0; i < n; i++) prefix_sum[i+1] = cnt_sum[i] + prefix_sum[i], sum[i+1] = sum[i] + arr[i];
+    vl ind_calc;
+    ind_calc.push_back(0);
+    ll prev = 0;
+    ll curr = n;
+    while(curr > 0) ind_calc.push_back(prev += curr), curr--;
+    while(q--) {
+        ll l, r;
+        cin >> l >> r;
+        ll left = lower_bound(all(ind_calc), l) - ind_calc.begin();
+        ll right = lower_bound(all(ind_calc), r) - ind_calc.begin();
+        ll ans = 0;
+        if(right - left > 1) ans += prefix_sum[right-1] - prefix_sum[left];
+        debug4(l, r, left, right);
+        if(left != right) {
+            int st = left + l - ind_calc[left-1] - 1;
+            ans += cnt_sum[st-1];
+            ans += (sum[st-1] - sum[left-1]) * (n-st+1);
+            // debug2(st, ans);
+            st = r - ind_calc[right - 1] - 1 + right;
+            ll tem = (st == n ? 0 : cnt_sum[st]);
+            ll pr_sum = sum[st] - sum[right - 1];
+            tem += pr_sum * (n - st);
+            ans += cnt_sum[right-1] - tem;
+            // debug4(st, tem, pr_sum, ans);
+        } else {    
+            int st = left + l - ind_calc[left-1] - 1;
+            ans += cnt_sum[st-1];
+            ans += (sum[st-1] - sum[left-1]) * (n-st+1);
+            // debug2(st, ans);
+            st = r - ind_calc[right - 1] - 1 + right;
+            ll tem = (st == n ? 0 : cnt_sum[st]);
+            ll pr_sum = sum[st] - sum[right - 1];
+            tem += pr_sum * (n - st);
+            ans -= tem;
+            // debug4(st, tem, pr_sum, ans);
+        }
+        cout << ans << endl;
+    }
+
 }
 
 int main()
@@ -142,7 +151,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    cin >> t;
+    // cin >> t;
     while (t--)
     {
         solve();
