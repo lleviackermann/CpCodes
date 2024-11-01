@@ -83,97 +83,14 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-int binpow(long long a, long long b, long long m) {
-    a %= m;
-    long long res = 1;
-    while (b > 0) {
-        if (b & 1)
-            res = res * a % m;
-        a = a * a % m;
-        b >>= 1;
-    }
-    return res;
-}
 
 void solve()
 {
     int n;
     cin >> n;
-    vvi tre(n);
-    for(int i = 1; i < n; i++) {
-        int st, en;
-        cin >> st >> en;
-        --st, --en;
-        tre[st].push_back(en);
-        tre[en].push_back(st);
-    }
-    const int limit = 22;
-    vector<int> subtree_size(n, 0), root_dist(n, 0);
-    vector<vector<int>> parent(n, vi(22, -1)), ancestor_sub(n, vi(limit, 0));
-    vector<array<int, 2>> max_subchild(n, {-1, -1});
-    auto dfs = [&](auto&& dfs, int u, int v, int curr) -> void {
-        root_dist[u] = curr;
-        if(v != -1) {
-            parent[u][0] = v;
-            for(int i = 1; i < limit; i++) {
-                if(parent[u][i-1] == -1) break;
-                parent[u][i] = parent[parent[u][i-1]][i-1];
-            }
-        }
-        for(auto neighbour : tre[u]) {
-            if(neighbour != v) {
-                dfs(dfs, neighbour, u, curr + 1);
-                subtree_size[u] = max(subtree_size[u], 1 + subtree_size[neighbour]);
-                auto &[fir, sec] = max_subchild[u];
-                if(fir == -1) fir = neighbour;
-                else if(subtree_size[fir] <= subtree_size[neighbour]) sec = fir, fir = neighbour;
-                else if(sec == -1) sec = neighbour;
-                else if(subtree_size[sec] < subtree_size[neighbour]) sec = neighbour;
-            }
-        }
-    };
-    dfs(dfs, 0, -1, 0);
-    for(int i = 1; i < n; i++) {
-        int par = parent[i][0];
-        auto &imm_par = ancestor_sub[i][0];
-        auto &[fir, sec] = max_subchild[par];
-        if(fir == i) {
-            if(sec == -1) imm_par = 1;
-            else imm_par = 2 + subtree_size[sec];
-        } else {
-            imm_par = 2 + subtree_size[fir];
-        }
-    }
-    for(int level = 1; level < limit; level++) {
-        for(int node = 1; node < n; node++) {
-            if(parent[node][level] == -1) continue;
-            auto &left = ancestor_sub[node][level-1];
-            auto &right = ancestor_sub[parent[node][level-1]][level-1];
-            ancestor_sub[node][level] = max(left, binpow(2, level - 1, mod) + right);
-        }
-    }
-    auto get_ancestor_max = [&](int node, int par) {
-        int ans = 0;
-        int curr = 0;
-        par = min(par, root_dist[node]);
-        for(int level = 21; level >= 0; level--) {
-            if((par >> level) & 1) {
-                ans = max(ans, curr + ancestor_sub[node][level]);
-                curr += binpow(2, level, mod);
-                node = parent[node][level];
-            }
-        }
-        return ans;
-    };
-    int q;
-    cin >> q;
-    while(q--) {
-        int node, par;
-        cin >> node >> par;
-        --node;
-        cout << max(subtree_size[node], get_ancestor_max(node, par)) << " ";
-    }
-    cout << endl;
+    vi arr(n);
+    read(arr);
+    
 }
 
 int main()
