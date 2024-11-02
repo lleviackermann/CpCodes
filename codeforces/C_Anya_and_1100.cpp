@@ -46,9 +46,9 @@ const ll mod = 1e9 + 7;
 
 bool comp2(pair<ll, ll> &arr, pair<ll, ll> &b)
 {
-	if (arr.first == b.first)
-		return arr.second < b.second;
-	return arr.first < b.first;
+    if (arr.first == b.first)
+        return arr.second < b.second;
+    return arr.first < b.first;
 };
 
 template <typename T> void read(T i, T n, vector<T> &arr) { for(T j = i; j < n; j++) cin >> arr[j]; }
@@ -86,32 +86,52 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 void solve()
 {
-	vl arr{864691128455135232, 576460752303423488, 288230376151711744};
-	sort(all(arr));
-	debug((576460752500649318 ^ 864691128652361062));
-	ll tem = 0;
-	ll fir, sec;
-	cin >> fir >> sec;
-	for(int i = 0; i < 3; i++) if(arr[i] >= fir && arr[i] <= sec) tem ^= arr[i];
-	cout << tem << endl;
+    string s;
+    cin >> s;
+    int n = s.size();
+    set<int> se;
+    auto check = [&](int i) {
+        if(i < 0 || i + 3 >= n) return false;
+        return (s[i] == '1' && s[i+1] == '1' && s[i+2] == '0' && s[i+3] == '0');
+    };
+    for(int i = 0; i + 3 < n; i++) {
+        if(check(i)) se.insert(i);
+    }
+    auto update = [&](int ind) {
+        for(int i = ind - 3; i <= ind; i++) {
+            if(check(i)) se.insert(i);
+            else if(se.count(i)) se.erase(i);
+        }
+    };
+    int q;
+    cin >> q;
+    while(q--) {
+        int ind, val;
+        cin >> ind >> val;
+        --ind;
+        s[ind] = to_string(val)[0];
+        update(ind);
+        if(se.size()) cout << "YES\n";
+        else cout << "NO\n";
+    }
 }
 
 int main()
 { 
-	suprit;
-	clock_t start = clock();
+    suprit;
+    clock_t start = clock();
 
-	int t = 1;
-	// cin >> t;
-	while (t--)
-	{
-		solve();
-	}
-	clock_t end = clock();
-	
-	#ifndef ONLINE_JUDGE
-	double elapsed = double(end - start) / CLOCKS_PER_SEC;
-	cout << setprecision(10) << elapsed << endl;
-	#endif
-	return 0;
+    int t = 1;
+    cin >> t;
+    while (t--)
+    {
+        solve();
+    }
+    clock_t end = clock();
+    
+    #ifndef ONLINE_JUDGE
+    double elapsed = double(end - start) / CLOCKS_PER_SEC;
+    cout << setprecision(10) << elapsed << endl;
+    #endif
+    return 0;
 }

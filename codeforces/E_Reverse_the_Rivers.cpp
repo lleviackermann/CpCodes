@@ -46,9 +46,9 @@ const ll mod = 1e9 + 7;
 
 bool comp2(pair<ll, ll> &arr, pair<ll, ll> &b)
 {
-	if (arr.first == b.first)
-		return arr.second < b.second;
-	return arr.first < b.first;
+    if (arr.first == b.first)
+        return arr.second < b.second;
+    return arr.first < b.first;
 };
 
 template <typename T> void read(T i, T n, vector<T> &arr) { for(T j = i; j < n; j++) cin >> arr[j]; }
@@ -86,32 +86,57 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 void solve()
 {
-	vl arr{864691128455135232, 576460752303423488, 288230376151711744};
-	sort(all(arr));
-	debug((576460752500649318 ^ 864691128652361062));
-	ll tem = 0;
-	ll fir, sec;
-	cin >> fir >> sec;
-	for(int i = 0; i < 3; i++) if(arr[i] >= fir && arr[i] <= sec) tem ^= arr[i];
-	cout << tem << endl;
+    ll n, k, q;
+    cin >> n >> k >> q;
+    vvl mat(n, vl(k));
+    for(auto &i : mat) read(i);
+    vvi vals(k);
+    for(int i = 1; i < n; i++) {
+        for(int j = 0; j < k; j++) mat[i][j] |= mat[i-1][j];
+    }
+    for(int j = 0; j < k; j++) {
+        for(int i = 0; i < n; i++) vals[j].push_back(mat[i][j]);
+    }
+    while(q--) {
+        int mn = 0, mx = n-1;
+        int m;
+        cin >> m;
+        // int flag = 
+        while(m--) {
+            int region, limit;
+            char oper;
+            cin >> region >> oper >> limit;
+            region--;
+            if(oper == '>') {
+                int ind = upper_bound(all(vals[region]), limit) - vals[region].begin();
+                mn = max(mn, ind); 
+            } else {
+                int ind = lower_bound(all(vals[region]), limit) - vals[region].begin();
+                ind--;
+                mx = min(mx, ind);
+            }
+        }
+        if(mn <= mx && mn >= 0 && mn < n && mx < n) cout << mn + 1 << endl;
+        else cout << -1 << endl;
+    }
 }
 
 int main()
 { 
-	suprit;
-	clock_t start = clock();
+    suprit;
+    clock_t start = clock();
 
-	int t = 1;
-	// cin >> t;
-	while (t--)
-	{
-		solve();
-	}
-	clock_t end = clock();
-	
-	#ifndef ONLINE_JUDGE
-	double elapsed = double(end - start) / CLOCKS_PER_SEC;
-	cout << setprecision(10) << elapsed << endl;
-	#endif
-	return 0;
+    int t = 1;
+    // cin >> t;
+    while (t--)
+    {
+        solve();
+    }
+    clock_t end = clock();
+    
+    #ifndef ONLINE_JUDGE
+    double elapsed = double(end - start) / CLOCKS_PER_SEC;
+    cout << setprecision(10) << elapsed << endl;
+    #endif
+    return 0;
 }

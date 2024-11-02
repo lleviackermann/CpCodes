@@ -46,9 +46,9 @@ const ll mod = 1e9 + 7;
 
 bool comp2(pair<ll, ll> &arr, pair<ll, ll> &b)
 {
-	if (arr.first == b.first)
-		return arr.second < b.second;
-	return arr.first < b.first;
+    if (arr.first == b.first)
+        return arr.second < b.second;
+    return arr.first < b.first;
 };
 
 template <typename T> void read(T i, T n, vector<T> &arr) { for(T j = i; j < n; j++) cin >> arr[j]; }
@@ -83,35 +83,93 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
+ll query(ll a, ll b) {
+    cout << "xor " << a << " " << b << endl;
+    cout.flush();
+    ll num;
+    cin >> num;
+    return num;
+}
 
+int tt = 0;
 void solve()
 {
-	vl arr{864691128455135232, 576460752303423488, 288230376151711744};
-	sort(all(arr));
-	debug((576460752500649318 ^ 864691128652361062));
-	ll tem = 0;
-	ll fir, sec;
-	cin >> fir >> sec;
-	for(int i = 0; i < 3; i++) if(arr[i] >= fir && arr[i] <= sec) tem ^= arr[i];
-	cout << tem << endl;
+    ll n;
+    cin >> n;
+    vl ans;
+    ll tot = query(1ll, n);
+    // int tt = 
+    tt++;
+    ll i = 0;
+    ll flag = 0, guessed = 0, xo = 0, l, h, ri;
+    while((1ll << i) <= n) {
+        ll tem = (1ll << (i + 1)) - 1, curr = (1ll << i);
+        tem = min(n, tem);
+        ll ret = query(curr, tem);
+        if(i == 0) {
+            if(ret == 1) ans.push_back(1);
+        }
+        else if(ret != 0) {
+            ll val = ret;
+            ll low = curr, high = tem;
+            ll ano = curr;
+            while(low <= high) {
+                ll mid = (low + high) / 2ll;
+                ll qu = query(curr, mid);
+                if(i == 59 and tt == 5 && qu <= 0) {
+                    cout << curr << "|" << mid << "|" << qu << endl;
+                }
+                if(qu > 0ll) {
+                    high = mid - 1, ano = mid;
+                } else low = mid + 1;
+            }
+            ans.push_back(ano);
+            if(i == 59) xo = val, guessed = ano, l = low, h = high, flag = curr, ri = tem;
+            if(ans.size() == 2) break;
+            ll f = ano + 1;
+            if(val != ano) {
+                low = ano + 1, high = tem;
+                ano = low;
+                while(low <= high) {
+                    ll mid = (low + high) / 2;
+                    ll qu = query(f, mid);
+                    if(qu > 0ll) high = mid - 1, ano = mid;
+                    else low = mid + 1;
+                }
+                ans.push_back(ano);
+                if(ans.size() == 2) break;
+            }
+        }
+        i++;
+        if(ans.size() == 2) break;
+    }
+    assert(ans.size() == 2);
+    ans.push_back(tot ^ ans[0] ^ ans[1]);
+    if(tt == 5 && n == 1000000000000000000) {
+        cout << l << "|" << h << "|" << guessed << endl;
+    }
+    cout << "ans ";
+    for(auto i : ans) cout << i << " ";
+    cout << endl;
+    cout.flush();
 }
 
 int main()
 { 
-	suprit;
-	clock_t start = clock();
+    suprit;
+    clock_t start = clock();
 
-	int t = 1;
-	// cin >> t;
-	while (t--)
-	{
-		solve();
-	}
-	clock_t end = clock();
-	
-	#ifndef ONLINE_JUDGE
-	double elapsed = double(end - start) / CLOCKS_PER_SEC;
-	cout << setprecision(10) << elapsed << endl;
-	#endif
-	return 0;
+    int t = 1;
+    cin >> t;
+    while (t--)
+    {
+        solve();
+    }
+    clock_t end = clock();
+    
+    #ifndef ONLINE_JUDGE
+    double elapsed = double(end - start) / CLOCKS_PER_SEC;
+    cout << setprecision(10) << elapsed << endl;
+    #endif
+    return 0;
 }
