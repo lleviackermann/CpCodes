@@ -83,65 +83,38 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-ll query(ll a, ll b) {
-    cout << "xor " << a << " " << b << endl;
-    cout.flush();
-    ll num;
-    cin >> num;
-    assert(num != -1);
-    return num;
-}
-
 void solve()
 {
-    ll n;
+    int n;
     cin >> n;
-    vl ans;
-    ll tot = query(1ll, n);
-    ll i = (ll)__lg(n);
-    while((1ll << i) <= n) {
-        ll tem = (1ll << (i + 1)) - 1, curr = (1ll << i);
-        tem = min(n, tem);
-        ll ret = query(curr, tem);
-        if(i == 0) {
-            if(ret == 1) ans.push_back(1);
-        }
-        else if(ret != 0) {
-            ll val = ret;
-            ll low = curr, high = tem;
-            ll ano = curr;
-            while(low <= high) {
-                ll mid = (low + high) / 2;
-                ll qu = query(curr, mid);
-                if(qu > 0ll) {
-                    high = mid - 1, ano = mid;
-                } else low = mid + 1;
-            }
-            ans.push_back(ano);
-            if(ans.size() == 2) break;
-            ll f = ano + 1;
-            if(val != ano) {
-                low = ano + 1, high = tem;
-                ano = low;
-                while(low <= high) {
-                    ll mid = (low + high) / 2;
-                    ll qu = query(f, mid);
-                    if(qu > 0ll) high = mid - 1, ano = mid;
-                    else low = mid + 1;
-                }
-                ans.push_back(ano);
-                if(ans.size() == 2) break;
+    vector<array<int, 2>> arr(n);
+    for(auto &i : arr) cin >> i[0] >> i[1];
+    set<array<int, 2>> flag(all(arr));
+    map<array<int, 2>, array<int, 2>> ans;
+    int dx[] = {0, 0, -1, 1};
+    int dy[] = {1, -1, 0, 0};
+    queue<array<int, 2>> bfs;
+    for(auto &point : arr) {
+        for(int dist = 0; dist < 4; dist++) {
+            int nx = point[0] + dx[dist], ny = point[1] + dy[dist];
+            if(!flag.count({nx, ny})) {
+                ans[point] = {nx, ny};
+                bfs.push(point);
+                break;
             }
         }
-        i--;
-        if(ans.size() == 2) break;
     }
-    assert(ans.size() == 2);
-    ans.push_back(tot ^ ans[0] ^ ans[1]);
-    cout << "ans ";
-    for(auto i : ans) cout << i << " ";
-    cout << endl;
-    cout.flush();
+    while(bfs.size()) {
+        auto [x, y] = bfs.front();
+        bfs.pop();
+        for(int di = 0; di < 4; di++) {
+            int nx = x + dx[di], ny = y + dy[di];
+            if(!flag.count({nx, ny}) || ans.count({nx, ny})) continue;
+            ans[{nx, ny}] = ans[{x, y}];
+            bfs.push({nx, ny});
+        }
+    }
+    for(auto ptr : arr) cout << ans[ptr][0] << " " << ans[ptr][1] << endl;
 }
 
 int main()
@@ -150,7 +123,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    cin >> t;
+    // cin >> t;
     while (t--)
     {
         solve();

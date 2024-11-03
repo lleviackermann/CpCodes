@@ -83,65 +83,52 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-ll query(ll a, ll b) {
-    cout << "xor " << a << " " << b << endl;
-    cout.flush();
-    ll num;
-    cin >> num;
-    assert(num != -1);
-    return num;
-}
 
 void solve()
 {
-    ll n;
+    int n;
     cin >> n;
-    vl ans;
-    ll tot = query(1ll, n);
-    ll i = (ll)__lg(n);
-    while((1ll << i) <= n) {
-        ll tem = (1ll << (i + 1)) - 1, curr = (1ll << i);
-        tem = min(n, tem);
-        ll ret = query(curr, tem);
-        if(i == 0) {
-            if(ret == 1) ans.push_back(1);
-        }
-        else if(ret != 0) {
-            ll val = ret;
-            ll low = curr, high = tem;
-            ll ano = curr;
-            while(low <= high) {
-                ll mid = (low + high) / 2;
-                ll qu = query(curr, mid);
-                if(qu > 0ll) {
-                    high = mid - 1, ano = mid;
-                } else low = mid + 1;
-            }
-            ans.push_back(ano);
-            if(ans.size() == 2) break;
-            ll f = ano + 1;
-            if(val != ano) {
-                low = ano + 1, high = tem;
-                ano = low;
-                while(low <= high) {
-                    ll mid = (low + high) / 2;
-                    ll qu = query(f, mid);
-                    if(qu > 0ll) high = mid - 1, ano = mid;
-                    else low = mid + 1;
-                }
-                ans.push_back(ano);
-                if(ans.size() == 2) break;
-            }
-        }
-        i--;
-        if(ans.size() == 2) break;
+    vector<vector<int>> tre(n);
+    for(int i = 1; i < n; i++) {
+        int st, en;
+        cin >> st >> en;
+        --st, --en;
+        tre[st].push_back(en);
+        tre[en].push_back(st);
     }
-    assert(ans.size() == 2);
-    ans.push_back(tot ^ ans[0] ^ ans[1]);
-    cout << "ans ";
-    for(auto i : ans) cout << i << " ";
-    cout << endl;
-    cout.flush();
+    vi arr(n);
+    read(arr);
+    for(auto &i : arr) --i;
+    vi indeg(n);
+    for(int i = 0; i < n; i++) {
+        indeg[i] = tre[i].size();
+        if(i) indeg[i]--;
+    }
+    queue<int> checker;
+    if(arr[0] != 0) {
+        cout << "No\n";
+        return;
+    }
+    print(indeg);
+    checker.push(0);
+    vi parent(n, -1);
+    auto dfs = [&](auto&& dfs, int u, int v) -> void {
+        parent[u] = v;
+        for(auto nei : tre[u]) {
+            if(nei != v) dfs(dfs, nei, u);
+        }
+    };
+    dfs(dfs, 0, -1);
+    for(int i = 1; i < n; i++) {
+        if(parent[arr[i]] != checker.front()) {
+            cout << "No\n";
+            return;
+        }
+        checker.push(arr[i]);
+        indeg[checker.front()]--;
+        while(checker.size() && indeg[checker.front()] == 0) checker.pop();
+    }
+    cout << "Yes" << endl;
 }
 
 int main()
@@ -150,7 +137,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    cin >> t;
+    // cin >> t;
     while (t--)
     {
         solve();
