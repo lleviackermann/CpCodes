@@ -46,9 +46,9 @@ const ll mod = 1e9 + 7;
 
 bool comp2(pair<ll, ll> &arr, pair<ll, ll> &b)
 {
-	if (arr.first == b.first)
-		return arr.second < b.second;
-	return arr.first < b.first;
+    if (arr.first == b.first)
+        return arr.second < b.second;
+    return arr.first < b.first;
 };
 
 template <typename T> void read(T i, T n, vector<T> &arr) { for(T j = i; j < n; j++) cin >> arr[j]; }
@@ -83,48 +83,70 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
+// x * (x + 2), x2 + 4x
 
 void solve()
 {
-	int n;
-	cin >> n;
-	vector<int> a(n), grr(n-2);
-	for(auto &i : a) cin >> i;
-	for(auto &i : grr) cin >> i;
-	sort(a.begin(), a.end());
-	sort(grr.begin(), grr.end());
-	set<int> se(a.begin(), a.end());
-	int an = 1;
-	while(true) {
-		int cnt = 0;
-		for(auto i : grr) {
-			if(se.count(i - an)) cnt++;
-		}
-		if(cnt == n - 2) {
-			cout << an << endl;
-			return;
-		}
-		an++;
-	}
-
+    ll k;
+    cin >> k;
+    vpi ans;
+    ans.push_back({1, 1});
+    ll curr = 0;
+    ll cnt = 1;
+    int diff = 0;
+    for(int i = 1; i < 2024; i++) {
+        if(curr + cnt <= k) {
+            ans.push_back({ans.back().first + 1, ans.back().second + 1});
+            curr += cnt;
+            cnt++;
+        } else {
+            cnt = 1;
+            diff++;
+            // if(curr == k) diff--;
+            int sec = ans.back().second + 1;
+            while(sec - diff <= ans.back().first) sec++;
+            ans.push_back({sec - diff, sec});
+        }
+    }
+    // cout << ans.size() << endl;
+    // for(auto i : ans) cout << i.first << " " << i.second << endl;
+    // debug(ans.size());
+    // debug(ans.back().second);
+    // debug(ans.back().first);
+    assert(curr == k);
+    cnt = 0;
+    for(int i = 0; i < 2023; i++) {
+        auto [fi, se] = ans[i];
+        for(int j = i + 1; j < 2024; j++) {
+            auto [fj, sj] = ans[j];
+            ll num = (fj - fi) * (sj - se);
+            ll x = sqrtl(num);
+            if(x * x == num) {
+                cnt++;
+                // debug4(fi, se, fj, sj);
+            }
+        }
+    }
+    // for(auto [fir, sec] : ans) cout << fir << " " << sec << endl;
+    cout << cnt << endl;
 }
 
 int main()
 { 
-	suprit;
-	clock_t start = clock();
+    suprit;
+    clock_t start = clock();
 
-	int t = 1;
-	// cin >> t;
-	while (t--)
-	{
-		solve();
-	}
-	clock_t end = clock();
-	
-	#ifndef ONLINE_JUDGE
-	double elapsed = double(end - start) / CLOCKS_PER_SEC;
-	cout << setprecision(10) << elapsed << endl;
-	#endif
-	return 0;
+    int t = 1;
+    cin >> t;
+    while (t--)
+    {
+        solve();
+    }
+    clock_t end = clock();
+    
+    #ifndef ONLINE_JUDGE
+    double elapsed = double(end - start) / CLOCKS_PER_SEC;
+    cout << setprecision(10) << elapsed << endl;
+    #endif
+    return 0;
 }

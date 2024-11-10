@@ -46,9 +46,9 @@ const ll mod = 1e9 + 7;
 
 bool comp2(pair<ll, ll> &arr, pair<ll, ll> &b)
 {
-	if (arr.first == b.first)
-		return arr.second < b.second;
-	return arr.first < b.first;
+    if (arr.first == b.first)
+        return arr.second < b.second;
+    return arr.first < b.first;
 };
 
 template <typename T> void read(T i, T n, vector<T> &arr) { for(T j = i; j < n; j++) cin >> arr[j]; }
@@ -83,48 +83,90 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
+const int vmax = 4e5+1;
+const int nmax = 1e5+1;
+
+vi lowest_genearator(vmax, 1e9);
+vi odd_adder(vmax, -1);
+
+void add(int num, int div) {
+    if(num & 1) return;
+    if(!(div & 1) || div == 1) return;
+    if(num + div < vmax) odd_adder[num + div] = max(odd_adder[num + div], num);
+}
+
+void preprocess() {
+    for(int i = 2; i < vmax; i++) {
+        for(int div = 1; div * div <= i; div++) {
+            if(i % div) continue;
+            if(div != 1 && i + div < vmax) lowest_genearator[i + div] = min(lowest_genearator[i + div], min(lowest_genearator[i], i));
+            add(i, div);
+            if(div * div != i && i + i / div < vmax) {
+                lowest_genearator[i + i / div] = min(lowest_genearator[i + i / div], min(lowest_genearator[i], i));
+            } 
+            add(i, i / div);
+        }
+    }
+}
 
 void solve()
 {
-	int n;
-	cin >> n;
-	vector<int> a(n), grr(n-2);
-	for(auto &i : a) cin >> i;
-	for(auto &i : grr) cin >> i;
-	sort(a.begin(), a.end());
-	sort(grr.begin(), grr.end());
-	set<int> se(a.begin(), a.end());
-	int an = 1;
-	while(true) {
-		int cnt = 0;
-		for(auto i : grr) {
-			if(se.count(i - an)) cnt++;
-		}
-		if(cnt == n - 2) {
-			cout << an << endl;
-			return;
-		}
-		an++;
-	}
+    int n;
+    cin >> n;
+    vi arr(n);
+    read(arr);
+    int ans = -1;
+    int cnt = 0;
+    int low = 1e9;
+    for(int i = 0; i < n; i++) {
+        if(lowest_genearator[arr[i]] == 1e9) {
+            cnt++;
+            if(cnt > 1) {
+                cout << -1 << endl;
+                return;
+            }
+            if(cnt == 1) {
+                ans = arr[i];
+            }
+        } 
+    }
+    if(ans == -1) {
+        cout << 2 << endl;
+        return;
+    }
+    for(auto num : arr) {
+        if(num == ans) continue;
+        if(num < 2 * ans) {
+            cout << -1 << endl;
+            return;
+        }
+        if(num % 2 == 0) continue;
+        if(odd_adder[num] < 2 * ans) {
+            cout << -1 << endl;
+            return;
+        }
+    }
 
+    cout << ans << endl;
 }
 
 int main()
 { 
-	suprit;
-	clock_t start = clock();
+    suprit;
+    clock_t start = clock();
 
-	int t = 1;
-	// cin >> t;
-	while (t--)
-	{
-		solve();
-	}
-	clock_t end = clock();
-	
-	#ifndef ONLINE_JUDGE
-	double elapsed = double(end - start) / CLOCKS_PER_SEC;
-	cout << setprecision(10) << elapsed << endl;
-	#endif
-	return 0;
+    int t = 1;
+    preprocess();
+    cin >> t;
+    while (t--)
+    {
+        solve();
+    }
+    clock_t end = clock();
+    
+    #ifndef ONLINE_JUDGE
+    double elapsed = double(end - start) / CLOCKS_PER_SEC;
+    cout << setprecision(10) << elapsed << endl;
+    #endif
+    return 0;
 }
