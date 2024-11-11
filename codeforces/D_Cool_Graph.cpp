@@ -88,11 +88,68 @@ void solve()
 {
     int n, m;
     cin >> n >> m;
-    vvi graph(n);
+    vector<set<int>> graph(n);
+    vi deg(n, 0);
+    vpi edges;
     for(int i = 0; i < m; i++) {
         int st, en;
         cin >> st >> en; 
+        --st, --en;
+        edges.push_back({st, en});
+        graph[st].insert(en);
+        graph[en].insert(st);
+        deg[st]++, deg[en]++;
     }
+    int zero_deg = -1;
+    for(int i = 0; i < n; i++) {
+        if(deg[i] == 0) {
+            zero_deg = i;
+            break;
+        }
+    }
+    if(zero_deg == -1) zero_deg = 0;
+    auto update = [&](int st, int en) {
+        if(graph[st].count(en)) {
+            graph[st].erase(en);
+            graph[en].erase(st);
+            deg[st]--;
+            deg[en]--;
+        } else {
+            graph[st].insert(en), graph[en].insert(st);
+            deg[st]++, deg[en]++;
+        }
+    };
+    vector<array<int, 3>> ans;
+    for(int i = 0; i < m; i++) {
+        auto &[st, en] = edges.back();
+        edges.pop_back();
+        if(st == zero_deg || en == zero_deg) continue;
+        ans.push_back({zero_deg + 1, st + 1, en + 1});
+        update(zero_deg, st);
+        update(zero_deg, en);
+        update(st, en);
+    }
+    for(int i = 0; i < n; i++) {
+        if(i == zero_deg) continue;
+        assert(deg[i] <= 1);
+    }
+    if(deg[zero_deg]) {
+        int fir = -1;
+        for(int i = 0; i < n; i++) {
+            if(i == zero_deg) continue;
+            if(deg[i]) {
+                fir = i;
+                break;
+            }
+        }
+        for(int i = 0; i < n; i++) {
+            if(deg[i]) continue;
+            ans.push_back({zero_deg + 1, i + 1, fir + 1});
+            fir = i;
+        }
+    }
+    cout << ans.size() << endl;
+    for(auto &[fir, sec, thi] : ans) cout << fir << " " << sec << " " << thi << endl;
 }
 
 int main()

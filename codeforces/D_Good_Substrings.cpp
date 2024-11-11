@@ -83,16 +83,37 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-int fun(int n) {
-    cout<<1<<"\n";
-    if(n==0) return 0;
-    return (n-1) * fun(n-1);
-}
 
 void solve()
 {
-    fun(5);
-    
+    string s;
+    cin >> s;
+    string is_good;
+    cin >> is_good;
+    int k;
+    cin >> k;
+    int n = s.size();
+    vector<pair<ll, ll>> ans;
+        const int mod2 = 1e9 + 9;
+    ll pri = 31, prj = 37;
+    for(int i = 0; i < n; i++) {
+        ll hash = 0;
+        int cnt = 0;
+        ll curr = 1;
+        ll hash2 = 0, curr2 = 1;
+        for(int j = i; j < n; j++) {
+            curr = curr * pri % mod;
+            curr2 = curr2 * prj % mod;
+            if(is_good[s[j] - 'a'] == '0') cnt++;
+            if(cnt > k) break;
+            hash = (hash + 1ll * ((s[j] - 'a') + 1) * curr % mod) % mod;
+            hash2 = (hash2 + 1ll * ((s[j] - 'a') + 1) * curr2 % mod2) % mod2;
+            ans.push_back({hash, hash2});
+        }
+    }
+    sort(all(ans));
+    ans.erase(unique(all(ans)), ans.end());
+    cout << ans.size() << endl;
 }
 
 int main()
