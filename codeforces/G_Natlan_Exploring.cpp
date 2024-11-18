@@ -42,7 +42,7 @@ typedef set<pair<ll, ll>> spl;
 typedef ordered_set<ll> osl;
 typedef ordered_set<pair<ll, ll>> ospl;
 
-const ll mod = 1e9 + 7;
+const ll mod = 998244353;
 
 bool comp2(pair<ll, ll> &arr, pair<ll, ll> &b)
 {
@@ -83,30 +83,29 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-long long binpow(long long a, long long b, long long m) {
-    a %= m;
-    long long res = 1;
-    while (b > 0) {
-        if (b & 1)
-            res = res * a % m;
-        a = a * a % m;
-        b >>= 1;
-    }
-    return res;
-}
 
 void solve()
 {
-    const int m = 998244353;
-    set<int> se;
-    for(int i = 0; i <= 10000000; i++) {
-      ll mo = binpow(2ll, i, m);
-      if(se.count(mo)) {
-        debug2(i, mo);
-      }
-      se.insert(mo);
-      // debug2(i, mo);
-    }
+    ll n;
+    cin >> n;
+    vl arr(n);
+    read(arr);
+    ll ma = *max_element(all(arr));
+    ll ans = 0;
+    vvl divisors(ma + 1);
+    for(int i = 2; i <= ma; i++) {
+        for(int j = i; j <= ma; j += i) {
+            divisors[j].push_back(i);
+        }
+    }   
+    vl cnt(ma + 1, 1);
+    for(int i = 2; i <= ma; i++) {
+        for(int j = 2 * i; j <= ma; j += i) {
+            cnt[j] -= cnt[i];
+        }
+    } 
+    vl sum(ma + 1), dp(n);
+    
 }
 
 int main()

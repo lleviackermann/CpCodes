@@ -83,30 +83,45 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-long long binpow(long long a, long long b, long long m) {
-    a %= m;
-    long long res = 1;
-    while (b > 0) {
-        if (b & 1)
-            res = res * a % m;
-        a = a * a % m;
-        b >>= 1;
-    }
-    return res;
+ll ask(int l, int r) {
+    cout << "? " << l << " " << r << endl;
+    cout.flush();
+    ll x;
+    cin >> x;
+    return x;
 }
 
 void solve()
 {
-    const int m = 998244353;
-    set<int> se;
-    for(int i = 0; i <= 10000000; i++) {
-      ll mo = binpow(2ll, i, m);
-      if(se.count(mo)) {
-        debug2(i, mo);
-      }
-      se.insert(mo);
-      // debug2(i, mo);
+    int n;
+    cin >> n;
+    ll prev = -1;
+    string ans = "";
+    for(int i = 1; i < n; i++) {
+        ll ret = ask(i, n);
+        if(i == 1 && ret == 0) {
+            ans = "IMPOSSIBLE";
+            break;
+        }
+        if(i == 1) prev = ret;
+        else {
+            if(prev > 0 && ret == 0) {
+                ans += "0";
+                while(prev > 0) {
+                    ans += "1";
+                    prev--;
+                }
+                while(ans.size() < n) ans += "0";
+                break;
+            }
+            if(prev == ret) ans += "1";
+            else ans += "0";
+        }
+        prev = ret;
+        if(i == n-1) ans += "01";
     }
+    cout << "! " << ans << endl;
+    cout.flush();
 }
 
 int main()
@@ -115,7 +130,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    // cin >> t;
+    cin >> t;
     while (t--)
     {
         solve();

@@ -83,30 +83,45 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
-long long binpow(long long a, long long b, long long m) {
-    a %= m;
-    long long res = 1;
-    while (b > 0) {
-        if (b & 1)
-            res = res * a % m;
-        a = a * a % m;
-        b >>= 1;
-    }
-    return res;
-}
 
 void solve()
 {
-    const int m = 998244353;
-    set<int> se;
-    for(int i = 0; i <= 10000000; i++) {
-      ll mo = binpow(2ll, i, m);
-      if(se.count(mo)) {
-        debug2(i, mo);
-      }
-      se.insert(mo);
-      // debug2(i, mo);
+    int n;
+    cin >> n;
+    int m;
+    cin >> m;
+    map<int, ll> place;
+    vector<vpi> tre(n);
+    vector<array<ll, 3>> condition;
+    for(int i = 0; i < m; i++) {
+        int a, b, d;
+        cin >> a >> b >> d;
+        --a, --b;
+        condition.push_back({a, b, d});
+        tre[a].push_back({b, d});
+        tre[b].push_back({a, -d});
     }
+    auto dfs = [&](auto&& dfs, int u) -> void {
+        for(auto &[nei, dis] : tre[u]) {
+            if(place.count(nei)) continue;
+            place[nei] = place[u] + dis;
+            dfs(dfs, nei);
+        }
+    };
+    for(int i = 0; i < n; i++) {
+        if(place.count(i)) continue;
+        place[i] = 0;
+        dfs(dfs, i);
+    }
+    print(place);
+    for(int i = 0; i < m; i++) {
+        auto &[a, b, d] = condition[i];
+        if(place[b] - place[a] != d) {
+            cout << "NO\n";
+            return;
+        }
+    }
+    cout << "YES\n";
 }
 
 int main()
@@ -115,7 +130,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    // cin >> t;
+    cin >> t;
     while (t--)
     {
         solve();
