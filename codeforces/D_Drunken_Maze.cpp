@@ -82,11 +82,19 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 #define debug4(x, y, z, a)
 
 #endif
+int n, m;
+vector<vector<int>> dp;
+vector<string> mat;
 
+int target_x, target_y;
+
+void recur(int row, int col, int prev, int cnt) {
+    
+}
 
 void solve()
 {
-    cout << !(4 && 3) << " " << !(4 & 3) << endl;
+    cin >> n >> m;
 }
 
 int main()
@@ -95,7 +103,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    cin >> t;
+    // cin >> t;
     while (t--)
     {
         solve();

@@ -86,7 +86,57 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 void solve()
 {
-    cout << !(4 && 3) << " " << !(4 & 3) << endl;
+    ll n, m, q;
+    cin >> n >> m >> q;
+    vpl arr(n);
+    for(int i = 0; i < n; i++) cin >> arr[i].first;
+    for(int i = 0; i < n; i++) cin >> arr[i].second;
+    sort(all(arr), [&](pl& fir, pl& sec){
+        return fir.second < sec.second;
+    });
+    vector<ll> store, tim;
+    ll ma = 1e18;
+    for(int i = n-1; i >= 0; i--) {
+        ma = min(arr[i].second, ma);
+        store.push_back(ma - arr[i].first + 1);
+        tim.push_back(arr[i].first);
+        ma -= arr[i].first;
+    }
+    reverse(all(tim));
+    reverse(all(store));
+    vl sum;
+    sum.push_back(tim[0]);
+    for(int i = 1; i < n; i++) sum.push_back(sum.back() + tim[i]);
+    vl episodes(m+1, 0);
+    // read(episodes);
+    for(int i = 1; i <= m; i++) cin >> episodes[i], episodes[i] += episodes[i-1];
+    vl query(q);
+    read(query);
+    auto binary = [&](ll mid, ll limit) {
+        if(episodes[mid] > limit) return false;
+        int ind = upper_bound(all(store), limit) - store.begin();
+        if(ind == 0) {
+            return true;
+        }
+        ind--;
+        ll time_home = sum[ind] - ((store[ind] + tim[ind] - 1) > limit ? store[ind] + tim[ind] - 1 - limit : 0);
+        ll remain  = limit - time_home;
+        debug3(ind, time_home, remain);
+        return remain >= episodes[mid];
+    };
+
+    for(auto tim : query) {
+        int low = 0, high = m;
+        ll curr_ans = 0;
+        while(low <= high) {
+            ll mid = (low + high) >> 1;
+            if(binary(mid, tim)) curr_ans = mid, low = mid + 1;
+            else high = mid - 1;
+        }
+        cout << curr_ans << " ";
+    }
+    // cout << binary(3, 51);
+    cout << endl;
 }
 
 int main()

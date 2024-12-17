@@ -86,7 +86,29 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 void solve()
 {
-    cout << !(4 && 3) << " " << !(4 & 3) << endl;
+    ll w, b;
+    cin >> w >> b;
+    ll low = 0, high = 1e5;
+    if(w > b) swap(w, b);
+    auto binary = [&](ll mid) {
+        vl arr(mid+1, 0);
+        ll temw = w, temb = b;
+        for(int i = mid; i > 0; i--) {
+            if(temw >= i) temw -= i, arr[i] = 1;
+        }
+        for(int i = mid; i > 0; i--) {
+            if(temb >= i && arr[i] == 0) arr[i] = 1, temb -= i;
+        }
+        int sum = accumulate(all(arr), 0);
+        return sum == mid;
+    };
+    ll ans = 0;
+    while(low <= high) {
+        ll mid = (low + high) >> 1;
+        if(binary(mid)) ans = mid, low = mid + 1;
+        else high = mid - 1;
+    }
+    cout << ans << endl;
 }
 
 int main()

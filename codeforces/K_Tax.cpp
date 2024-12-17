@@ -83,10 +83,68 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
+int m;
+
+const int nmax = 51;
+const int mmax = 2501;
+vector<vector<pi>> child(nmax);
+
+vector<int> ans(nmax, 1e9+1000);
+int curr_ans = 0;
+vector<int> cnt(mmax, 0);
+vl arr;
+
+void solve(int node) {
+    ans[node] = min(ans[node], curr_ans);
+
+    for(auto &[nei, par] : child[node]) {
+        cnt[par]++;
+        curr_ans += cnt[par] * arr[par];
+        solve(nei);
+        curr_ans -= cnt[par] * arr[par];
+        cnt[par]--;
+    }
+}
 
 void solve()
 {
-    cout << !(4 && 3) << " " << !(4 & 3) << endl;
+    ll n;
+    cin >> n >> m;
+    arr.resize(m);
+    read(arr);
+    vector<vpl> tre(n);
+    for(int i = 0; i < m; i++) {
+        int a, b, c;
+        cin >> a >> b >> c;
+        --a;
+        --b;
+        --c;
+        tre[a].push_back({b, c});
+        tre[b].push_back({a, c});
+    }
+
+    queue<int> qu;
+    qu.push(0);
+    vector<int> dist(n, 1000);
+    dist[0] = 0;
+    while(qu.size()) {
+        int node = qu.front();
+        qu.pop();
+        for(auto &[nei, party] : tre[node]) {
+            if(dist[nei] > dist[node] + 1) {
+                dist[nei] = dist[node] + 1;
+                child[node].push_back({nei, party});
+                qu.push(nei);
+            } else if(dist[nei] == dist[node] + 1) {
+                child[node].push_back({nei, party});
+            }
+        }
+    }
+
+    solve(0);
+
+    for(int i = 1; i < n; i++) cout << ans[i] << endl;
+
 }
 
 int main()
@@ -95,7 +153,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    cin >> t;
+    // cin >> t;
     while (t--)
     {
         solve();
@@ -108,3 +166,7 @@ int main()
     #endif
     return 0;
 }
+
+// 2 ko update krna 
+// 3 se 8 tk nikal rha h jha 9 nhi h
+// 5

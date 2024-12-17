@@ -86,7 +86,80 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 void solve()
 {
-    cout << !(4 && 3) << " " << !(4 & 3) << endl;
+    string input;
+    cin >> input;
+    int n = input.size();
+    string ans = "";
+
+    auto divide_and_calc = [&](string& temp) {
+        int flag = 1;
+        temp += "-";
+        int n_ = temp.size();
+        vector<string> left, right;
+        int eu = 0;
+        string an = "";
+        for(int i = 0; i < n_; i++) {
+            if(isdigit(temp[i])) an += temp[i];
+            else {
+                if((an.size() > 1 && an[0] == '0') || an.size() > 10) return false;
+                if(flag) {
+                    if(eu) right.push_back(an);
+                    else left.push_back(an);
+                } else {
+                    if(eu) left.push_back(an);
+                    else right.push_back(an);
+                }
+
+                an = "";
+                if(temp[i] == '=') eu = 1, flag = 1;
+                else if(temp[i] == '-') flag = 0;
+                else if(temp[i] == '+') flag = 1;
+            }
+        }
+        ll lef = 0, rig = 0;
+        for(auto &str : left) lef += stoll(str);
+        for(auto &str : right) rig += stoll(str);
+        if(lef != rig) {
+            return false;
+        } 
+        temp.pop_back();
+        ans = temp;
+        return true;
+    };
+
+    if(divide_and_calc(input)) {
+        cout << "Correct" << endl;
+        return;
+    }
+    // debug(input);
+    input.pop_back();
+
+    auto get_ans = [&](int rep, int pos) -> bool {
+        // if(rep > 0 )
+        string temp = "";
+        for(int i = 0; i < n; i++) {
+            if(i == pos) {
+                temp += input[rep];
+                if(pos != rep) temp += input[pos];
+            } else if(i != rep) temp += input[i];
+        }
+        if(pos == n) temp += input[rep];
+        for(int i = 1; i < temp.size(); i++) {
+            if((!isdigit(temp[i]) && !isdigit(temp[i-1])) || !isdigit(temp[0]) || !isdigit(temp.back())) return false;
+        }
+        assert(temp.size() == n);
+        return divide_and_calc(temp);
+    };
+    for(int i = 0; i < n; i++) {
+        if(!isdigit(input[i])) continue;
+        for(int j = 0; j <= n; j++) {
+            if(get_ans(i, j)) {
+                cout << ans << endl;
+                return;
+            }
+        }
+    }
+    cout << "Impossible" << endl;
 }
 
 int main()
@@ -95,7 +168,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    cin >> t;
+    // cin >> t;
     while (t--)
     {
         solve();

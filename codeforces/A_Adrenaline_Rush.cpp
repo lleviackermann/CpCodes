@@ -86,7 +86,16 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 void solve()
 {
-    cout << !(4 && 3) << " " << !(4 & 3) << endl;
+    int n;
+    cin >> n;
+    vi arr(n);
+    read(arr);
+    vi ind(n+1, -1);
+    for(int i = 0; i < n; i++) ind[arr[i]] = i;
+    vpi ans;
+    
+    cout << ans.size() << endl;
+    for(auto [fir, sec] : ans) cout << fir << " " << sec << endl;
 }
 
 int main()
@@ -95,7 +104,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    cin >> t;
+    // cin >> t;
     while (t--)
     {
         solve();

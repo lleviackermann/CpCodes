@@ -83,10 +83,35 @@ template <typename T> void print(T t) { cout<<t<<"\n"; }
 
 #endif
 
+ll dp[(1 << 12)][(1 << 12)];
+ll arr[12][12][12];
+ll n;
+
+int recur(int xmask, int ymask, int z) {
+    if(z == n) return 0;
+    if(dp[xmask][ymask] != -1) return dp[xmask][ymask];
+    ll ans = 1e18;
+    for(int i = 0; i < n; i++) {
+        if(xmask & (1 << i)) continue;
+        for(int j = 0; j < n; j++) {
+            if(ymask & (1 << j)) continue;
+            ans = min(ans, arr[i][j][z] + recur(xmask | (1 << i), ymask | (1 << j), z + 1));
+        }
+    }
+    return dp[xmask][ymask] = ans;
+}
 
 void solve()
 {
-    cout << !(4 && 3) << " " << !(4 & 3) << endl;
+    // int n;
+    cin >> n;
+    for(int i = 0; i < n * n; i++) {
+        for(int j = 0; j < n; j++) {
+            cin >> arr[i / n][i - i / n * n][j];
+        }
+    }
+    memset(dp, -1, sizeof(dp));
+    cout << recur(0, 0, 0) << endl;
 }
 
 int main()
@@ -95,7 +120,7 @@ int main()
     clock_t start = clock();
 
     int t = 1;
-    cin >> t;
+    // cin >> t;
     while (t--)
     {
         solve();
